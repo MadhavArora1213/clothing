@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/config/database.php';
 session_start();
 session_destroy();
-redirect('/admin/login.php');
+redirect(adminUrl('login.php'));

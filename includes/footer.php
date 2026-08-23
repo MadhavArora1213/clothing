@@ -108,16 +108,19 @@
 
     if (mobileMenuBtn && mobileDrawer) {
       mobileMenuBtn.addEventListener('click', () => {
-        mobileDrawer.style.display = 'block';
+        mobileDrawer.classList.add('open');
+        document.body.style.overflow = 'hidden';
       });
       if (closeDrawerBtn) {
         closeDrawerBtn.addEventListener('click', () => {
-          mobileDrawer.style.display = 'none';
+          mobileDrawer.classList.remove('open');
+          document.body.style.overflow = '';
         });
       }
       if (drawerBackdrop) {
         drawerBackdrop.addEventListener('click', () => {
-          mobileDrawer.style.display = 'none';
+          mobileDrawer.classList.remove('open');
+          document.body.style.overflow = '';
         });
       }
     }
