@@ -4,7 +4,7 @@
 // Connected to 'cloths' database
 // ============================================
 
-define('APP_NAME', 'AURA & CO. — Fashion & Admin');
+define('APP_NAME', 'urban outfit — Fashion & Admin');
 define('BASE_PATH', dirname(__DIR__));
 
 if (session_status() === PHP_SESSION_NONE) {

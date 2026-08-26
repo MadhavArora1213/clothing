@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config/database.php';
-$pageTitle = 'Shop Collection — AURA & CO.';
+$pageTitle = 'Shop Collection — urban outfit';
 $pageDescription = 'Browse our complete collection of oversized drop tees, resort co-ords, and artisanal ethnic fusion kurtas.';
 $currentPage = 'shop';
 

@@ -78,7 +78,7 @@ $imageUrls = $product['images'] ?? [
   'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1000&auto=format&fit=crop&q=85'
 ];
 
-$pageTitle = $product['name'] . ' — AURA & CO.';
+$pageTitle = $product['name'] . ' — urban outfit';
 $pageDescription = $product['description'] ?? '';
 include __DIR__ . '/includes/header.php';
 ?>
