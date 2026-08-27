@@ -124,6 +124,9 @@ function getAdmin() {
 }
 
 function redirect($url, $statusCode = 302) {
+  if (strpos($url, 'http') !== 0) {
+    $url = BASE_URL . '/' . ltrim($url, '/');
+  }
   header('Location: ' . $url, true, $statusCode);
   exit;
 }

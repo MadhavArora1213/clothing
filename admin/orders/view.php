@@ -111,7 +111,7 @@ include dirname(__DIR__) . '/includes/header.php';
     </div>
   <?php endif; ?>
 
-  <div class="admin-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+  <div class="admin-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-4);">
     <!-- Left Column: Items & Customer Details -->
     <div>
       <!-- Order Items Card -->

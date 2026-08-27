@@ -1,14 +1,13 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
-$pageTitle = 'Shopping Cart — ATELIER';
+$pageTitle = 'Shopping Cart — urban outfit';
 $pageDescription = 'Review your cart items.';
 include dirname(__DIR__) . '/includes/header.php';
 
 $customerId = $_SESSION['customer_id'] ?? null;
 $sessionId = session_id();
 
-// Get or create cart
 $cart = null;
 if ($customerId) {
   $stmt = $mysqli->prepare('SELECT id FROM carts WHERE customer_id = ?');
@@ -58,89 +57,119 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<main style="padding-top: calc(var(--header-height) + var(--space-16)); padding-bottom: var(--space-16);">
-  <div class="container">
-    <div class="section-header">
-      <h1 class="section-title">Shopping Cart</h1>
-      <p class="section-subtitle"><?= count($items) ?> item<?= count($items) !== 1 ? 's' : '' ?> in your cart</p>
+<main class="cart-page">
+  <div class="aura-container">
+    <div class="cart-header reveal">
+      <div>
+        <div class="lux-eyebrow">Your Selection</div>
+        <h1 class="lux-section-title" style="margin-bottom: 4px;">Shopping Cart</h1>
+        <p class="lux-section-sub" style="margin-top: 0;"><?= count($items) ?> item<?= count($items) !== 1 ? 's' : '' ?> ready for checkout</p>
+      </div>
     </div>
 
     <?php if (empty($items)): ?>
-      <div class="text-center" style="padding: 80px 0; color: var(--color-text-tertiary);">
-        <p style="font-size: 18px; margin-bottom: var(--space-6);">Your cart is empty.</p>
-        <a href="/shop.php" class="btn btn-primary">Continue Shopping</a>
+      <div class="cart-empty reveal" style="text-align: center; padding: 100px 0;">
+        <div class="cart-empty-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <h3 style="font-family: var(--font-display); font-size: 28px; margin-bottom: 8px; color: var(--color-text-main);">Your cart is empty</h3>
+        <p style="color: var(--color-text-muted); margin-bottom: 32px; font-size: 14px;">Looks like you haven't added anything to your cart yet.</p>
+        <a href="/shop.php" class="lux-btn-primary" style="display: inline-flex; text-decoration: none;">
+          <span>Continue Shopping</span>
+        </a>
       </div>
     <?php else: ?>
-      <div class="admin-grid">
-        <div class="admin-card">
-          <div class="table-wrap">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($items as $item): ?>
-                  <tr>
-                    <td>
-                      <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="<?= $item['image'] ?>" alt="" style="width: 64px; height: 80px; object-fit: cover; border-radius: var(--radius-sm); background: var(--color-bg-elevated);">
-                        <div>
-                          <a href="/product.php?slug=<?= $item['slug'] ?>" style="font-weight: 600; color: var(--color-text-primary);"><?= sanitize($item['name']) ?></a>
-                          <?php if ($item['size']): ?>
-                            <div style="font-size: var(--text-caption); color: var(--color-text-tertiary);">Size: <?= sanitize($item['size']) ?></div>
-                          <?php endif; ?>
-                        </div>
-                      </div>
-                    </td>
-                    <td><?= formatPrice($item['unit_price']) ?></td>
-                    <td>
-                      <form method="POST" style="display: inline-flex; align-items: center; gap: 0;">
-                        <input type="hidden" name="action" value="update">
-                        <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
-                        <button type="submit" name="quantity" value="<?= max(1, $item['quantity'] - 1) ?>" class="qty-btn" style="border: 1px solid var(--color-accent-tertiary); border-radius: var(--radius-sm);">&minus;</button>
-                        <span style="width: 40px; text-align: center; font-weight: 600;"><?= (int)$item['quantity'] ?></span>
-                        <button type="submit" name="quantity" value="<?= $item['quantity'] + 1 ?>" class="qty-btn" style="border: 1px solid var(--color-accent-tertiary); border-radius: var(--radius-sm);">+</button>
-                      </form>
-                    </td>
-                    <td style="font-weight: 600;"><?= formatPrice($item['unit_price'] * $item['quantity']) ?></td>
-                    <td>
-                      <form method="POST">
-                        <input type="hidden" name="action" value="remove">
-                        <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this item?')">&times;</button>
-                      </form>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
+      <div class="cart-layout">
+        <div class="cart-items-col">
+          <?php foreach ($items as $index => $item): ?>
+            <?php
+              $itemTotal = $item['unit_price'] * $item['quantity'];
+              $img = !empty($item['image']) ? $item['image'] : 'https://via.placeholder.com/200x260?text=No+Image';
+            ?>
+            <div class="cart-item-card reveal" style="animation-delay: <?= 0.05 * $index ?>s;">
+              <div class="cart-item-img">
+                <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy">
+              </div>
+              <div class="cart-item-body">
+                <div class="cart-item-top">
+                  <div>
+                    <a href="/product.php?slug=<?= $item['slug'] ?>" class="cart-item-name"><?= sanitize($item['name']) ?></a>
+                    <?php if ($item['size']): ?>
+                      <div class="cart-item-meta">Size: <strong><?= sanitize($item['size']) ?></strong></div>
+                    <?php endif; ?>
+                  </div>
+                  <div class="cart-item-price"><?= formatPrice($item['unit_price']) ?></div>
+                </div>
+
+                <div class="cart-item-bottom">
+                  <form method="POST" class="qty-form">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
+                    <button type="button" class="qty-btn" data-action="dec" data-id="<?= $item['id'] ?>" data-current="<?= (int)$item['quantity'] ?>">&minus;</button>
+                    <input type="number" name="quantity" value="<?= (int)$item['quantity'] ?>" min="1" class="qty-input" data-id="<?= $item['id'] ?>">
+                    <button type="button" class="qty-btn" data-action="inc" data-id="<?= $item['id'] ?>" data-current="<?= (int)$item['quantity'] ?>">+</button>
+                  </form>
+                  <form method="POST" class="remove-form" onsubmit="return confirm('Remove this item?')">
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
+                    <button type="submit" class="remove-btn" aria-label="Remove item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div class="cart-item-total">
+                <span class="cart-total-label">Total</span>
+                <span class="cart-total-value"><?= formatPrice($itemTotal) ?></span>
+              </div>
+            </div>
+          <?php endforeach; ?>
         </div>
 
-        <div>
-          <div class="admin-card" style="margin-bottom: var(--space-6);">
-            <div class="admin-card-header"><h2>Cart Summary</h2></div>
-            <div style="padding: var(--space-6);">
-              <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-3);">
-                <span>Subtotal</span>
-                <span style="font-weight: 600;"><?= formatPrice($subtotal) ?></span>
-              </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-3); color: var(--color-text-tertiary);">
-                <span>Shipping</span>
-                <span>Calculated at checkout</span>
-              </div>
-              <div style="border-top: 1px solid var(--color-accent-tertiary); padding-top: var(--space-4); display: flex; justify-content: space-between; font-size: var(--text-h4); font-weight: 700;">
-                <span>Total</span>
+        <div class="cart-summary-col">
+          <div class="cart-summary-card reveal" style="animation-delay: 0.3s;">
+            <h3 class="cart-summary-title">Order Summary</h3>
+            <div class="cart-summary-rows">
+              <div class="cart-summary-row">
+                <span>Subtotal (<?= count($items) ?> item<?= count($items) !== 1 ? 's' : '' ?>)</span>
                 <span><?= formatPrice($subtotal) ?></span>
               </div>
-              <a href="/customer/checkout.php" class="btn btn-primary" style="width: 100%; margin-top: var(--space-6); padding: var(--space-4);">Proceed to Checkout</a>
-              <a href="/shop.php" class="btn btn-secondary" style="width: 100%; margin-top: var(--space-3);">Continue Shopping</a>
+              <div class="cart-summary-row">
+                <span>Shipping</span>
+                <span class="text-muted">Free</span>
+              </div>
+            </div>
+
+            <div style="margin: 16px 0; padding: 14px; background: var(--color-accent-light); border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span style="font-size: 13px; font-weight: 600; color: var(--color-text-main);">Free shipping on all prepaid orders</span>
+            </div>
+
+            <div class="cart-summary-divider"></div>
+            <div class="cart-summary-total">
+              <span>Estimated Total</span>
+              <span><?= formatPrice($subtotal) ?></span>
+            </div>
+            <a href="/customer/checkout.php" class="lux-btn-primary" style="display: flex; width: 100%; text-decoration: none; justify-content: center; margin-top: 20px;">
+              <span>Proceed to Checkout</span>
+            </a>
+            <a href="/shop.php" class="lux-view-all" style="display: flex; width: 100%; justify-content: center; margin-top: 14px; text-decoration: none;">
+              Continue Shopping
+            </a>
+          </div>
+
+          <div class="cart-trust reveal" style="animation-delay: 0.4s;">
+            <div class="trust-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Secure Checkout</span>
+            </div>
+            <div class="trust-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9.75 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M21 3v5h-5"/></svg>
+              <span>7-Day Easy Returns</span>
+            </div>
+            <div class="trust-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              <span>Free Express Shipping over ₹999</span>
             </div>
           </div>
         </div>

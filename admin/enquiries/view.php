@@ -49,7 +49,7 @@ include dirname(__DIR__) . '/includes/header.php';
     </div>
   <?php endif; ?>
 
-  <div class="admin-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+  <div class="admin-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-4);">
     <div class="admin-card" style="padding: var(--space-6);">
       <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Customer Message</h2>
       
