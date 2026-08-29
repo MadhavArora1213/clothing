@@ -119,17 +119,17 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
 <main class="aura-main" style="padding: 40px 0 80px;">
   <div class="aura-container">
     
-    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start;">
+    <div class="pdp-grid" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start;">
       
       <!-- Product Image Gallery -->
       <div>
-        <div style="border-radius: var(--radius-xl); overflow: hidden; background: #F1F5F9; aspect-ratio: 3/4; box-shadow: var(--shadow-md); margin-bottom: 16px;">
+        <div class="pdp-main-img" style="border-radius: var(--radius-xl); overflow: hidden; background: #F1F5F9; aspect-ratio: 3/4; box-shadow: var(--shadow-md); margin-bottom: 16px;">
           <img src="<?= $imageUrls[0] ?>" alt="<?= htmlspecialchars($product['name']) ?>" id="mainProductImg" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
 
         <div style="display: flex; gap: 12px;">
           <?php foreach ($imageUrls as $idx => $img): ?>
-            <button onclick="document.getElementById('mainProductImg').src='<?= $img ?>'" style="width: 80px; height: 100px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid <?= $idx === 0 ? 'var(--color-accent)' : 'var(--color-border)' ?>; cursor: pointer;">
+            <button class="pdp-thumb-btn" onclick="document.getElementById('mainProductImg').src='<?= $img ?>'" style="width: 80px; height: 100px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid <?= $idx === 0 ? 'var(--color-accent)' : 'var(--color-border)' ?>; cursor: pointer;">
               <img src="<?= $img ?>" alt="Thumb" style="width: 100%; height: 100%; object-fit: cover;">
             </button>
           <?php endforeach; ?>
@@ -146,7 +146,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
           <?= htmlspecialchars($product['name']) ?>
         </h1>
 
-        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border);">
+        <div class="pdp-price-row" style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border);">
           <span style="font-family: var(--font-mono); font-size: 26px; font-weight: 800; color: #0F172A;">
             ₹<?= number_format($product['price']) ?>
           </span>
@@ -164,7 +164,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         <!-- Size Selector -->
         <div style="margin-bottom: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <label style="font-size: 12px; font-weight: 700; color: #0F172A;">Select Size:</label>
+            <label class="pdp-size-label" style="font-size: 12px; font-weight: 700; color: #0F172A;">Select Size:</label>
             <span style="font-size: 11px; font-weight: 600; color: var(--color-accent); cursor: pointer;">📏 Size Guide</span>
           </div>
 
@@ -179,19 +179,20 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         </div>
 
         <!-- Stock Alert -->
-        <div style="display: flex; align-items: center; gap: 8px; background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; padding: 10px 14px; border-radius: var(--radius-md); font-size: 12px; font-weight: 600; margin-bottom: 24px;">
-          <span>⚡ Low Stock Alert: Only 4 pieces remaining in size M!</span>
+        <div class="pdp-stock-alert" style="display: flex; align-items: center; gap: 8px; background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; padding: 10px 14px; border-radius: var(--radius-md); font-size: 12px; font-weight: 600; margin-bottom: 24px; overflow-wrap: break-word;">
+          <span style="flex-shrink: 0;">⚡</span>
+          <span>Low Stock Alert: Only 4 pieces remaining in size M!</span>
         </div>
 
         <!-- Action Buttons -->
-        <div style="display: flex; gap: 12px; margin-bottom: 32px;">
+        <div class="pdp-actions" style="display: flex; gap: 12px; margin-bottom: 32px;">
           <button type="button" onclick="handleAddToCart()" class="btn btn-primary" style="flex: 1; padding: 16px; font-size: 14px;">
             <span>Add to Bag</span>
           </button>
           <a href="<?= BASE_URL ?>/customer/checkout.php" class="btn btn-dark" style="flex: 1; padding: 16px; font-size: 14px; text-align: center;">
             <span>Buy Now</span>
           </a>
-          <button type="button" id="productWishlistBtn" onclick="toggleProductWishlist()" style="width: 52px; height: 52px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: <?= $isWishlisted ? '#FEF2F2' : '#fff' ?>; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;">
+          <button type="button" id="productWishlistBtn" onclick="toggleProductWishlist()" class="pdp-wish-btn" style="width: 52px; height: 52px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: <?= $isWishlisted ? '#FEF2F2' : '#fff' ?>; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;">
             <svg id="productWishlistIcon" width="22" height="22" viewBox="0 0 24 24" fill="<?= $isWishlisted ? '#dc2626' : 'none' ?>" stroke="<?= $isWishlisted ? '#dc2626' : '#64748B' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
@@ -199,7 +200,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         </div>
 
         <!-- Fabric & Specifications Accordion -->
-        <div style="border-top: 1px solid var(--color-border); padding-top: 20px; font-size: 13px; line-height: 1.7; color: #475569;">
+        <div class="pdp-desc" style="border-top: 1px solid var(--color-border); padding-top: 20px; font-size: 13px; line-height: 1.7; color: #475569;">
           <h3 style="font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">Product Description &amp; Fit:</h3>
           <p style="margin-bottom: 16px;"><?= nl2br(htmlspecialchars($product['description'] ?? '')) ?></p>
           
@@ -215,6 +216,122 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       </div>
 
     </div>
+
+    <!-- ═══════════ Product Page Responsive ═══════════ -->
+    <style>
+      /* Desktop grid base (from inline) */
+      .pdp-grid {
+        display: grid !important;
+        grid-template-columns: 1.1fr 1fr !important;
+        gap: 48px !important;
+        align-items: start !important;
+      }
+
+      /* ─── 768px — Tablet / iPad ─── */
+      @media (max-width: 768px) {
+        .pdp-grid {
+          grid-template-columns: 1fr !important;
+          gap: 28px !important;
+        }
+        .pdp-grid > div:first-child {
+          max-width: 100%;
+        }
+        .pdp-grid h1 {
+          font-size: 26px !important;
+          margin-bottom: 8px !important;
+        }
+        .pdp-grid .pdp-price-row {
+          flex-wrap: wrap;
+          gap: 8px !important;
+          margin-bottom: 16px !important;
+          padding-bottom: 12px !important;
+        }
+        .pdp-grid .pdp-price-row span:last-child {
+          flex-basis: 100%;
+          font-size: 10px !important;
+        }
+        .pdp-grid .pdp-stock-alert {
+          font-size: 11px !important;
+          padding: 8px 12px !important;
+        }
+        .pdp-grid .pdp-actions {
+          gap: 8px !important;
+        }
+        .pdp-grid .pdp-actions a,
+        .pdp-grid .pdp-actions button {
+          padding: 14px 12px !important;
+          font-size: 13px !important;
+        }
+        .pdp-grid .pdp-desc {
+          font-size: 13px !important;
+        }
+        .pdp-grid .pdp-desc h3 {
+          font-size: 13px !important;
+        }
+      }
+
+      /* ─── 480px — Mobile ─── */
+      @media (max-width: 480px) {
+        .pdp-grid {
+          gap: 20px !important;
+        }
+        .pdp-grid h1 {
+          font-size: 22px !important;
+          margin-bottom: 6px !important;
+        }
+        .pdp-grid .pdp-main-img {
+          aspect-ratio: 1/1 !important;
+          border-radius: 16px !important;
+        }
+        .pdp-grid .pdp-thumb-btn {
+          width: 64px !important;
+          height: 80px !important;
+        }
+        .pdp-grid .pdp-price-row span:first-child {
+          font-size: 22px !important;
+        }
+        .pdp-grid .pdp-price-row span:nth-child(2) {
+          font-size: 14px !important;
+        }
+        .pdp-grid .pdp-size-label {
+          font-size: 11px !important;
+        }
+        .pdp-grid .pdp-actions {
+          flex-wrap: wrap !important;
+        }
+        .pdp-grid .pdp-actions a,
+        .pdp-grid .pdp-actions button.btn {
+          flex: 1 1 calc(50% - 4px) !important;
+          min-width: 0 !important;
+        }
+        .pdp-grid .pdp-actions .pdp-wish-btn {
+          flex: 0 0 48px !important;
+          width: 48px !important;
+          height: 48px !important;
+        }
+        .pdp-grid .pdp-desc {
+          font-size: 12px !important;
+        }
+        .pdp-grid .pdp-desc h3 {
+          font-size: 12px !important;
+        }
+        .pdp-grid .pdp-stock-alert {
+          font-size: 10px !important;
+          padding: 8px 10px !important;
+          gap: 6px !important;
+        }
+        .rev-summary {
+          flex-direction: column;
+          gap: 24px;
+        }
+        .rev-summary-score {
+          text-align: center;
+        }
+        .rev-bars {
+          width: 100%;
+        }
+      }
+    </style>
 
     <!-- ═══════════ Reviews & Ratings Section ═══════════ -->
     <style>
@@ -396,6 +513,30 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       .rev-submit-btn:hover { background: #D4AF37; transform: translateY(-1px); }
       .rev-login-msg {
         text-align: center;
+      }
+
+      /* Reviews Mobile */
+      @media (max-width: 768px) {
+        .rev-section { margin-top: 40px; padding-top: 28px; }
+        .rev-summary { flex-direction: column; gap: 20px; padding: 20px; }
+        .rev-summary-score { min-width: auto; }
+        .rev-summary-score .big { font-size: 40px; }
+        .rev-card-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+        .rev-form-wrap { padding: 20px; }
+        .rev-form-wrap h3 { font-size: 18px; }
+      }
+      @media (max-width: 480px) {
+        .rev-section { margin-top: 32px; padding-top: 20px; }
+        .rev-section-title { font-size: 20px; margin-bottom: 20px; }
+        .rev-summary { padding: 16px; gap: 16px; }
+        .rev-summary-score .big { font-size: 36px; }
+        .rev-card { padding: 16px 0; }
+        .rev-card-title { font-size: 14px; }
+        .rev-card-comment { font-size: 13px; }
+        .rev-star-select .star-btn { font-size: 24px; }
+        .rev-form-field input, .rev-form-field textarea { padding: 10px 12px; font-size: 13px; }
+        .rev-submit-btn { padding: 12px 24px; font-size: 13px; width: 100%; justify-content: center; }
+      }
         padding: 40px;
         font-size: 14px;
         color: #9A8E7E;

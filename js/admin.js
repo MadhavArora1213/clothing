@@ -1,29 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Sidebar toggle
   const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
 
   if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener('click', () => {
+    sidebarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
       sidebar.classList.toggle('open');
+      if (overlay) overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
     });
   }
 
-  // Close sidebar when clicking outside on mobile
-  document.addEventListener('click', (e) => {
-    if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+  if (overlay) {
+    overlay.addEventListener('click', () => {
       sidebar.classList.remove('open');
+      overlay.style.display = 'none';
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== sidebarToggle && !sidebarToggle.contains(e.target)) {
+      sidebar.classList.remove('open');
+      if (overlay) overlay.style.display = 'none';
     }
   });
 
-  // Form enhancements
   document.querySelectorAll('.form-group input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', function() {
       this.nextElementSibling?.remove();
     });
   });
 
-  // Confirm delete actions
   document.querySelectorAll('a[href*="delete.php"]').forEach(link => {
     if (!link.getAttribute('onclick')) {
       link.setAttribute('onclick', 'return confirm("Are you sure?")');

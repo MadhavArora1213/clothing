@@ -4873,6 +4873,11 @@ button, input, select, textarea {
    HOMEPAGE FULL RESPONSIVE — 1280 / 1024 / 768 / 480
    ═══════════════════════════════════════════ */
 
+/* ─── 1440px — iPad Pro landscape / large tablets ─── */
+@media (max-width: 1440px) {
+  .lux-hero { min-height: auto; }
+}
+
 /* ─── 1280px ─── */
 @media (max-width: 1280px) {
   .lux-product-grid { grid-template-columns: repeat(3, 1fr); }
@@ -4881,15 +4886,16 @@ button, input, select, textarea {
   .lux-arch-frame { width: 200px; height: 300px; }
 }
 
-/* ─── 1024px ─── */
+/* ─── 1024px — iPad Pro ─── */
 @media (max-width: 1024px) {
-  .lux-hero { padding: 50px 0 32px; }
+  .lux-hero { padding: 50px 0 32px; min-height: auto; }
   .lux-hero-wrapper { padding: 0 48px; }
-  .lux-hero-title { font-size: clamp(44px, 6vw, 68px); margin-bottom: 32px; }
+  .lux-hero-title { font-size: clamp(44px, 6vw, 68px); margin-bottom: 24px; }
   .lux-hero-images { height: 380px; padding: 0 16px; }
   .lux-arch-frame { width: 160px; height: 260px; }
   .lux-hero-img-center img { width: 240px; height: 340px; }
   .lux-arch-bg { width: 220px; height: 300px; }
+  .lux-hero-bottom { margin-top: 16px; }
   .lux-collections { padding: 60px 0; }
   .lux-collections-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
   .lux-col-img { aspect-ratio: 3/4; }
@@ -4906,7 +4912,7 @@ button, input, select, textarea {
 
 /* ─── 768px ─── */
 @media (max-width: 768px) {
-  .lux-hero { padding: 36px 0 24px; }
+  .lux-hero { padding: 36px 0 24px; min-height: auto; }
   .lux-hero-wrapper { padding: 0 20px; }
   .lux-hero-title { font-size: clamp(32px, 9vw, 48px); margin-bottom: 24px; }
   .lux-hero-images {
@@ -5463,6 +5469,287 @@ button, input, select, textarea {
   .login-card {
     padding: 32px 24px;
     border-radius: var(--radius-md);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   HOMEPAGE MOBILE FIXES — 320px / 360px / 375px
+   ═══════════════════════════════════════════ */
+
+/* Prevent horizontal overflow globally on mobile */
+@media (max-width: 480px) {
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─── 375px — Small phones ─── */
+@media (max-width: 375px) {
+  /* Hero: reduce min-height so content isn't pushed way down */
+  .lux-hero {
+    min-height: auto;
+    padding: 20px 0 16px;
+  }
+
+  .lux-hero-wrapper {
+    padding: 0 12px;
+    overflow: hidden;
+  }
+
+  .lux-hero-title {
+    font-size: 26px;
+    margin-bottom: 16px;
+  }
+
+  /* Hide side images on very small screens, keep center only */
+  .lux-hero-images {
+    gap: 0;
+    height: auto;
+    min-height: 180px;
+  }
+  .lux-hero-img-left {
+    display: none;
+  }
+  .lux-hero-img-right {
+    display: none;
+  }
+  .lux-hero-img-center {
+    margin: 0;
+  }
+  .lux-hero-img-center img {
+    width: 140px;
+    height: 200px;
+  }
+  .lux-arch-bg {
+    width: 120px;
+    height: 190px;
+  }
+
+  .lux-hero-bottom {
+    margin-top: 16px;
+    gap: 10px;
+  }
+  .lux-hero-desc p {
+    font-size: 11px;
+  }
+  .lux-hero-stat .lux-stat-num {
+    font-size: 22px;
+  }
+
+  /* Collections */
+  .lux-collections {
+    padding: 32px 0;
+  }
+  .lux-col-card {
+    border-radius: 12px;
+  }
+  .lux-col-info h3 {
+    font-size: 18px;
+  }
+
+  /* Shop by Category */
+  .uoc-shop {
+    padding: 36px 0 24px;
+  }
+  .uoc-shop-head {
+    margin-bottom: 24px;
+  }
+  .uoc-shop-title {
+    font-size: 28px;
+  }
+  .uoc-shop-item {
+    padding: 14px 0;
+    gap: 10px;
+  }
+  .uoc-shop-item-text {
+    font-size: 16px;
+  }
+  .uoc-shop-item-tag {
+    font-size: 10px;
+  }
+
+  /* Trending */
+  .uoc-trending {
+    padding: 36px 0 24px;
+  }
+  .uoc-trending-head {
+    margin-bottom: 24px;
+  }
+  .uoc-trending-title {
+    font-size: 28px;
+  }
+  .uoc-trending-grid {
+    gap: 8px;
+  }
+  .uoc-t-card-info {
+    padding: 8px 2px 0;
+  }
+  .uoc-t-card-name {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  .uoc-t-card-cat {
+    font-size: 7px;
+  }
+  .uoc-t-price-now {
+    font-size: 12px;
+  }
+  .uoc-t-price-was {
+    font-size: 10px;
+  }
+
+  /* Signature Collection */
+  .uoc-sigv3-content {
+    padding: 36px 16px 20px;
+  }
+  .uoc-sigv3-title-sm {
+    font-size: 18px;
+  }
+  .uoc-sigv3-title-lg {
+    font-size: 32px;
+  }
+  .uoc-sigv3-desc {
+    font-size: 13px;
+  }
+  .uoc-sigv3-stats {
+    gap: 8px;
+  }
+  .uoc-sigv3-stat {
+    padding: 0 10px;
+  }
+  .uoc-sigv3-stat-num {
+    font-size: 20px;
+  }
+  .uoc-sigv3-stat-label {
+    font-size: 10px;
+  }
+  .uoc-sigv3-img-main {
+    height: 280px;
+    max-width: 220px;
+  }
+  .uoc-sigv3-badge {
+    width: 64px;
+    height: 64px;
+  }
+  .uoc-sigv3-badge-center {
+    font-size: 10px;
+  }
+  .uoc-sigv3-btn {
+    font-size: 13px;
+    padding: 12px 20px;
+  }
+
+  /* Ethos */
+  .uoc-ethos {
+    padding: 40px 0;
+  }
+  .uoc-ethos-title {
+    font-size: 24px;
+  }
+  .uoc-ethos-body {
+    font-size: 13px;
+  }
+  .uoc-ethos-feat {
+    padding: 12px;
+    gap: 10px;
+  }
+  .uoc-ethos-feat h4 {
+    font-size: 13px;
+  }
+  .uoc-ethos-feat p {
+    font-size: 12px;
+  }
+
+  /* Testimonials */
+  .lux-section {
+    padding: 40px 0;
+  }
+  .lux-section-title {
+    font-size: 24px;
+  }
+  .lux-testimonials {
+    gap: 12px;
+  }
+  .lux-testimonial {
+    padding: 20px 16px;
+  }
+  .lux-testi-text {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .lux-testi-name {
+    font-size: 13px;
+  }
+
+  /* Instagram */
+  .lux-insta-section {
+    padding: 40px 0 32px;
+  }
+  .lux-insta-grid {
+    gap: 4px;
+  }
+
+  /* Newsletter */
+  .lux-newsletter {
+    padding: 40px 0;
+  }
+  .lux-nl-title {
+    font-size: 22px;
+  }
+  .lux-nl-sub {
+    font-size: 13px;
+  }
+  .lux-nl-input {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  .lux-nl-btn {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+
+  /* Footer */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ─── 320px — Very small phones ─── */
+@media (max-width: 320px) {
+  .lux-hero-title {
+    font-size: 22px;
+  }
+  .lux-hero-img-center img {
+    width: 120px;
+    height: 170px;
+  }
+  .lux-arch-bg {
+    width: 100px;
+    height: 160px;
+  }
+  .lux-hero-bottom {
+    margin-top: 12px;
+  }
+  .lux-hero-stat .lux-stat-num {
+    font-size: 20px;
+  }
+  .lux-hero-stat .lux-stat-text {
+    font-size: 11px;
+  }
+
+  .uoc-shop-title {
+    font-size: 24px;
+  }
+  .uoc-trending-title {
+    font-size: 24px;
+  }
+  .uoc-sigv3-title-lg {
+    font-size: 28px;
+  }
+  .lux-section-title {
+    font-size: 20px;
   }
 }
 

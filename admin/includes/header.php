@@ -83,6 +83,7 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
       </a>
     </div>
   </aside>
+  <div class="admin-sidebar-overlay" id="sidebarOverlay"></div>
 
   <div class="admin-main">
     <header class="admin-topbar">

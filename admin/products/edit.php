@@ -225,12 +225,12 @@ include dirname(__DIR__) . '/includes/header.php';
 
 <div class="admin-content">
   <div class="page-header" style="margin-bottom: var(--space-6);">
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
       <div>
         <h1 style="margin: 0; font-size: 26px;">Edit Product: <?= sanitize($product['name']) ?></h1>
         <p style="margin: 4px 0 0 0; color: #64748b;">Manage apparel details, photo gallery, square color swatches, and size inventory.</p>
       </div>
-      <div style="display: flex; gap: 8px;">
+      <div class="page-header-actions" style="display: flex; gap: 8px;">
         <a href="<?= adminUrl('products/') ?>" class="btn btn-secondary">&larr; Back to Products</a>
         <a href="<?= siteUrl('product.php?slug=' . $product['slug']) ?>" target="_blank" class="btn btn-secondary">View in Store &rarr;</a>
         <button type="submit" form="editProductForm" class="btn btn-primary" style="padding: 10px 22px;">Update Product</button>
@@ -271,7 +271,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <input type="text" name="name" id="productName" required value="<?= sanitize($product['name']) ?>">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group" style="margin: 0;">
                 <label>Brand</label>
                 <input type="text" name="brand" value="<?= sanitize($product['brand'] ?? 'AURA & CO.') ?>">
@@ -375,7 +375,7 @@ include dirname(__DIR__) . '/includes/header.php';
             </h3>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Fabric / Material</label>
               <input type="text" name="material" value="<?= sanitize($product['material'] ?? '') ?>">
@@ -457,7 +457,7 @@ include dirname(__DIR__) . '/includes/header.php';
             </h3>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+          <div class="form-inline-grid form-inline-grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
             <div class="form-group" style="margin: 0;">
               <label style="font-size: 11px;">Selling Price (₹) <span class="required" style="color: #ef4444;">*</span></label>
               <input type="number" step="0.01" name="price" id="sellingPrice" required value="<?= $product['price'] ?>" oninput="calcDiscount()">

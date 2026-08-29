@@ -158,12 +158,12 @@ include dirname(__DIR__) . '/includes/header.php';
 
 <div class="admin-content">
   <div class="page-header" style="margin-bottom: var(--space-6);">
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
       <div>
         <h1 style="margin: 0; font-size: 26px;">Add New Product</h1>
         <p style="margin: 4px 0 0 0; color: #64748b;">Fill in details on Left and Right sides to create your fashion product.</p>
       </div>
-      <div style="display: flex; gap: 8px;">
+      <div class="page-header-actions" style="display: flex; gap: 8px;">
         <a href="<?= adminUrl('products/') ?>" class="btn btn-secondary">&larr; Back to Products</a>
         <button type="submit" form="productForm" class="btn btn-primary" style="padding: 10px 22px;">Save &amp; Publish Product</button>
       </div>
@@ -197,7 +197,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <input type="text" name="name" id="productName" required placeholder="e.g. Pure Georgette Embroidered Anarkali Suit Set" value="<?= sanitize($_POST['name'] ?? '') ?>" oninput="autoGenerateSlug(this.value)">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group" style="margin: 0;">
                 <label>Brand</label>
                 <input type="text" name="brand" value="<?= sanitize($_POST['brand'] ?? 'AURA & CO.') ?>">
@@ -282,7 +282,7 @@ include dirname(__DIR__) . '/includes/header.php';
             </h3>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Fabric / Material</label>
               <input type="text" name="material" placeholder="e.g. Pure Chanderi Silk with Santoon Lining" value="<?= sanitize($_POST['material'] ?? '') ?>">
