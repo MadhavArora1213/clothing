@@ -4,12 +4,14 @@
 // Connected to 'cloths' database
 // ============================================
 
-define('APP_NAME', 'urban outfit — Fashion & Admin');
-define('BASE_PATH', dirname(__DIR__));
+ob_start();
 
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
+
+define('APP_NAME', 'urban outfit — Fashion & Admin');
+define('BASE_PATH', dirname(__DIR__));
 
 // Dynamic Base URL Detection
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? 80) == 443) ? "https://" : "http://";

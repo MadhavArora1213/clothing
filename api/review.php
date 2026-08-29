@@ -36,8 +36,8 @@ if ($check->get_result()->num_rows > 0) {
   exit;
 }
 
-$stmt = $mysqli->prepare("INSERT INTO reviews (product_id, customer_id, customer_name, rating, title, comment, is_approved) VALUES (?, ?, (SELECT CONCAT(first_name, ' ', last_name) FROM customers WHERE id = ?), ?, ?, ?, 0)");
+$stmt = $mysqli->prepare("INSERT INTO reviews (product_id, customer_id, customer_name, rating, title, comment, is_approved) VALUES (?, ?, (SELECT CONCAT(first_name, ' ', last_name) FROM customers WHERE id = ?), ?, ?, ?, 1)");
 $stmt->bind_param('iiisss', $productId, $customerId, $customerId, $rating, $title, $comment);
 $stmt->execute();
 
-echo json_encode(['success' => true, 'message' => 'Review submitted successfully. It will be visible after admin approval.']);
+echo json_encode(['success' => true, 'message' => 'Review submitted successfully!']);

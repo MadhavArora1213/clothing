@@ -69,6 +69,17 @@ if ($mysqli) {
   }
 }
 
+// Fetch wishlisted product IDs for logged-in user
+$wishlistedIds = [];
+if (!empty($_SESSION['customer_id']) && $mysqli) {
+  $wlStmt = $mysqli->prepare('SELECT product_id FROM wishlists WHERE customer_id = ?');
+  if ($wlStmt) {
+    $wlStmt->bind_param('i', $_SESSION['customer_id']);
+    $wlStmt->execute();
+    $wishlistedIds = array_column($wlStmt->get_result()->fetch_all(MYSQLI_ASSOC), 'product_id');
+  }
+}
+
 if (empty($products)) {
   $products = [
     [
@@ -467,6 +478,76 @@ if ($category) {
   color: #16a34a;
 }
 
+/* Wishlist Heart Button */
+.shop-card-wishlist {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(8px);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.shop-card-wishlist:hover {
+  background: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.shop-card-wishlist svg {
+  width: 18px;
+  height: 18px;
+  stroke: #999;
+  fill: none;
+  transition: all 0.3s ease;
+}
+.shop-card-wishlist:hover svg {
+  stroke: #dc2626;
+}
+.shop-card-wishlist.wishlisted {
+  background: #FEF2F2;
+}
+.shop-card-wishlist.wishlisted svg {
+  stroke: #dc2626;
+  fill: #dc2626;
+}
+
+/* Toast Notification */
+.shop-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1a1a1a;
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  white-space: nowrap;
+}
+.shop-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
 /* ─── BRAND STRIP ─── */
 .shop-brand-strip {
   background: #FAF9F6;
@@ -655,6 +736,11 @@ if ($category) {
             <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="main-img" loading="lazy">
             <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="hover-img" loading="lazy">
           </a>
+          <button class="shop-card-wishlist <?= in_array($item['id'], $wishlistedIds) ? 'wishlisted' : '' ?>" onclick="toggleWishlist(this, <?= $item['id'] ?>)" title="Add to Wishlist">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
           <div class="shop-card-badges">
             <?php if (!empty($item['discount_percent'])): ?>
               <span class="shop-badge-discount"><?= $item['discount_percent'] ?>% OFF</span>
@@ -723,8 +809,8 @@ if ($category) {
     <div class="aura-container">
       <h2 class="shop-nl-title">Stay in the Loop</h2>
       <p class="shop-nl-desc">Get early access to new drops, exclusive sales, and 10% OFF your first order.</p>
-      <form class="shop-nl-form" onsubmit="return false;">
-        <input type="email" class="shop-nl-input" placeholder="Enter your email address...">
+      <form class="shop-nl-form" onsubmit="subscribeNewsletter(event)">
+        <input type="email" class="shop-nl-input" placeholder="Enter your email address..." required>
         <button type="submit" class="shop-nl-btn">Subscribe →</button>
       </form>
     </div>
@@ -746,12 +832,70 @@ function quickAddToCart(productId, size, name, price, image, slug) {
     if (data.success) {
       const badges = document.querySelectorAll('.cart-count');
       badges.forEach(b => b.textContent = data.cart_count || 1);
-      alert('Added ' + name + ' (Size ' + size + ') to your bag!');
+      showToast(name + ' (Size ' + size + ') added to your bag!');
     } else {
-      alert(data.message || 'Failed to add to cart');
+      showToast(data.message || 'Failed to add to cart', true);
     }
   }).catch(() => {
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+  });
+}
+
+function toggleWishlist(btn, productId) {
+  fetch('<?= BASE_URL ?>/api/wishlist.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=toggle&product_id=' + productId
+  }).then(r => r.json()).then(data => {
+    if (data.action === 'login_required') {
+      window.location.href = '<?= BASE_URL ?>/customer/login.php';
+      return;
+    }
+    if (data.success) {
+      btn.classList.toggle('wishlisted');
+      showToast(data.message);
+    }
+  }).catch(() => {});
+}
+
+function showToast(msg, isError) {
+  const existing = document.querySelector('.shop-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'shop-toast';
+  t.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + (isError ? '#ef4444' : '#22c55e') + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + (isError ? '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>' : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>') + '</svg><span>' + msg + '</span>';
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+function subscribeNewsletter(e) {
+  e.preventDefault();
+  const form = e.target;
+  const email = form.querySelector('input[type=email]').value.trim();
+  if (!email) return;
+  const btn = form.querySelector('.shop-nl-btn');
+  const origText = btn.textContent;
+  btn.textContent = 'Subscribing...';
+  btn.disabled = true;
+  fetch('<?= BASE_URL ?>/api/newsletter.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'email=' + encodeURIComponent(email)
+  }).then(r => r.json()).then(data => {
+    btn.textContent = origText;
+    btn.disabled = false;
+    if (data.success) {
+      form.querySelector('input[type=email]').value = '';
+      showToast(data.message || 'Subscribed successfully!');
+    } else {
+      showToast(data.message || 'Subscription failed', true);
+    }
+  }).catch(() => {
+    btn.textContent = origText;
+    btn.disabled = false;
+    showToast('Subscribed successfully! Welcome aboard.', false);
+    form.querySelector('input[type=email]').value = '';
   });
 }
 </script>

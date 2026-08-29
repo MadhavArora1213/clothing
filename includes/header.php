@@ -136,8 +136,24 @@ if (!defined('BASE_URL')) {
 
         <!-- User -->
         <?php if (isset($_SESSION['customer_id'])): ?>
-          <a href="<?= BASE_URL ?>/customer/account.php" class="lux-user-btn" title="My Account">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <?php
+            $custName = '';
+            $custInitial = '';
+            if (isset($mysqli) && $mysqli) {
+              $cid = (int)$_SESSION['customer_id'];
+              $custRow = $mysqli->query("SELECT first_name, last_name FROM customers WHERE id = $cid LIMIT 1");
+              if ($custRow) {
+                $row = $custRow->fetch_assoc();
+                if ($row) {
+                  $custName = trim($row['first_name']);
+                  $custInitial = strtoupper(mb_substr($custName, 0, 1));
+                }
+              }
+            }
+          ?>
+          <a href="<?= BASE_URL ?>/customer/account.php" class="lux-user-btn logged-in" title="My Account">
+            <span class="user-avatar-circle"><?= $custInitial ?: '?' ?></span>
+            <span class="user-name-label"><?= htmlspecialchars($custName) ?></span>
           </a>
         <?php else: ?>
           <a href="<?= BASE_URL ?>/customer/login.php" class="lux-user-btn" title="Sign In">
@@ -188,6 +204,44 @@ if (!defined('BASE_URL')) {
   </div>
 
   <!-- Search Modal -->
+  <style>
+    .lux-user-btn.logged-in {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .lux-user-btn.logged-in:hover { opacity: 0.8; }
+    .user-avatar-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--color-accent, #D4AF37);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--color-accent, #D4AF37);
+      font-family: var(--font-body, 'Plus Jakarta Sans');
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .user-name-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary, #1a1a1a);
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @media (max-width: 768px) {
+      .user-name-label { display: none; }
+    }
+  </style>
   <div class="lux-search-modal" id="searchModal">
     <div class="lux-search-backdrop" id="searchBackdrop"></div>
     <div class="lux-search-card">
