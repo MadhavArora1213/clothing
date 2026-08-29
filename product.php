@@ -624,14 +624,40 @@ function setRating(val) {
 
 function submitReview(e) {
   e.preventDefault();
+  const msg = document.getElementById('reviewMsg');
+  msg.style.display = 'block';
+  msg.style.padding = '10px 14px';
+  msg.style.borderRadius = '8px';
+  msg.style.fontSize = '13px';
+  msg.style.fontWeight = '500';
+
   if (selectedRating < 1) {
-    const msg = document.getElementById('reviewMsg');
-    msg.style.display = 'block';
-    msg.style.color = '#C0392B';
-    msg.textContent = 'Please select a star rating.';
+    msg.style.color = '#991B1B';
+    msg.style.background = '#FEF2F2';
+    msg.style.border = '1px solid #FECACA';
+    msg.textContent = 'Please select a star rating before submitting.';
     return;
   }
+
   const form = document.getElementById('reviewForm');
+  const title = form.querySelector('[name=title]').value.trim();
+  const comment = form.querySelector('[name=comment]').value.trim();
+
+  if (!title) {
+    msg.style.color = '#991B1B';
+    msg.style.background = '#FEF2F2';
+    msg.style.border = '1px solid #FECACA';
+    msg.textContent = 'Please enter a review title.';
+    return;
+  }
+  if (!comment) {
+    msg.style.color = '#991B1B';
+    msg.style.background = '#FEF2F2';
+    msg.style.border = '1px solid #FECACA';
+    msg.textContent = 'Please write your review.';
+    return;
+  }
+
   const btn = document.getElementById('reviewSubmitBtn');
   btn.textContent = 'Submitting...';
   btn.disabled = true;
@@ -641,27 +667,29 @@ function submitReview(e) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'product_id=' + form.querySelector('[name=product_id]').value +
           '&rating=' + selectedRating +
-          '&title=' + encodeURIComponent(form.querySelector('[name=title]').value) +
-          '&comment=' + encodeURIComponent(form.querySelector('[name=comment]').value)
+          '&title=' + encodeURIComponent(title) +
+          '&comment=' + encodeURIComponent(comment)
   }).then(r => r.json()).then(data => {
-    const msg = document.getElementById('reviewMsg');
-    msg.style.display = 'block';
     if (data.success) {
       msg.style.color = '#166534';
+      msg.style.background = '#F0FDF4';
+      msg.style.border = '1px solid #BBF7D0';
       msg.textContent = '✓ ' + data.message;
       showToast('Review submitted! Refreshing...');
       setTimeout(() => location.reload(), 1200);
     } else {
-      msg.style.color = '#C0392B';
-      msg.textContent = data.error || data.message || 'Something went wrong.';
+      msg.style.color = '#991B1B';
+      msg.style.background = '#FEF2F2';
+      msg.style.border = '1px solid #FECACA';
+      msg.textContent = data.error || data.message || 'Something went wrong. Please try again.';
       btn.textContent = 'Submit Review';
       btn.disabled = false;
     }
   }).catch(() => {
-    const msg = document.getElementById('reviewMsg');
-    msg.style.display = 'block';
-    msg.style.color = '#C0392B';
-    msg.textContent = 'Network error. Please try again.';
+    msg.style.color = '#991B1B';
+    msg.style.background = '#FEF2F2';
+    msg.style.border = '1px solid #FECACA';
+    msg.textContent = 'Network error. Please check your connection and try again.';
     btn.textContent = 'Submit Review';
     btn.disabled = false;
   });
