@@ -666,10 +666,10 @@ if ($category) {
           <div class="shop-card-quick">
             <span class="shop-quick-label">Quick Add</span>
             <div class="shop-quick-sizes">
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'S')">S</button>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'M')">M</button>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'L')">L</button>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'XL')">XL</button>
+              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'S', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">S</button>
+              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'M', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">M</button>
+              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'L', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">L</button>
+              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'XL', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">XL</button>
             </div>
           </div>
         </div>
@@ -737,18 +737,18 @@ function scrollFilters(dir) {
   el.scrollBy({ left: dir * 300, behavior: 'smooth' });
 }
 
-function quickAddToCart(productId, size) {
+function quickAddToCart(productId, size, name, price, image, slug) {
   fetch('<?= BASE_URL ?>/api/cart.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1'
+    body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1&product_name=' + encodeURIComponent(name) + '&product_price=' + price + '&product_image=' + encodeURIComponent(image) + '&product_slug=' + encodeURIComponent(slug)
   }).then(r => r.json()).then(data => {
     if (data.success) {
       const badges = document.querySelectorAll('.cart-count');
       badges.forEach(b => b.textContent = data.cart_count || 1);
-      alert('✓ Added size ' + size + ' to your bag!');
+      alert('Added ' + name + ' (Size ' + size + ') to your bag!');
     } else {
-      window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+      alert(data.message || 'Failed to add to cart');
     }
   }).catch(() => {
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';

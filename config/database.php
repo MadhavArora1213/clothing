@@ -86,6 +86,39 @@ if ($conn && !$conn->connect_error) {
     if ($checkGender && $checkGender->num_rows === 0) {
       $mysqli->query("ALTER TABLE products ADD COLUMN gender ENUM('women', 'men', 'kids', 'unisex') DEFAULT 'women' AFTER brand");
     }
+    // Check if last_login column exists in customers
+    $checkLastLogin = $mysqli->query("SHOW COLUMNS FROM customers LIKE 'last_login'");
+    if ($checkLastLogin && $checkLastLogin->num_rows === 0) {
+      $mysqli->query("ALTER TABLE customers ADD COLUMN last_login DATETIME NULL AFTER is_active");
+    }
+    // Check if carts table exists
+    $checkCarts = $mysqli->query("SHOW TABLES LIKE 'carts'");
+    if ($checkCarts && $checkCarts->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS carts (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT UNSIGNED NULL,
+        session_id VARCHAR(128) NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+    // Check if cart_items table exists
+    $checkCartItems = $mysqli->query("SHOW TABLES LIKE 'cart_items'");
+    if ($checkCartItems && $checkCartItems->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS cart_items (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        cart_id INT UNSIGNED NOT NULL,
+        product_id INT UNSIGNED NOT NULL,
+        quantity INT UNSIGNED NOT NULL DEFAULT 1,
+        size VARCHAR(20) NULL,
+        unit_price DECIMAL(10,2) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
   }
 } else {
   $mysqli = null;

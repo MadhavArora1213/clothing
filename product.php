@@ -206,10 +206,15 @@ function handleAddToCart() {
   fetch('<?= BASE_URL ?>/api/cart.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'action=add&product_id=<?= $product['id'] ?>&size=' + encodeURIComponent(activeSize) + '&quantity=1'
+    body: 'action=add&product_id=<?= $product['id'] ?>&size=' + encodeURIComponent(activeSize) + '&quantity=1&product_name=' + encodeURIComponent(<?= json_encode($product['name']) ?>) + '&product_price=<?= $product['price'] ?>&product_image=' + encodeURIComponent(<?= json_encode($imageUrls[0] ?? '') ?>) + '&product_slug=<?= $product['slug'] ?? '' ?>'
   }).then(r => r.json()).then(data => {
-    alert('🎉 Added ' + <?= json_encode($product['name']) ?> + ' (Size ' + activeSize + ') to your bag!');
-    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+    if (data.success) {
+      const badges = document.querySelectorAll('.cart-count');
+      badges.forEach(b => b.textContent = data.cart_count || 1);
+      alert('Added ' + <?= json_encode($product['name']) ?> + ' (Size ' + activeSize + ') to your bag!');
+    } else {
+      alert(data.message || 'Failed to add to cart');
+    }
   }).catch(() => {
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';
   });

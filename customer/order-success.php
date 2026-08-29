@@ -30,13 +30,13 @@ if ($orderId) {
           </div>
         </div>
         <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
-          <a href="/customer/orders.php" class="btn btn-primary">View Orders</a>
-          <a href="/shop.php" class="btn btn-secondary">Continue Shopping</a>
+          <a href="<?= BASE_URL ?>/customer/orders.php" class="btn btn-primary">View Orders</a>
+          <a href="<?= BASE_URL ?>/shop.php" class="btn btn-secondary">Continue Shopping</a>
         </div>
       <?php else: ?>
         <h1 style="font-family: var(--font-display); font-size: var(--text-h2); margin-bottom: var(--space-4);">No Order Found</h1>
         <p style="color: var(--color-text-secondary); margin-bottom: var(--space-8);">It looks like you haven't placed an order yet.</p>
-        <a href="/shop.php" class="btn btn-primary">Start Shopping</a>
+        <a href="<?= BASE_URL ?>/shop.php" class="btn btn-primary">Start Shopping</a>
       <?php endif; ?>
     </div>
   </div>

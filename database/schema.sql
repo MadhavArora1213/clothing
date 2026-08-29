@@ -123,6 +123,7 @@ CREATE TABLE IF NOT EXISTS customers (
   avatar VARCHAR(500) NULL,
   gender ENUM('male', 'female', 'other') NULL,
   is_active TINYINT(1) DEFAULT 1,
+  last_login DATETIME NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -261,7 +262,35 @@ CREATE TABLE IF NOT EXISTS reviews (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 15. SETTINGS
+-- 15. CARTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS carts (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT UNSIGNED NULL,
+  session_id VARCHAR(128) NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- 16. CART ITEMS
+-- ============================================
+CREATE TABLE IF NOT EXISTS cart_items (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  cart_id INT UNSIGNED NOT NULL,
+  product_id INT UNSIGNED NOT NULL,
+  quantity INT UNSIGNED NOT NULL DEFAULT 1,
+  size VARCHAR(20) NULL,
+  unit_price DECIMAL(10,2) NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- 17. SETTINGS
 -- ============================================
 CREATE TABLE IF NOT EXISTS settings (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
