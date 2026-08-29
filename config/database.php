@@ -135,6 +135,111 @@ function sanitize($string) {
   return htmlspecialchars(trim((string)$string), ENT_QUOTES, 'UTF-8');
 }
 
+// ─── SECURITY FUNCTIONS ───
+
+function generateCSRFToken() {
+  if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  }
+  return $_SESSION['csrf_token'];
+}
+
+function validateCSRFToken($token) {
+  return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function getCSRFInput() {
+  return '<input type="hidden" name="csrf_token" value="' . generateCSRFToken() . '">';
+}
+
+function rateLimit($key, $maxAttempts = 5, $windowSeconds = 300) {
+  global $mysqli;
+  if (!$mysqli) return false;
+
+  $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+  $rateKey = $key . ':' . $ip;
+
+  if (!isset($_SESSION['rate_limit'])) {
+    $_SESSION['rate_limit'] = [];
+  }
+
+  $now = time();
+
+  if (!isset($_SESSION['rate_limit'][$rateKey])) {
+    $_SESSION['rate_limit'][$rateKey] = ['count' => 0, 'first' => $now];
+  }
+
+  $rl = &$_SESSION['rate_limit'][$rateKey];
+
+  if (($now - $rl['first']) > $windowSeconds) {
+    $rl = ['count' => 0, 'first' => $now];
+  }
+
+  $rl['count']++;
+
+  if ($rl['count'] > $maxAttempts) {
+    return true; // rate limited
+  }
+
+  return false;
+}
+
+function getRemainingAttempts($key, $maxAttempts = 5, $windowSeconds = 300) {
+  if (!isset($_SESSION['rate_limit'])) return $maxAttempts;
+  $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+  $rateKey = $key . ':' . $ip;
+  $rl = $_SESSION['rate_limit'][$rateKey] ?? null;
+  if (!$rl) return $maxAttempts;
+  $elapsed = time() - $rl['first'];
+  if ($elapsed > $windowSeconds) return $maxAttempts;
+  return max(0, $maxAttempts - $rl['count']);
+}
+
+function validateEmail($email) {
+  $email = trim($email);
+  if (strlen($email) > 254) return false;
+  return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function validateName($name) {
+  $name = trim($name);
+  if (strlen($name) < 2 || strlen($name) > 100) return false;
+  return preg_match('/^[a-zA-Z\s\.\-\']+$/', $name) === 1;
+}
+
+function validatePhone($phone) {
+  $phone = trim($phone);
+  if (empty($phone)) return true; // optional
+  $phone = preg_replace('/[\s\-\(\)\+]/', '', $phone);
+  return preg_match('/^[6-9]\d{9}$/', $phone) === 1;
+}
+
+function validateSubject($subject) {
+  $subject = trim($subject);
+  if (strlen($subject) < 2 || strlen($subject) > 200) return false;
+  return preg_match('/^[a-zA-Z0-9\s\.\,\-\?\!\@\&\']+$/', $subject) === 1;
+}
+
+function validateMessage($message) {
+  $message = trim($message);
+  if (strlen($message) < 5 || strlen($message) > 2000) return false;
+  return preg_match('/^[\s\S]{5,2000}$/', $message) === 1;
+}
+
+function isHoneypotFilled() {
+  return !empty($_POST['website_url']);
+}
+
+function sanitizeInput($input, $maxLen = 500) {
+  $input = trim((string)$input);
+  $input = strip_tags($input);
+  $input = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $input);
+  if (strlen($input) > $maxLen) {
+    $input = substr($input, 0, $maxLen);
+  }
+  return $input;
+}
+
 function formatPrice($amount) {
   return '₹' . number_format((float)$amount, 2);
 }

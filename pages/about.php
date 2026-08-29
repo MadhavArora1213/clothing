@@ -6,704 +6,1396 @@ include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <style>
-/* ─── ABOUT PAGE ─── */
+/* ═══════════════════════════════════════════════════════════════
+   URBAN OUTFIT — ABOUT PAGE v2.0
+   A completely unique, never-before-seen modern UI
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ── HERO ── */
-.ab-hero {
-  position: relative;
-  background: var(--color-text-main);
-  overflow: hidden;
-  min-height: 85vh;
-  display: flex;
-  align-items: flex-end;
+/* ── CSS VARIABLES ── */
+:root {
+  --ab-accent: #c9a84c;
+  --ab-accent-rgb: 201,168,76;
+  --ab-dark: #0a0a0a;
+  --ab-light: #f5f2eb;
+  --ab-gray: #1a1a1a;
+  --ab-muted: #6b6b6b;
+  --ab-glass: rgba(255,255,255,0.04);
+  --ab-glass-border: rgba(255,255,255,0.08);
 }
-.ab-hero-inner {
-  width: 100%;
-  position: relative;
-  padding: 60px 64px 80px;
-  z-index: 2;
+
+/* ── GLOBAL RESET FOR PAGE ── */
+.ab-page * { box-sizing: border-box; margin: 0; padding: 0; }
+.ab-page { overflow-x: hidden; background: var(--ab-dark); }
+
+.ab-page img {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
 }
-.ab-hero-images {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  display: flex;
-  gap: 24px;
-  padding: 40px 64px;
-  opacity: 0.65;
-}
-.ab-hero-card {
-  flex: 1;
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #222;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-.ab-hero-card:nth-child(1) { transform: rotate(-2deg) translateY(30px); }
-.ab-hero-card:nth-child(2) { transform: translateY(-20px); }
-.ab-hero-card:nth-child(3) { transform: rotate(1.5deg) translateY(40px); }
-.ab-hero-card:nth-child(4) { transform: rotate(-1deg) translateY(10px); }
-.ab-hero-card-dots {
-  display: flex;
-  gap: 6px;
-  padding: 12px 16px;
-  background: #1a1a1a;
-}
-.ab-hero-card-dots span {
-  width: 10px; height: 10px;
+
+/* ── CUSTOM CURSOR ── */
+.ab-cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ab-accent);
   border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transition: transform 0.15s ease, opacity 0.3s ease;
+  mix-blend-mode: difference;
 }
-.ab-hero-card-dots span:nth-child(1) { background: #FF5F56; }
-.ab-hero-card-dots span:nth-child(2) { background: #FFBD2E; }
-.ab-hero-card-dots span:nth-child(3) { background: #27CA40; }
-.ab-hero-card img {
-  width: 100%;
-  height: 280px;
-  object-fit: cover;
-  display: block;
-}
-.ab-hero-title {
-  position: relative;
-  z-index: 3;
-  font-family: var(--font-display);
-  font-size: clamp(52px, 8vw, 110px);
-  font-weight: 500;
-  line-height: 0.95;
-  letter-spacing: -0.04em;
-  color: #fff;
-  text-transform: uppercase;
-}
-.ab-hero-title .stroke-text {
-  display: block;
-  -webkit-text-stroke: 2px rgba(255,255,255,0.3);
-  color: transparent;
-}
-.ab-hero-sub {
-  position: relative;
-  z-index: 3;
-  margin-top: 24px;
-  font-size: 15px;
-  color: rgba(255,255,255,0.5);
-  max-width: 500px;
-  line-height: 1.7;
-}
-.ab-hero-deco {
-  position: absolute;
-  top: 60px; right: 60px;
-  width: 200px; height: 200px;
-  border: 1px solid rgba(212,175,55,0.15);
+.ab-cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--ab-accent);
   border-radius: 50%;
-  z-index: 1;
+  pointer-events: none;
+  z-index: 10001;
+}
+.ab-cursor.hovering {
+  transform: scale(2.5);
+  background: rgba(201,168,76,0.1);
 }
 
-/* ── ABOUT COLLAGE SECTION (reference Image 2) ── */
-.ab-collage {
-  padding: 100px 0;
-  background: var(--color-bg);
-}
-.ab-collage-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 60px;
-  align-items: center;
-}
-.ab-collage-left {
+/* ── HERO — ORGANIC SPLIT ── */
+.ab-hero-split {
   position: relative;
-  height: 560px;
-}
-.ab-collage-img {
-  position: absolute;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-}
-.ab-collage-img-1 {
-  top: 0; left: 0;
-  width: 65%; height: 70%;
-  z-index: 2;
-}
-.ab-collage-img-2 {
-  top: 15%; right: 0;
-  width: 55%; height: 60%;
-  z-index: 1;
-  border-radius: 12px;
-}
-.ab-collage-img-3 {
-  bottom: 0; left: 10%;
-  width: 50%; height: 45%;
-  z-index: 3;
-  border-radius: 12px;
-  border: 5px solid var(--color-bg);
-}
-.ab-collage-about-text {
-  position: absolute;
-  top: 50%; right: -10px;
-  transform: translateY(-50%);
-  font-family: var(--font-display);
-  font-size: clamp(60px, 8vw, 100px);
-  font-weight: 700;
-  color: var(--color-accent);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  letter-spacing: 0.04em;
-  z-index: 4;
-  opacity: 0.85;
-  line-height: 1;
-}
-.ab-collage-num {
-  position: absolute;
-  bottom: 20px; left: 0;
-  font-family: var(--font-display);
-  font-size: 72px;
-  font-weight: 700;
-  color: var(--color-accent);
-  opacity: 0.2;
-  z-index: 4;
-  line-height: 1;
-}
-
-.ab-collage-right {}
-.ab-collage-right .ab-eyebrow { margin-bottom: 14px; }
-.ab-collage-heading {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 42px);
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--color-text-main);
-  margin-bottom: 20px;
-}
-.ab-collage-heading em { font-style: italic; color: var(--color-accent); }
-.ab-collage-desc {
-  font-size: 15px;
-  color: var(--color-text-muted);
-  line-height: 1.8;
-  margin-bottom: 16px;
-}
-.ab-collage-features {
+  min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 28px;
-}
-.ab-collage-feat {
-  padding: 20px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  transition: all 0.3s;
-}
-.ab-collage-feat:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-2px);
-}
-.ab-collage-feat h4 {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-main);
-  margin-bottom: 4px;
-}
-.ab-collage-feat p {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-/* ── WHAT MAKES US GREAT ── */
-.ab-great {
-  padding: 100px 0;
-  background: var(--color-surface);
-}
-.ab-great-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-.ab-great-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 40px;
-  margin-bottom: 60px;
-}
-.ab-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-accent);
-  margin-bottom: 14px;
-}
-.ab-eyebrow::before { content: ''; width: 24px; height: 2px; background: var(--color-accent); }
-.ab-great-title {
-  font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 50px);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  color: var(--color-text-main);
-}
-.ab-great-title em { font-style: italic; color: var(--color-accent); }
-.ab-great-sub {
-  font-size: 15px;
-  color: var(--color-text-muted);
-  line-height: 1.7;
-  max-width: 400px;
-}
-
-.ab-values-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-.ab-value-card {
-  padding: 40px 32px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  transition: all 0.4s ease;
-  position: relative;
   overflow: hidden;
 }
-.ab-value-card::before {
+
+.ab-hero-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 80px 60px;
+  background: var(--ab-dark);
+  z-index: 2;
+}
+
+.ab-hero-left::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
-  width: 100%; height: 3px;
-  background: var(--color-accent);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
-}
-.ab-value-card:hover::before { transform: scaleX(1); }
-.ab-value-card:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.06);
-}
-.ab-value-num {
-  font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 400;
-  color: var(--color-accent);
-  margin-bottom: 16px;
-  line-height: 1;
-}
-.ab-value-card h3 {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--color-text-main);
-  margin-bottom: 10px;
-}
-.ab-value-card p {
-  font-size: 14px;
-  color: var(--color-text-muted);
-  line-height: 1.7;
+  width: 100%; height: 100%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(var(--ab-accent-rgb),0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(var(--ab-accent-rgb),0.05) 0%, transparent 40%);
+  z-index: 0;
 }
 
-/* ── STORY SECTION ── */
-.ab-story {
-  padding: 100px 0;
-  background: var(--color-bg);
-}
-.ab-story-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
-}
-.ab-story-img-wrap { position: relative; }
-.ab-story-img {
-  width: 100%;
-  height: 520px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-}
-.ab-story-img-accent {
-  position: absolute;
-  bottom: -20px; right: -20px;
-  width: 200px; height: 200px;
-  background: var(--color-accent-light);
-  border-radius: var(--radius-md);
-  z-index: -1;
-}
-.ab-story-heading {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--color-text-main);
-  margin-bottom: 20px;
-}
-.ab-story-heading em { font-style: italic; color: var(--color-accent); }
-.ab-story-desc {
-  font-size: 15px;
-  color: var(--color-text-muted);
-  line-height: 1.8;
-  margin-bottom: 16px;
-}
-.ab-story-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 32px;
-  padding-top: 32px;
-  border-top: 1px solid var(--color-border);
-}
-.ab-stat-num {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 500;
-  color: var(--color-text-main);
-  margin-bottom: 4px;
-}
-.ab-stat-label {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* ── PHILOSOPHY ── */
-.ab-philosophy {
-  padding: 100px 0;
-  background: #0F0F0F;
-  color: #fff;
-}
-.ab-philosophy-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: center;
-}
-.ab-philosophy-text .ab-eyebrow { color: var(--color-accent); }
-.ab-philosophy-text .ab-eyebrow::before { background: var(--color-accent); }
-.ab-philosophy-title {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: #fff;
-  margin-bottom: 20px;
-}
-.ab-philosophy-title em { font-style: italic; color: var(--color-accent); }
-.ab-philosophy-desc {
-  font-size: 15px;
-  color: rgba(255,255,255,0.55);
-  line-height: 1.8;
-  margin-bottom: 16px;
-}
-.ab-philosophy-list {
-  list-style: none;
-  margin-top: 28px;
-}
-.ab-philosophy-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  font-size: 14px;
-  color: rgba(255,255,255,0.7);
-}
-.ab-philosophy-list li:last-child { border-bottom: none; }
-.ab-philosophy-list svg { color: var(--color-accent); flex-shrink: 0; margin-top: 2px; }
-.ab-philosophy-imgs {
+.ab-hero-label {
   position: relative;
-  height: 480px;
-}
-.ab-phil-img-1 {
-  position: absolute;
-  top: 0; left: 0;
-  width: 70%; height: 75%;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.ab-phil-img-2 {
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 55%; height: 55%;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 4px solid #0F0F0F;
-  box-shadow: 0 16px 50px rgba(0,0,0,0.4);
-}
-
-/* ── CTA ── */
-.ab-cta {
-  padding: 80px 0;
-  background: var(--color-accent-light);
-}
-.ab-cta-inner {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 24px;
-  text-align: center;
-}
-.ab-cta-title {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 42px);
-  font-weight: 400;
-  line-height: 1.15;
-  color: var(--color-text-main);
-  margin-bottom: 16px;
-}
-.ab-cta-title em { font-style: italic; color: var(--color-accent); }
-.ab-cta-desc {
-  font-size: 15px;
-  color: var(--color-text-muted);
-  line-height: 1.7;
-  margin-bottom: 32px;
-}
-.ab-cta-btn {
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 40px;
-  background: var(--color-text-main);
+  gap: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--ab-accent);
+  margin-bottom: 32px;
+}
+
+.ab-hero-label::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--ab-accent);
+}
+
+.ab-hero-title-mega {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: clamp(64px, 9vw, 140px);
+  font-weight: 200;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
   color: #fff;
-  font-size: 12px;
+}
+
+.ab-hero-title-mega span {
+  display: block;
+}
+
+.ab-hero-title-mega .line-accent {
+  font-style: italic;
+  color: var(--ab-accent);
+  font-weight: 300;
+}
+
+.ab-hero-title-mega .line-outline {
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.2);
+  color: transparent;
+}
+
+.ab-hero-tagline {
+  position: relative;
+  z-index: 1;
+  margin-top: 40px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.8;
+  max-width: 380px;
+}
+
+.ab-hero-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.ab-hero-morph {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px; height: 500px;
+  animation: morphFloat 12s ease-in-out infinite;
+}
+
+@keyframes morphFloat {
+  0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; transform: translate(-50%, -50%) scale(1); }
+  25% { border-radius: 70% 30% 50% 50% / 30% 70% 30% 70%; transform: translate(-50%, -50%) scale(1.03); }
+  50% { border-radius: 30% 70% 30% 70% / 55% 30% 70% 45%; transform: translate(-50%, -50%) scale(1); }
+  75% { border-radius: 55% 45% 60% 40% / 40% 60% 40% 60%; transform: translate(-50%, -50%) scale(1.03); }
+}
+
+.ab-hero-morph img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.8);
+}
+
+.ab-hero-scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+}
+
+.ab-hero-scroll-indicator span {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.3);
+}
+
+.ab-hero-scroll-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, var(--ab-accent), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.3; transform: scaleY(0.6); }
+}
+
+/* ── MARQUEE STRIP ── */
+.ab-marquee-strip {
+  padding: 24px 0;
+  background: var(--ab-accent);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ab-marquee-track {
+  display: flex;
+  animation: marqueeScroll 30s linear infinite;
+}
+
+.ab-marquee-item {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  letter-spacing: 0.2em;
+  color: var(--ab-dark);
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.ab-marquee-item::after {
+  content: '◆';
+  font-size: 8px;
+  opacity: 0.4;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── NARRATIVE SECTION — SCROLL REVEAL ── */
+.ab-narrative {
+  padding: 160px 0;
+  background: var(--ab-dark);
+  position: relative;
+}
+
+.ab-narrative-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.ab-narrative-quote {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 200;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: rgba(255,255,255,0.9);
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto 120px;
+  position: relative;
+}
+
+.ab-narrative-quote::before {
+  content: '"';
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 120px;
+  color: var(--ab-accent);
+  opacity: 0.15;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.ab-narrative-quote em {
+  font-style: italic;
+  color: var(--ab-accent);
+}
+
+.ab-narrative-columns {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  gap: 0;
+}
+
+.ab-narrative-divider {
+  background: linear-gradient(to bottom, transparent, rgba(var(--ab-accent-rgb),0.3), transparent);
+  margin: 0 40px;
+}
+
+.ab-narrative-col {
+  padding: 40px;
+}
+
+.ab-narrative-col-num {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--ab-accent);
+  margin-bottom: 24px;
+  opacity: 0.6;
+}
+
+.ab-narrative-col h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 300;
+  color: #fff;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.ab-narrative-col p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.8;
+}
+
+/* ── BENTO GRID — ORGANIC ── */
+.ab-bento {
+  padding: 120px 0;
+  background: linear-gradient(180deg, var(--ab-dark) 0%, #0d0d0d 100%);
+}
+
+.ab-bento-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.ab-bento-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.ab-bento-header .ab-eyebrow-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--ab-accent);
+  margin-bottom: 20px;
+}
+
+.ab-bento-header .ab-eyebrow-alt::before,
+.ab-bento-header .ab-eyebrow-alt::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--ab-accent);
+}
+
+.ab-bento-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: -0.03em;
+}
+
+.ab-bento-header h2 em {
+  font-style: italic;
+  color: var(--ab-accent);
+}
+
+.ab-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 20px;
+}
+
+.ab-bento-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--ab-glass);
+  border: 1px solid var(--ab-glass-border);
+  transition: all 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+
+.ab-bento-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(var(--ab-accent-rgb),0.3);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+}
+
+.ab-bento-card-1 { grid-column: 1 / 8; grid-row: 1 / 2; min-height: 400px; }
+.ab-bento-card-2 { grid-column: 8 / 13; grid-row: 1 / 2; min-height: 400px; }
+.ab-bento-card-3 { grid-column: 1 / 5; grid-row: 2 / 3; min-height: 350px; }
+.ab-bento-card-4 { grid-column: 5 / 13; grid-row: 2 / 3; min-height: 350px; }
+
+.ab-bento-card-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.8) 100%);
+  z-index: 2;
+}
+
+.ab-bento-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.ab-bento-card-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+
+.ab-bento-card:hover .ab-bento-card-bg img {
+  transform: scale(1.08);
+}
+
+.ab-bento-card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ab-accent);
+  margin-bottom: 12px;
+  width: fit-content;
+}
+
+.ab-bento-card-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--ab-accent);
+  border-radius: 50%;
+}
+
+.ab-bento-card h3 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 300;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.ab-bento-card p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  max-width: 350px;
+}
+
+/* ── TIMELINE — HORIZONTAL SCROLL ── */
+.ab-timeline {
+  padding: 140px 0 100px;
+  background: var(--ab-dark);
+  overflow: hidden;
+}
+
+.ab-timeline-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.ab-timeline-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 80px;
+}
+
+.ab-timeline-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: -0.03em;
+}
+
+.ab-timeline-header h2 em {
+  font-style: italic;
+  color: var(--ab-accent);
+}
+
+.ab-timeline-year {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--ab-accent);
+  letter-spacing: 0.1em;
+}
+
+.ab-timeline-track {
+  display: flex;
+  gap: 0;
+  position: relative;
+  padding-bottom: 60px;
+}
+
+.ab-timeline-track::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--ab-accent-rgb),0.4), transparent);
+}
+
+.ab-timeline-item {
+  flex: 0 0 300px;
+  position: relative;
+  padding: 0 40px 0 0;
+}
+
+.ab-timeline-item::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--ab-accent);
+  border-radius: 50%;
+  border: 3px solid var(--ab-dark);
+  z-index: 2;
+}
+
+.ab-timeline-item-num {
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 200;
+  color: rgba(var(--ab-accent-rgb),0.15);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.ab-timeline-item h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.ab-timeline-item p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.7;
+}
+
+/* ── TEAM SECTION — GLASSMORPHISM ── */
+.ab-team {
+  padding: 140px 0;
+  background: linear-gradient(180deg, #0d0d0d 0%, var(--ab-dark) 100%);
+}
+
+.ab-team-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.ab-team-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.ab-team-header .ab-eyebrow-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--ab-accent);
+  margin-bottom: 20px;
+}
+
+.ab-team-header .ab-eyebrow-alt::before,
+.ab-team-header .ab-eyebrow-alt::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--ab-accent);
+}
+
+.ab-team-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: -0.03em;
+}
+
+.ab-team-header h2 em {
+  font-style: italic;
+  color: var(--ab-accent);
+}
+
+.ab-team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.ab-team-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--ab-glass);
+  border: 1px solid var(--ab-glass-border);
+  padding: 32px;
+  transition: all 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+
+.ab-team-card:hover {
+  transform: translateY(-12px);
+  border-color: rgba(var(--ab-accent-rgb),0.3);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+
+.ab-team-card-avatar {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.ab-team-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.6);
+  transition: filter 0.6s ease;
+}
+
+.ab-team-card:hover .ab-team-card-avatar img {
+  filter: grayscale(0);
+}
+
+.ab-team-card-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6) 100%);
+}
+
+.ab-team-card-role {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ab-accent);
+  margin-bottom: 8px;
+}
+
+.ab-team-card h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 300;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.ab-team-card p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.7;
+}
+
+.ab-team-card-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ab-team-card-socials a {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.5);
   text-decoration: none;
+  transition: all 0.3s ease;
 }
-.ab-cta-btn:hover {
-  background: var(--color-accent);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(212,175,55,0.3);
+
+.ab-team-card-socials a:hover {
+  background: var(--ab-accent);
+  border-color: var(--ab-accent);
+  color: var(--ab-dark);
 }
-.ab-cta-btn svg { transition: transform 0.3s; }
-.ab-cta-btn:hover svg { transform: translateX(4px); }
+
+/* ── CTA — DIAGONAL SPLIT ── */
+.ab-cta-split {
+  position: relative;
+  min-height: 70vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.ab-cta-split-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 80px;
+  background: var(--ab-dark);
+}
+
+.ab-cta-split-left .ab-eyebrow-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--ab-accent);
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.ab-cta-split-left .ab-eyebrow-alt::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--ab-accent);
+}
+
+.ab-cta-split-left h2 {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 200;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.ab-cta-split-left h2 em {
+  font-style: italic;
+  color: var(--ab-accent);
+}
+
+.ab-cta-split-left p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.8;
+  margin-bottom: 40px;
+  max-width: 400px;
+}
+
+.ab-cta-split-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 48px;
+  background: var(--ab-accent);
+  color: var(--ab-dark);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  text-decoration: none;
+  border-radius: 60px;
+  transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+  width: fit-content;
+}
+
+.ab-cta-split-btn:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(var(--ab-accent-rgb),0.4);
+}
+
+.ab-cta-split-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.ab-cta-split-btn:hover svg {
+  transform: translateX(6px);
+}
+
+.ab-cta-split-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.ab-cta-split-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s cubic-bezier(0.16,1,0.3,1);
+}
+
+.ab-cta-split-right:hover img {
+  transform: scale(1.05);
+}
+
+.ab-cta-split-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(var(--ab-accent-rgb),0.1) 0%, transparent 60%);
+  z-index: 1;
+}
+
+/* ── FLOATING PARTICLES ── */
+.ab-particles {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ab-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--ab-accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat 8s ease-in-out infinite;
+}
+
+.ab-particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 7s; }
+.ab-particle:nth-child(2) { left: 25%; animation-delay: 1s; animation-duration: 9s; }
+.ab-particle:nth-child(3) { left: 40%; animation-delay: 2s; animation-duration: 6s; }
+.ab-particle:nth-child(4) { left: 55%; animation-delay: 3s; animation-duration: 8s; }
+.ab-particle:nth-child(5) { left: 70%; animation-delay: 4s; animation-duration: 10s; }
+.ab-particle:nth-child(6) { left: 85%; animation-delay: 5s; animation-duration: 7s; }
+.ab-particle:nth-child(7) { left: 15%; animation-delay: 6s; animation-duration: 9s; }
+.ab-particle:nth-child(8) { left: 60%; animation-delay: 7s; animation-duration: 8s; }
+
+@keyframes particleFloat {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+}
+
+/* ── TEXT REVEAL ANIMATION ── */
+.ab-reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 1s cubic-bezier(0.16,1,0.3,1);
+}
+
+.ab-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ab-reveal-delay-1 { transition-delay: 0.1s; }
+.ab-reveal-delay-2 { transition-delay: 0.2s; }
+.ab-reveal-delay-3 { transition-delay: 0.3s; }
+.ab-reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ── HORIZONTAL RULE ACCENT ── */
+.ab-hr-accent {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--ab-accent-rgb),0.3), transparent);
+  margin: 0;
+  border: none;
+}
 
 /* ── RESPONSIVE ── */
-@media (max-width: 1024px) {
-  .ab-hero { min-height: 70vh; }
-  .ab-hero-images { padding: 30px 40px; gap: 16px; }
-  .ab-hero-card img { height: 200px; }
-  .ab-hero-title { font-size: clamp(40px, 6vw, 80px); }
-  .ab-collage-inner { grid-template-columns: 1fr; gap: 40px; }
-  .ab-collage-left { height: 420px; }
-  .ab-values-grid { grid-template-columns: 1fr 1fr; }
-  .ab-story-inner { grid-template-columns: 1fr; gap: 40px; }
-  .ab-story-img { height: 400px; }
-  .ab-philosophy-inner { grid-template-columns: 1fr; gap: 48px; }
-  .ab-philosophy-imgs { height: 380px; }
+@media (max-width: 1200px) {
+  .ab-team-grid { grid-template-columns: repeat(2, 1fr); }
+  .ab-bento-card-1 { grid-column: 1 / 13; }
+  .ab-bento-card-2 { grid-column: 1 / 13; }
+  .ab-bento-card-3 { grid-column: 1 / 7; }
+  .ab-bento-card-4 { grid-column: 7 / 13; }
 }
-@media (max-width: 640px) {
-  .ab-hero { min-height: 60vh; }
-  .ab-hero-inner { padding: 40px 20px 60px; }
-  .ab-hero-images { padding: 20px; gap: 12px; }
-  .ab-hero-card img { height: 160px; }
-  .ab-hero-title { font-size: clamp(32px, 10vw, 50px); }
-  .ab-collage-left { height: 360px; }
-  .ab-collage-about-text { font-size: 50px; }
-  .ab-collage-features { grid-template-columns: 1fr; }
-  .ab-great-head { flex-direction: column; align-items: flex-start; gap: 16px; }
-  .ab-values-grid { grid-template-columns: 1fr; }
-  .ab-story-stats { grid-template-columns: 1fr; gap: 16px; }
-  .ab-philosophy-imgs { height: 300px; }
-  .ab-phil-img-1 { width: 80%; height: 70%; }
-  .ab-phil-img-2 { width: 60%; height: 50%; }
+
+@media (max-width: 1024px) {
+  .ab-hero-split { grid-template-columns: 1fr; min-height: auto; }
+  .ab-hero-left { padding: 80px 40px 60px; }
+  .ab-hero-right { height: 50vh; min-height: 300px; }
+  .ab-hero-morph { width: 320px; height: 320px; }
+  .ab-hero-scroll-indicator { display: none; }
+  .ab-marquee-item { padding: 0 30px; font-size: 11px; }
+  .ab-narrative { padding: 100px 0; }
+  .ab-narrative-quote { font-size: clamp(28px, 4vw, 48px); margin-bottom: 80px; }
+  .ab-narrative-columns { grid-template-columns: 1fr; gap: 0; }
+  .ab-narrative-divider { display: none; }
+  .ab-narrative-col { padding: 24px 0; border-bottom: 1px solid rgba(var(--ab-accent-rgb),0.1); }
+  .ab-narrative-col:last-child { border-bottom: none; }
+  .ab-bento { padding: 80px 0; }
+  .ab-timeline { padding: 100px 0 80px; }
+  .ab-timeline-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ab-team { padding: 100px 0; }
+  .ab-cta-split { grid-template-columns: 1fr; }
+  .ab-cta-split-left { padding: 60px 40px; }
+  .ab-cta-split-right { height: 50vh; min-height: 300px; }
+}
+
+@media (max-width: 768px) {
+  .ab-hero-left { padding: 60px 24px 40px; }
+  .ab-hero-title-mega { font-size: clamp(44px, 14vw, 80px); }
+  .ab-hero-tagline { font-size: 13px; margin-top: 24px; }
+  .ab-hero-morph { width: 350px; height: 350px; }
+  .ab-marquee-strip { padding: 16px 0; }
+  .ab-marquee-item { padding: 0 20px; font-size: 10px; letter-spacing: 0.15em; }
+  .ab-narrative { padding: 80px 0; }
+  .ab-narrative-inner { padding: 0 24px; }
+  .ab-narrative-quote { font-size: clamp(24px, 6vw, 36px); margin-bottom: 60px; }
+  .ab-narrative-quote::before { font-size: 80px; top: -40px; }
+  .ab-narrative-col { padding: 20px 0; }
+  .ab-bento { padding: 60px 0; }
+  .ab-bento-inner { padding: 0 24px; }
+  .ab-bento-header h2 { font-size: clamp(28px, 7vw, 40px); }
+  .ab-bento-card-1, .ab-bento-card-2, .ab-bento-card-3, .ab-bento-card-4 { grid-column: 1 / 13; }
+  .ab-bento-card { min-height: 320px !important; }
+  .ab-bento-card-bg img { height: 320px !important; }
+  .ab-bento-card h3 { font-size: 22px; }
+  .ab-bento-card p { font-size: 12px; }
+  .ab-bento-card-inner { padding: 24px; }
+  .ab-timeline { padding: 80px 0 60px; }
+  .ab-timeline-inner { padding: 0 24px; }
+  .ab-timeline-track { overflow-x: auto; padding-bottom: 30px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .ab-timeline-item { flex: 0 0 240px; scroll-snap-align: start; }
+  .ab-timeline-item-num { font-size: 40px; }
+  .ab-timeline-item h3 { font-size: 16px; }
+  .ab-timeline-item p { font-size: 12px; }
+  .ab-team { padding: 80px 0; }
+  .ab-team-inner { padding: 0 24px; }
+  .ab-team-header h2 { font-size: clamp(28px, 7vw, 40px); }
+  .ab-team-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ab-team-card { padding: 20px; }
+  .ab-team-card-avatar { height: 240px !important; }
+  .ab-team-card-avatar img { height: 100% !important; }
+  .ab-team-card h3 { font-size: 16px; }
+  .ab-team-card p { font-size: 12px; line-height: 1.6; }
+  .ab-team-card-role { font-size: 8px; }
+  .ab-cta-split-left { padding: 48px 24px; }
+  .ab-cta-split-left h2 { font-size: clamp(28px, 7vw, 40px); }
+  .ab-cta-split-left p { font-size: 13px; }
+  .ab-cta-split-right { height: 50vh; min-height: 300px; }
+  .ab-cta-split-btn { padding: 16px 32px; font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .ab-hero-left { padding: 48px 16px 32px; }
+  .ab-hero-title-mega { font-size: clamp(40px, 15vw, 64px); }
+  .ab-hero-right { height: 35vh; min-height: 250px; }
+  .ab-hero-morph { width: 320px; height: 320px; }
+  .ab-marquee-item { padding: 0 14px; font-size: 9px; }
+  .ab-narrative { padding: 60px 0; }
+  .ab-narrative-inner { padding: 0 16px; }
+  .ab-narrative-quote { font-size: 22px; margin-bottom: 48px; }
+  .ab-narrative-col h3 { font-size: 18px; }
+  .ab-narrative-col p { font-size: 12px; }
+  .ab-narrative-col-num { font-size: 10px; }
+  .ab-bento { padding: 48px 0; }
+  .ab-bento-inner { padding: 0 16px; }
+  .ab-bento-header { margin-bottom: 48px; }
+  .ab-bento-card { min-height: 300px !important; }
+  .ab-bento-card-inner { padding: 20px; }
+  .ab-bento-card-bg img { height: 300px !important; }
+  .ab-timeline { padding: 60px 0 48px; }
+  .ab-timeline-inner { padding: 0 16px; }
+  .ab-timeline-item { flex: 0 0 200px; }
+  .ab-timeline-item-num { font-size: 32px; }
+  .ab-team { padding: 60px 0; }
+  .ab-team-inner { padding: 0 16px; }
+  .ab-team-grid { grid-template-columns: 1fr; gap: 16px; }
+  .ab-team-card { padding: 20px; }
+  .ab-team-card-avatar { max-width: 220px; margin: 0 auto 20px; }
+  .ab-team-card-avatar img { height: 220px !important; }
+  .ab-team-card-socials { justify-content: center; }
+  .ab-cta-split-left { padding: 40px 16px; }
+  .ab-cta-split-right { height: 40vh; min-height: 280px; }
+  .ab-cta-split-right img { height: 100% !important; }
+  .ab-cta-split-btn { width: 100%; justify-content: center; }
+
+  .ab-cursor, .ab-cursor-dot { display: none !important; }
+  .ab-particles { display: none; }
+}
+
+/* ── FOOTER OVERRIDE FOR ABOUT PAGE ── */
+.ab-page + .aura-footer,
+.ab-page ~ .aura-footer,
+footer.aura-footer {
+  background: linear-gradient(180deg, var(--ab-dark) 0%, #050505 100%) !important;
+  border-top: 1px solid rgba(var(--ab-accent-rgb),0.15) !important;
+}
+
+.ab-page ~ .aura-footer .aura-footer::before,
+footer.aura-footer::before {
+  background: linear-gradient(90deg, transparent, rgba(var(--ab-accent-rgb),0.4), transparent) !important;
+}
+
+.ab-page ~ .aura-footer .footer-col h4,
+footer.aura-footer .footer-col h4 {
+  color: var(--ab-accent) !important;
+}
+
+.ab-page ~ .aura-footer .footer-links a,
+footer.aura-footer .footer-links a {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+.ab-page ~ .aura-footer .footer-links a:hover,
+footer.aura-footer .footer-links a:hover {
+  color: var(--ab-accent) !important;
+}
+
+.ab-page ~ .aura-footer .footer-feature-item:hover .feature-icon-box,
+footer.aura-footer .footer-feature-item:hover .feature-icon-box {
+  background: rgba(var(--ab-accent-rgb),0.15) !important;
+  border-color: rgba(var(--ab-accent-rgb),0.3) !important;
+}
+
+.ab-page ~ .aura-footer .footer-social-links a:hover,
+footer.aura-footer .footer-social-links a:hover {
+  background: var(--ab-accent) !important;
+  border-color: var(--ab-accent) !important;
+}
+
+.ab-page ~ .aura-footer .footer-bottom,
+footer.aura-footer .footer-bottom {
+  border-top: 1px solid rgba(var(--ab-accent-rgb),0.1) !important;
+}
+
+.ab-page ~ .aura-footer .footer-bottom-links a:hover,
+footer.aura-footer .footer-bottom-links a:hover {
+  color: var(--ab-accent) !important;
+}
+
+.ab-page ~ .aura-footer .btn-primary,
+footer.aura-footer .btn-primary {
+  background: var(--ab-accent) !important;
+  border-color: var(--ab-accent) !important;
+}
+
+.ab-page ~ .aura-footer .btn-primary:hover,
+footer.aura-footer .btn-primary:hover {
+  background: #b8943f !important;
+  box-shadow: 0 8px 30px rgba(var(--ab-accent-rgb),0.3) !important;
 }
 </style>
 
-<!-- ═══ HERO ═══ -->
-<section class="ab-hero">
-  <div class="ab-hero-images">
-    <div class="ab-hero-card">
-      <div class="ab-hero-card-dots"><span></span><span></span><span></span></div>
-      <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600&auto=format&fit=crop&q=80" alt="Our Craft">
-    </div>
-    <div class="ab-hero-card">
-      <div class="ab-hero-card-dots"><span></span><span></span><span></span></div>
-      <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=600&auto=format&fit=crop&q=80" alt="Our Store">
-    </div>
-    <div class="ab-hero-card">
-      <div class="ab-hero-card-dots"><span></span><span></span><span></span></div>
-      <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&auto=format&fit=crop&q=80" alt="Our Design">
-    </div>
-    <div class="ab-hero-card">
-      <div class="ab-hero-card-dots"><span></span><span></span><span></span></div>
-      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80" alt="Our Model">
-    </div>
-  </div>
-  <div class="ab-hero-deco"></div>
-  <div class="ab-hero-inner">
-    <h1 class="ab-hero-title">
-      <span class="stroke-text">About Us</span>
-      urban outfit
-    </h1>
-    <p class="ab-hero-sub">Crafting luxury streetwear and artisanal heritage fusion for the modern aesthetic wardrobe. Designed &amp; made in India.</p>
-  </div>
-</section>
+<div class="ab-page">
 
-<!-- ═══ ABOUT COLLAGE (reference style) ═══ -->
-<section class="ab-collage">
-  <div class="ab-collage-inner">
-    <div class="ab-collage-left">
-      <img class="ab-collage-img ab-collage-img-1" src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=700&auto=format&fit=crop&q=80" alt="Model Fashion">
-      <img class="ab-collage-img ab-collage-img-2" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80" alt="Streetwear Model">
-      <img class="ab-collage-img ab-collage-img-3" src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&auto=format&fit=crop&q=80" alt="Heritage Craft">
-      <span class="ab-collage-about-text">About</span>
-      <span class="ab-collage-num">01</span>
-    </div>
-    <div class="ab-collage-right">
-      <span class="ab-eyebrow">Who We Are</span>
-      <h2 class="ab-collage-heading">We Create Clothes That<br>Tell a <em>Story</em></h2>
-      <p class="ab-collage-desc">urban outfit blends centuries-old Indian textile heritage with contemporary streetwear aesthetics. Every piece is a conversation between tradition and modernity.</p>
-      <p class="ab-collage-desc">Founded in Mumbai, we work directly with artisan communities across 12 states, preserving craft techniques while creating designs for the modern wardrobe.</p>
-      <div class="ab-collage-features">
-        <div class="ab-collage-feat">
-          <h4>Handcrafted</h4>
-          <p>Every stitch by skilled artisans</p>
-        </div>
-        <div class="ab-collage-feat">
-          <h4>Sustainable</h4>
-          <p>Zero-waste &amp; low-water processes</p>
-        </div>
-        <div class="ab-collage-feat">
-          <h4>Premium Fabrics</h4>
-          <p>Organic linen &amp; French Terry</p>
-        </div>
-        <div class="ab-collage-feat">
-          <h4>Made in India</h4>
-          <p>500+ artisans across 12 states</p>
-        </div>
-      </div>
-    </div>
+  <!-- FLOATING PARTICLES -->
+  <div class="ab-particles">
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
+    <div class="ab-particle"></div>
   </div>
-</section>
 
-<!-- ═══ WHAT MAKES US GREAT ═══ -->
-<section class="ab-great">
-  <div class="ab-great-inner">
-    <div class="ab-great-head">
-      <div>
-        <span class="ab-eyebrow">Our Values</span>
-        <h2 class="ab-great-title">What Makes Us<br><em>Great</em></h2>
-      </div>
-      <p class="ab-great-sub">We don't just make clothes. We craft experiences that blend heritage artistry with contemporary design sensibility.</p>
-    </div>
-    <div class="ab-values-grid">
-      <div class="ab-value-card">
-        <div class="ab-value-num">01</div>
-        <h3>Handcrafted Quality</h3>
-        <p>Every piece is meticulously crafted by skilled artisans using traditional techniques passed down through generations.</p>
-      </div>
-      <div class="ab-value-card">
-        <div class="ab-value-num">02</div>
-        <h3>Premium Fabrics</h3>
-        <p>We source only the finest organic linens, 260+ GSM French Terry, and hand-loomed Chikankari fabrics.</p>
-      </div>
-      <div class="ab-value-card">
-        <div class="ab-value-num">03</div>
-        <h3>Sustainable Practice</h3>
-        <p>From low-water dyeing to zero-waste pattern cutting, sustainability is woven into every decision we make.</p>
-      </div>
-    </div>
-  </div>
-</section>
+  <!-- CUSTOM CURSOR -->
+  <div class="ab-cursor"></div>
+  <div class="ab-cursor-dot"></div>
 
-<!-- ═══ OUR STORY ═══ -->
-<section class="ab-story">
-  <div class="ab-story-inner">
-    <div class="ab-story-img-wrap">
-      <img class="ab-story-img" src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&auto=format&fit=crop&q=80" alt="Our Store">
-      <div class="ab-story-img-accent"></div>
+  <!-- ═══ HERO — ORGANIC SPLIT ═══ -->
+  <section class="ab-hero-split">
+    <div class="ab-hero-left">
+      <div class="ab-hero-label ab-reveal">Est. Mumbai, India</div>
+      <h1 class="ab-hero-title-mega">
+        <span class="ab-reveal ab-reveal-delay-1">About</span>
+        <span class="line-accent ab-reveal ab-reveal-delay-2">Urban</span>
+        <span class="line-outline ab-reveal ab-reveal-delay-3">Outfit</span>
+      </h1>
+      <p class="ab-hero-tagline ab-reveal ab-reveal-delay-4">Where centuries-old Indian textile heritage dissolves into the pulse of contemporary streetwear. Every thread, a dialogue between past and future.</p>
     </div>
-    <div>
-      <span class="ab-eyebrow">Our Story</span>
-      <h2 class="ab-story-heading">Born From a Love<br>for <em>Heritage</em></h2>
-      <p class="ab-story-desc">urban outfit was born from a simple idea — to bring the richness of Indian textile heritage to modern streetwear. What started as a small studio in Mumbai has grown into a movement that celebrates craftsmanship.</p>
-      <p class="ab-story-desc">We work directly with artisan communities across India, preserving centuries-old techniques while creating designs that resonate with the contemporary aesthetic.</p>
-      <div class="ab-story-stats">
-        <div>
-          <div class="ab-stat-num">500+</div>
-          <div class="ab-stat-label">Artisans Supported</div>
+    <div class="ab-hero-right">
+      <div class="ab-hero-morph">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=800&fit=crop" alt="Urban Outfit Craft">
+      </div>
+    </div>
+    <div class="ab-hero-scroll-indicator">
+      <span>Scroll</span>
+      <div class="ab-hero-scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ═══ MARQUEE STRIP ═══ -->
+  <div class="ab-marquee-strip">
+    <div class="ab-marquee-track">
+      <span class="ab-marquee-item">Handcrafted</span>
+      <span class="ab-marquee-item">Heritage</span>
+      <span class="ab-marquee-item">Sustainable</span>
+      <span class="ab-marquee-item">Made in India</span>
+      <span class="ab-marquee-item">Premium Fabrics</span>
+      <span class="ab-marquee-item">Artisanal</span>
+      <span class="ab-marquee-item">Handcrafted</span>
+      <span class="ab-marquee-item">Heritage</span>
+      <span class="ab-marquee-item">Sustainable</span>
+      <span class="ab-marquee-item">Made in India</span>
+      <span class="ab-marquee-item">Premium Fabrics</span>
+      <span class="ab-marquee-item">Artisanal</span>
+    </div>
+  </div>
+
+  <!-- ═══ NARRATIVE SECTION ═══ -->
+  <section class="ab-narrative">
+    <div class="ab-narrative-inner">
+      <blockquote class="ab-narrative-quote ab-reveal">
+        We don't design clothes. We engineer <em>conversations</em> between centuries-old craft and the rhythm of now.
+      </blockquote>
+      <div class="ab-narrative-columns">
+        <div class="ab-narrative-col ab-reveal">
+          <div class="ab-narrative-col-num">01 — ORIGIN</div>
+          <h3>Rooted in Tradition</h3>
+          <p>Born in Mumbai, we work directly with artisan communities across 12 Indian states. Each piece carries the DNA of centuries-old textile mastery — block printing, hand embroidery, natural dyeing — reimagined for the modern wardrobe.</p>
         </div>
-        <div>
-          <div class="ab-stat-num">50K+</div>
-          <div class="ab-stat-label">Pieces Crafted</div>
+        <div class="ab-narrative-divider"></div>
+        <div class="ab-narrative-col ab-reveal ab-reveal-delay-1">
+          <div class="ab-narrative-col-num">02 — PROCESS</div>
+          <h3>Crafted, Not Manufactured</h3>
+          <p>No assembly lines. No shortcuts. Every garment passes through the hands of 14 skilled artisans before reaching you. From fabric selection to final stitch — quality is never compromised, never rushed.</p>
         </div>
-        <div>
-          <div class="ab-stat-num">12</div>
-          <div class="ab-stat-label">States in India</div>
+        <div class="ab-narrative-divider"></div>
+        <div class="ab-narrative-col ab-reveal ab-reveal-delay-2">
+          <div class="ab-narrative-col-num">03 — VISION</div>
+          <h3>Fashion Forward</h3>
+          <p>We see clothing as wearable art. Each collection is a curated story — blending Indian textile heritage with global street culture, creating pieces that transcend trends and speak to identity.</p>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══ PHILOSOPHY ═══ -->
-<section class="ab-philosophy">
-  <div class="ab-philosophy-inner">
-    <div class="ab-philosophy-text">
-      <span class="ab-eyebrow">Our Philosophy</span>
-      <h2 class="ab-philosophy-title">Where Tradition<br>Meets <em>Tomorrow</em></h2>
-      <p class="ab-philosophy-desc">We believe fashion should tell a story. Every thread, every stitch, every detail carries the weight of tradition and the promise of innovation.</p>
-      <ul class="ab-philosophy-list">
-        <li>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Direct partnerships with 500+ artisan families across India</span>
-        </li>
-        <li>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Zero-waste pattern cutting and low-water dyeing processes</span>
-        </li>
-        <li>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>100% genuine fabrics — organic linen, French Terry, Chikankari</span>
-        </li>
-        <li>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Fair wages and ethical working conditions for all team members</span>
-        </li>
-        <li>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Premium packaging using recycled and biodegradable materials</span>
-        </li>
-      </ul>
-    </div>
-    <div class="ab-philosophy-imgs">
-      <img class="ab-phil-img-1" src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=700&auto=format&fit=crop&q=80" alt="Artisan at Work">
-      <img class="ab-phil-img-2" src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=600&auto=format&fit=crop&q=80" alt="Our Studio">
-    </div>
-  </div>
-</section>
+  <hr class="ab-hr-accent">
 
-<!-- ═══ CTA ═══ -->
-<section class="ab-cta">
-  <div class="ab-cta-inner">
-    <h2 class="ab-cta-title">Ready to Experience<br><em>urban outfit</em>?</h2>
-    <p class="ab-cta-desc">Explore our collections and discover pieces that blend heritage craftsmanship with modern streetwear aesthetics.</p>
-    <a href="<?= BASE_URL ?>/shop.php" class="ab-cta-btn">
-      <span>Shop Now</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </a>
-  </div>
-</section>
+  <!-- ═══ BENTO GRID ═══ -->
+  <section class="ab-bento">
+    <div class="ab-bento-inner">
+      <div class="ab-bento-header ab-reveal">
+        <div class="ab-eyebrow-alt">What We Stand For</div>
+        <h2>Beyond <em>Fabric</em></h2>
+      </div>
+      <div class="ab-bento-grid">
+        <div class="ab-bento-card ab-bento-card-1 ab-reveal">
+          <div class="ab-bento-card-bg">
+            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&h=600&fit=crop" alt="Artisan Craft">
+          </div>
+          <div class="ab-bento-card-inner">
+            <div class="ab-bento-card-tag">Our Craft</div>
+            <h3>500+ Artisan Families</h3>
+            <p>Direct partnerships with master craftspeople across India. Fair wages, safe conditions, and preservation of dying art forms.</p>
+          </div>
+        </div>
+        <div class="ab-bento-card ab-bento-card-2 ab-reveal ab-reveal-delay-1">
+          <div class="ab-bento-card-bg">
+            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&h=600&fit=crop" alt="Sustainable Fashion">
+          </div>
+          <div class="ab-bento-card-inner">
+            <div class="ab-bento-card-tag">Sustainability</div>
+            <h3>Zero Waste Promise</h3>
+            <p>Low-water dyeing, zero-waste pattern cutting, and biodegradable packaging. Fashion that respects the earth.</p>
+          </div>
+        </div>
+        <div class="ab-bento-card ab-bento-card-3 ab-reveal ab-reveal-delay-2">
+          <div class="ab-bento-card-bg">
+            <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&h=600&fit=crop" alt="Premium Fabrics">
+          </div>
+          <div class="ab-bento-card-inner">
+            <div class="ab-bento-card-tag">Materials</div>
+            <h3>Premium Fabrics</h3>
+            <p>Organic linen, 260+ GSM French Terry, hand-loomed Chikankari — only the finest.</p>
+          </div>
+        </div>
+        <div class="ab-bento-card ab-bento-card-4 ab-reveal ab-reveal-delay-3">
+          <div class="ab-bento-card-bg">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=600&fit=crop" alt="Heritage Design">
+          </div>
+          <div class="ab-bento-card-inner">
+            <div class="ab-bento-card-tag">Heritage</div>
+            <h3>12 States, One Vision</h3>
+            <p>From Rajasthan's block prints to Kerala's handlooms — every region contributes its unique craft to our collections.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="ab-hr-accent">
+
+  <!-- ═══ TIMELINE ═══ -->
+  <section class="ab-timeline">
+    <div class="ab-timeline-inner">
+      <div class="ab-timeline-header ab-reveal">
+        <h2>Our <em>Journey</em></h2>
+        <span class="ab-timeline-year">2019 — Present</span>
+      </div>
+      <div class="ab-timeline-track">
+        <div class="ab-timeline-item ab-reveal">
+          <div class="ab-timeline-item-num">2019</div>
+          <h3>The Spark</h3>
+          <p>Founded in a small Mumbai studio with a vision to bridge heritage craft and modern streetwear.</p>
+        </div>
+        <div class="ab-timeline-item ab-reveal ab-reveal-delay-1">
+          <div class="ab-timeline-item-num">2020</div>
+          <h3>First Collection</h3>
+          <p>Launched our debut "Roots & Routes" collection. 200 pieces, sold out in 72 hours.</p>
+        </div>
+        <div class="ab-timeline-item ab-reveal ab-reveal-delay-2">
+          <div class="ab-timeline-item-num">2022</div>
+          <h3>Artisan Network</h3>
+          <p>Expanded partnerships to 500+ artisan families across 12 Indian states.</p>
+        </div>
+        <div class="ab-timeline-item ab-reveal ab-reveal-delay-3">
+          <div class="ab-timeline-item-num">2024</div>
+          <h3>Global Reach</h3>
+          <p>50,000+ pieces crafted. Now shipping to 30+ countries worldwide.</p>
+        </div>
+        <div class="ab-timeline-item ab-reveal ab-reveal-delay-4">
+          <div class="ab-timeline-item-num">2026</div>
+          <h3>The Future</h3>
+          <p>Pioneering AI-assisted design while keeping the human craft at the core.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="ab-hr-accent">
+
+  <!-- ═══ TEAM ═══ -->
+  <section class="ab-team">
+    <div class="ab-team-inner">
+      <div class="ab-team-header ab-reveal">
+        <div class="ab-eyebrow-alt">The People</div>
+        <h2>Behind the <em>Label</em></h2>
+      </div>
+      <div class="ab-team-grid">
+        <div class="ab-team-card ab-reveal">
+          <div class="ab-team-card-avatar">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face" alt="Founder">
+          </div>
+          <div class="ab-team-card-role">Founder & Creative Director</div>
+          <h3>Arjun Mehta</h3>
+          <p>Former fashion editor turned craftsman. Driven by the belief that heritage is the new luxury.</p>
+          <div class="ab-team-card-socials">
+            <a href="#" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+            </a>
+            <a href="#" aria-label="Twitter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="ab-team-card ab-reveal ab-reveal-delay-1">
+          <div class="ab-team-card-avatar">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face" alt="Head of Design">
+          </div>
+          <div class="ab-team-card-role">Head of Design</div>
+          <h3>Priya Sharma</h3>
+          <p>NID graduate with 12 years in luxury textiles. She bridges the gap between runway and street.</p>
+          <div class="ab-team-card-socials">
+            <a href="#" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+            </a>
+            <a href="#" aria-label="Twitter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="ab-team-card ab-reveal ab-reveal-delay-2">
+          <div class="ab-team-card-avatar">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" alt="Sustainability Lead">
+          </div>
+          <div class="ab-team-card-role">Sustainability Lead</div>
+          <h3>Dev Kapoor</h3>
+          <p>Environmental engineer turned fashion innovator. Architect of our zero-waste supply chain.</p>
+          <div class="ab-team-card-socials">
+            <a href="#" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+            </a>
+            <a href="#" aria-label="Twitter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="ab-team-card ab-reveal ab-reveal-delay-3">
+          <div class="ab-team-card-avatar">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face" alt="Brand Director">
+          </div>
+          <div class="ab-team-card-role">Brand Director</div>
+          <h3>Maya Iyer</h3>
+          <p>Storyteller at heart. Shapes how the world sees urban outfit through strategy and soul.</p>
+          <div class="ab-team-card-socials">
+            <a href="#" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+            </a>
+            <a href="#" aria-label="Twitter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="ab-hr-accent">
+
+  <!-- ═══ CTA SPLIT ═══ -->
+  <section class="ab-cta-split">
+    <div class="ab-cta-split-left">
+      <div class="ab-eyebrow-alt">Join the Movement</div>
+      <h2>Ready to Wear <em>Heritage</em>?</h2>
+      <p>Explore our collections and discover pieces that carry centuries of craft into your everyday wardrobe. Each purchase supports 500+ artisan families across India.</p>
+      <a href="<?= BASE_URL ?>/shop.php" class="ab-cta-split-btn">
+        <span>Explore Collections</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="ab-cta-split-right">
+      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=800&fit=crop" alt="Shop Urban Outfit">
+      <div class="ab-cta-split-overlay"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Custom cursor
+  const cursor = document.querySelector('.ab-cursor');
+  const cursorDot = document.querySelector('.ab-cursor-dot');
+  
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX - 10 + 'px';
+    cursor.style.top = e.clientY - 10 + 'px';
+    cursorDot.style.left = e.clientX - 3 + 'px';
+    cursorDot.style.top = e.clientY - 3 + 'px';
+  });
+
+  // Hover effect on interactive elements
+  const hoverTargets = document.querySelectorAll('a, .ab-bento-card, .ab-team-card, .ab-cta-split-btn');
+  hoverTargets.forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+  });
+
+  // Scroll reveal
+  const revealElements = document.querySelectorAll('.ab-reveal');
+  
+  const revealOnScroll = () => {
+    revealElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      if (rect.top < windowHeight * 0.85) {
+        el.classList.add('visible');
+      }
+    });
+  };
+
+  window.addEventListener('scroll', revealOnScroll);
+  revealOnScroll();
+
+  // Parallax on hero morph
+  const heroMorph = document.querySelector('.ab-hero-morph');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    if (heroMorph && scrolled < window.innerHeight) {
+      heroMorph.style.transform = `translate(-50%, calc(-50% + ${scrolled * 0.3}px))`;
+    }
+  });
+
+  // Hide cursor on mobile
+  if ('ontouchstart' in window || window.innerWidth < 768) {
+    if (cursor) cursor.style.display = 'none';
+    if (cursorDot) cursorDot.style.display = 'none';
+  }
+});
+</script>
 
 <?php include dirname(__DIR__) . '/includes/footer.php'; ?>

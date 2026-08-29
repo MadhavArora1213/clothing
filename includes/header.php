@@ -50,19 +50,65 @@ if (!defined('BASE_URL')) {
 
       <!-- Brand Logo (Left) -->
       <a href="<?= BASE_URL ?>/" class="lux-brand">
-        <div class="lux-logo-text">
-          <span class="lux-logo-name">urban outfit</span>
-          <span class="lux-logo-sub">fashion studio</span>
-        </div>
+        <img src="<?= BASE_URL ?>/src/Logo.png" alt="urban outfit" class="lux-logo-img">
       </a>
 
       <!-- Centered Navigation -->
       <nav class="lux-nav" aria-label="Main Navigation">
         <a href="<?= BASE_URL ?>/" class="<?= ($currentPage ?? '') === 'home' ? 'active' : '' ?>">Home</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=new">
-          <span>Collection</span>
-          <span class="nav-badge">New</span>
-        </a>
+
+        <!-- Collection Mega Dropdown -->
+        <div class="lux-nav-item lux-mega-wrap">
+          <a href="<?= BASE_URL ?>/shop.php?category=new" class="lux-nav-link">
+            <span>Collection</span>
+            <span class="nav-badge">New</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </a>
+          <div class="lux-mega-dropdown">
+            <div class="lux-mega-inner">
+              <!-- Men -->
+              <div class="lux-mega-col">
+                <h4 class="lux-mega-heading">Men</h4>
+                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=oversized-tees" class="lux-mega-link">Oversized Drop Tees</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=streetwear" class="lux-mega-link">Streetwear</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=kurtas" class="lux-mega-link">Ethnic Fusion Kurtas</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=co-ords" class="lux-mega-link">Resort Co-Ords</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=shirts" class="lux-mega-link">Shirts</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=bottoms" class="lux-mega-link">Bottoms</a>
+              </div>
+              <!-- Women -->
+              <div class="lux-mega-col">
+                <h4 class="lux-mega-heading">Women</h4>
+                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=chikankari" class="lux-mega-link">Chikankari Edit</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=dresses" class="lux-mega-link">Dresses & Co-Ords</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=kurtis" class="lux-mega-link">Kurtis & Sets</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=streetwear" class="lux-mega-link">Streetwear</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=linen" class="lux-mega-link">Linen Collection</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=bottoms" class="lux-mega-link">Bottoms</a>
+              </div>
+              <!-- Kids -->
+              <div class="lux-mega-col">
+                <h4 class="lux-mega-heading">Kids</h4>
+                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=boys" class="lux-mega-link">Boys</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=girls" class="lux-mega-link">Girls</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=ethnic" class="lux-mega-link">Ethnic Wear</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=co-ords" class="lux-mega-link">Matching Co-Ords</a>
+              </div>
+              <!-- Quick Links -->
+              <div class="lux-mega-col lux-mega-highlight">
+                <h4 class="lux-mega-heading">Explore</h4>
+                <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals" class="lux-mega-link">New Arrivals</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=bestsellers" class="lux-mega-link">Bestsellers</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="lux-mega-link">Heritage Fusion</a>
+                <a href="<?= BASE_URL ?>/shop.php?category=sale" class="lux-mega-link lux-mega-sale">Sale</a>
+                <div class="lux-mega-img">
+                  <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=250&fit=crop" alt="New Collection" loading="lazy">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <a href="<?= BASE_URL ?>/pages/about.php">About Us</a>
         <a href="<?= BASE_URL ?>/pages/contact.php">Contact</a>
       </nav>
@@ -120,7 +166,21 @@ if (!defined('BASE_URL')) {
 
       <nav class="lux-drawer-links">
         <a href="<?= BASE_URL ?>/">Home</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=new">Collection</a>
+        <div class="lux-drawer-mega">
+          <button class="lux-drawer-toggle" onclick="this.parentElement.classList.toggle('is-open')">
+            <span>Collection</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="lux-drawer-sub">
+            <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals">New Arrivals</a>
+            <a href="<?= BASE_URL ?>/shop.php?category=bestsellers">Bestsellers</a>
+            <a href="<?= BASE_URL ?>/shop.php?category=men">Men</a>
+            <a href="<?= BASE_URL ?>/shop.php?category=women">Women</a>
+            <a href="<?= BASE_URL ?>/shop.php?category=kids">Kids</a>
+            <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion">Heritage Fusion</a>
+            <a href="<?= BASE_URL ?>/shop.php?category=sale">Sale</a>
+          </div>
+        </div>
         <a href="<?= BASE_URL ?>/pages/about.php">About Us</a>
         <a href="<?= BASE_URL ?>/pages/contact.php">Contact</a>
       </nav>

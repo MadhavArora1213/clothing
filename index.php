@@ -252,235 +252,337 @@ include __DIR__ . '/includes/header.php';
   </div>
 
   <!-- ===== CATEGORIES SECTION ===== -->
-  <section class="lux-section">
+  <section class="uoc-shop">
     <div class="aura-container">
-      <div class="lux-section-head reveal">
-        <div>
-          <span class="lux-eyebrow">Curated Collections</span>
-          <h2 class="lux-section-title">Shop by Category</h2>
-        </div>
-        <a href="<?= BASE_URL ?>/shop.php" class="lux-view-all">
-          View All Drops
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+      <div class="uoc-shop-head reveal">
+        <span class="uoc-shop-eyebrow">Curated Collections</span>
+        <h2 class="uoc-shop-title">Shop by<br><em>Category</em></h2>
       </div>
 
-      <!-- Modern Asymmetric Grid -->
-      <div class="lux-cat-grid">
+      <div class="uoc-shop-list">
 
-        <!-- Hero Category Card -->
-        <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="lux-cat-card lux-cat-hero reveal reveal-delay-1">
-          <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=900&auto=format&fit=crop&q=80" alt="Arya Ethnic Fusion">
-          <div class="lux-cat-glass">
-            <span class="lux-cat-eyebrow">Heritage Collection</span>
-            <h3 class="lux-cat-name">Artisanal Fusion</h3>
-            <span class="lux-cat-btn">Discover</span>
+        <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="uoc-shop-item reveal">
+          <div class="uoc-shop-item-num">01</div>
+          <div class="uoc-shop-item-name">
+            <span class="uoc-shop-item-text">Artisanal Fusion</span>
+            <span class="uoc-shop-item-tag">Heritage Collection</span>
+          </div>
+          <div class="uoc-shop-item-img">
+            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&h=400&fit=crop" alt="Artisanal Fusion" loading="lazy">
+          </div>
+          <div class="uoc-shop-item-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </div>
         </a>
 
-        <!-- Right Stack -->
-        <div class="lux-cat-stack">
-          <a href="<?= BASE_URL ?>/shop.php?category=men" class="lux-cat-card lux-cat-sm reveal reveal-delay-2">
-            <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=600&auto=format&fit=crop&q=80" alt="Men's Collection">
-            <div class="lux-cat-glass">
-              <span class="lux-cat-eyebrow">The Wardrobe</span>
-              <h3 class="lux-cat-name">Men's Edit</h3>
-              <span class="lux-cat-btn">Discover</span>
-            </div>
-          </a>
-          <a href="<?= BASE_URL ?>/shop.php?category=women" class="lux-cat-card lux-cat-sm reveal reveal-delay-3">
-            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80" alt="Women's Collection">
-            <div class="lux-cat-glass">
-              <span class="lux-cat-eyebrow">Contemporary</span>
-              <h3 class="lux-cat-name">Women's Edit</h3>
-              <span class="lux-cat-btn">Discover</span>
-            </div>
-          </a>
-        </div>
-
-        <!-- Bottom Row -->
-        <a href="<?= BASE_URL ?>/shop.php?category=oversized" class="lux-cat-card lux-cat-wide reveal reveal-delay-1">
-          <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=700&auto=format&fit=crop&q=80" alt="Oversized Drops">
-          <div class="lux-cat-glass">
-            <span class="lux-cat-eyebrow">Premium Weight</span>
-            <h3 class="lux-cat-name">Oversized Drops</h3>
-            <span class="lux-cat-btn">Discover</span>
+        <a href="<?= BASE_URL ?>/shop.php?category=men" class="uoc-shop-item reveal reveal-delay-1">
+          <div class="uoc-shop-item-num">02</div>
+          <div class="uoc-shop-item-name">
+            <span class="uoc-shop-item-text">Men's Edit</span>
+            <span class="uoc-shop-item-tag">The Wardrobe</span>
           </div>
-        </a>
-        <a href="<?= BASE_URL ?>/shop.php?category=co-ords" class="lux-cat-card lux-cat-wide reveal reveal-delay-2">
-          <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=700&auto=format&fit=crop&q=80" alt="Co-Ords">
-          <div class="lux-cat-glass">
-            <span class="lux-cat-eyebrow">Breezy Linen</span>
-            <h3 class="lux-cat-name">Resort Co-Ords</h3>
-            <span class="lux-cat-btn">Discover</span>
+          <div class="uoc-shop-item-img">
+            <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=600&h=400&fit=crop" alt="Men's Edit" loading="lazy">
           </div>
-        </a>
-        <a href="<?= BASE_URL ?>/shop.php?category=accessories" class="lux-cat-card lux-cat-wide reveal reveal-delay-3">
-          <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=700&auto=format&fit=crop&q=80" alt="Accessories">
-          <div class="lux-cat-glass">
-            <span class="lux-cat-eyebrow">The Details</span>
-            <h3 class="lux-cat-name">Accessories</h3>
-            <span class="lux-cat-btn">Discover</span>
+          <div class="uoc-shop-item-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </div>
         </a>
 
+        <a href="<?= BASE_URL ?>/shop.php?category=women" class="uoc-shop-item reveal reveal-delay-2">
+          <div class="uoc-shop-item-num">03</div>
+          <div class="uoc-shop-item-name">
+            <span class="uoc-shop-item-text">Women's Edit</span>
+            <span class="uoc-shop-item-tag">Contemporary</span>
+          </div>
+          <div class="uoc-shop-item-img">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=400&fit=crop" alt="Women's Edit" loading="lazy">
+          </div>
+          <div class="uoc-shop-item-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </a>
+
+        <a href="<?= BASE_URL ?>/shop.php?category=oversized" class="uoc-shop-item reveal reveal-delay-3">
+          <div class="uoc-shop-item-num">04</div>
+          <div class="uoc-shop-item-name">
+            <span class="uoc-shop-item-text">Oversized Drops</span>
+            <span class="uoc-shop-item-tag">Premium Weight</span>
+          </div>
+          <div class="uoc-shop-item-img">
+            <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600&h=400&fit=crop" alt="Oversized Drops" loading="lazy">
+          </div>
+          <div class="uoc-shop-item-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </a>
+
+        <a href="<?= BASE_URL ?>/shop.php?category=co-ords" class="uoc-shop-item reveal reveal-delay-4">
+          <div class="uoc-shop-item-num">05</div>
+          <div class="uoc-shop-item-name">
+            <span class="uoc-shop-item-text">Resort Co-Ords</span>
+            <span class="uoc-shop-item-tag">Breezy Linen</span>
+          </div>
+          <div class="uoc-shop-item-img">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=400&fit=crop" alt="Resort Co-Ords" loading="lazy">
+          </div>
+          <div class="uoc-shop-item-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </a>
+
+        <a href="<?= BASE_URL ?>/shop.php?category=accessories" class="uoc-shop-item reveal reveal-delay-4">
+          <div class="uoc-shop-item-num">06</div>
+          <div class="uoc-shop-item-name">
+            <span class="uoc-shop-item-text">Accessories</span>
+            <span class="uoc-shop-item-tag">The Details</span>
+          </div>
+          <div class="uoc-shop-item-img">
+            <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&h=400&fit=crop" alt="Accessories" loading="lazy">
+          </div>
+          <div class="uoc-shop-item-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </a>
+
+      </div>
+
+      <div class="uoc-shop-bottom reveal">
+        <a href="<?= BASE_URL ?>/shop.php" class="uoc-shop-explore">
+          <span>Explore All Collections</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- ===== TRENDING PRODUCTS ===== -->
-  <section class="lux-section lux-section-cream">
+  <!-- ===== TRENDING PRODUCTS — NEW UI ===== -->
+  <section class="uoc-trending">
     <div class="aura-container">
-      <div class="lux-section-head reveal">
-        <div>
-          <span class="lux-eyebrow">Most Wanted Right Now</span>
-          <h2 class="lux-section-title">Trending Garments</h2>
+      <div class="uoc-trending-head reveal">
+        <div class="uoc-trending-head-left">
+          <span class="uoc-trending-eyebrow">Most Wanted Right Now</span>
+          <h2 class="uoc-trending-title">Trending<br><em>Garments</em></h2>
         </div>
-        <a href="<?= BASE_URL ?>/shop.php" class="lux-view-all">
-          View All
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+        <div class="uoc-trending-head-right">
+          <p>Handpicked styles our community can't stop wearing. Updated weekly with fresh drops.</p>
+          <a href="<?= BASE_URL ?>/shop.php" class="uoc-trending-viewall">
+            View All
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
       </div>
 
-      <div class="lux-product-grid">
+      <div class="uoc-trending-grid">
         <?php foreach ($featured as $i => $item): ?>
-        <div class="lux-product-card reveal reveal-delay-<?= ($i % 4) + 1 ?>">
-          <div class="lux-pcard-img">
-            <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>">
-              <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="lux-img-main" loading="lazy">
-              <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="lux-img-hover" loading="lazy">
-            </a>
+        <div class="uoc-t-card reveal reveal-delay-<?= ($i % 4) + 1 ?>">
+          <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>" class="uoc-t-card-link">
 
-            <!-- Badges -->
-            <div class="lux-badges">
-              <?php if (!empty($item['discount_percent'])): ?>
-              <span class="lux-badge-sale"><?= $item['discount_percent'] ?>% OFF</span>
-              <?php endif; ?>
-              <?php if (!empty($item['is_bestseller'])): ?>
-              <span class="lux-badge-hot">BESTSELLER</span>
-              <?php endif; ?>
-            </div>
+            <div class="uoc-t-card-img">
+              <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="uoc-t-img-main" loading="lazy">
+              <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="uoc-t-img-hover" loading="lazy">
 
-            <!-- Wishlist -->
-            <button class="lux-wishlist" onclick="event.preventDefault(); toggleWishlist(<?= $item['id'] ?>, this)" title="Add to Wishlist">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.33.93-4.17 2.36a.75.75 0 0 1-1.33 0C10.33 3.93 8.76 3 7 3A5.5 5.5 0 0 0 1.5 8.5c0 2.3 1.51 4.04 3 5.5l7.5 7.5L19 14z"/></svg>
-            </button>
+              <!-- Badges -->
+              <div class="uoc-t-badges">
+                <?php if (!empty($item['discount_percent'])): ?>
+                <span class="uoc-t-badge-sale"><?= $item['discount_percent'] ?>% OFF</span>
+                <?php endif; ?>
+                <?php if (!empty($item['is_bestseller'])): ?>
+                <span class="uoc-t-badge-hot">BESTSELLER</span>
+                <?php endif; ?>
+              </div>
 
-            <!-- Quick Add Glassmorphic Drawer -->
-            <div class="lux-quick-add">
-              <span class="lux-qa-label">Quick Add</span>
-              <div class="lux-size-row">
-                <button onclick="quickAddToCart(<?= $item['id'] ?>, 'S')">S</button>
-                <button onclick="quickAddToCart(<?= $item['id'] ?>, 'M')">M</button>
-                <button onclick="quickAddToCart(<?= $item['id'] ?>, 'L')">L</button>
-                <button onclick="quickAddToCart(<?= $item['id'] ?>, 'XL')">XL</button>
+              <!-- Wishlist -->
+              <button class="uoc-t-wish" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(<?= $item['id'] ?>, this)" title="Add to Wishlist">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.33.93-4.17 2.36a.75.75 0 0 1-1.33 0C10.33 3.93 8.76 3 7 3A5.5 5.5 0 0 0 1.5 8.5c0 2.3 1.51 4.04 3 5.5l7.5 7.5L19 14z"/></svg>
+              </button>
+
+              <!-- Quick Add -->
+              <div class="uoc-t-quick">
+                <span>Quick Add</span>
+                <div class="uoc-t-sizes">
+                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'S')">S</button>
+                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'M')">M</button>
+                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'L')">L</button>
+                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'XL')">XL</button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="lux-pcard-body">
-            <span class="lux-pcard-cat"><?= htmlspecialchars($item['category_name'] ?? 'Premium') ?></span>
-            <h4 class="lux-pcard-name">
-              <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
-            </h4>
-            <div class="lux-pcard-price">
-              <span class="lux-price-now">&#8377;<?= number_format($item['price']) ?></span>
-              <?php if (!empty($item['original_price']) && $item['original_price'] > $item['price']): ?>
-              <span class="lux-price-was">&#8377;<?= number_format($item['original_price']) ?></span>
-              <span class="lux-price-save">Save <?= $item['discount_percent'] ?>%</span>
-              <?php endif; ?>
+            <div class="uoc-t-card-info">
+              <span class="uoc-t-card-cat"><?= htmlspecialchars($item['category_name'] ?? 'Premium') ?></span>
+              <h4 class="uoc-t-card-name"><?= htmlspecialchars($item['name']) ?></h4>
+              <div class="uoc-t-card-price">
+                <span class="uoc-t-price-now">&#8377;<?= number_format($item['price']) ?></span>
+                <?php if (!empty($item['original_price']) && $item['original_price'] > $item['price']): ?>
+                <span class="uoc-t-price-was">&#8377;<?= number_format($item['original_price']) ?></span>
+                <?php endif; ?>
+              </div>
             </div>
-          </div>
+
+          </a>
         </div>
         <?php endforeach; ?>
       </div>
 
-      <div class="lux-see-more-wrap reveal">
-        <a href="<?= BASE_URL ?>/shop.php" class="lux-see-more-btn">
-          <span>View All Products</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="uoc-trending-bottom reveal">
+        <a href="<?= BASE_URL ?>/shop.php" class="uoc-trending-explore">
+          <span>Explore All Products</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- ===== CURATED EDIT — Split-Screen Parallax ===== -->
-  <section class="lux-curated">
-    <div class="lux-curated-grid">
-      <!-- Visual Side -->
-      <div class="lux-curated-visual">
-        <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1000&auto=format&fit=crop&q=80" alt="The Signature Collection" loading="lazy">
-        <div class="lux-curated-visual-overlay"></div>
-      </div>
-
-      <!-- Text Side -->
-      <div class="lux-curated-text reveal-right">
-        <div class="lux-curated-eyebrow">The Archives</div>
-        <h3 class="lux-curated-title">The <span class="lux-curated-highlight">Signature</span> Collection</h3>
-        <p class="lux-curated-desc">
-          Discover our highest-rated Lucknowi Chikankari pieces, 260+ GSM oversized drops, and luxurious resort linen sets. Crafted for longevity and timeless appeal.
-        </p>
-        <div class="lux-coupon-row">
-          <span>Complimentary Shipping on all orders.</span>
-        </div>
-        <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="lux-curated-cta">
-          Explore The Collection
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== ETHOS SECTION ===== -->
-  <section class="lux-section">
+  <!-- ===== SIGNATURE COLLECTION — EDITORIAL ===== -->
+  <section class="uoc-sig-v3">
+    <div class="uoc-sigv3-bg-text" aria-hidden="true">SIGNATURE</div>
     <div class="aura-container">
-      <div class="lux-ethos-grid">
-        <!-- Visual Side -->
-        <div class="lux-ethos-visual reveal-left">
-          <div class="lux-ethos-img-main">
-            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&auto=format&fit=crop&q=80" alt="Premium Craftsmanship" loading="lazy">
+      <div class="uoc-sigv3-grid">
+
+        <!-- Left: Content -->
+        <div class="uoc-sigv3-content">
+          <div class="uoc-sigv3-num">02</div>
+
+          <div class="uoc-sigv3-tag">
+            <span class="uoc-sigv3-tag-dot"></span>
+            <span class="uoc-sigv2-tag-text">The Archives</span>
           </div>
-          <div class="lux-ethos-img-accent">
-            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&auto=format&fit=crop&q=80" alt="Ethnic Fusion Fabric" loading="lazy">
+
+          <h2 class="uoc-sigv3-title">
+            <span class="uoc-sigv3-title-sm">The</span>
+            <span class="uoc-sigv3-title-lg">Signature</span>
+            <span class="uoc-sigv3-title-sm">Collection</span>
+          </h2>
+
+          <p class="uoc-sigv3-desc">Discover our highest-rated Lucknowi Chikankari pieces, 260+ GSM oversized drops, and luxurious resort linen sets. Crafted for longevity and timeless appeal.</p>
+
+          <div class="uoc-sigv3-quote">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3z"/></svg>
+            <span>"Where tradition meets the streets"</span>
+          </div>
+
+          <div class="uoc-sigv3-divider"></div>
+
+          <div class="uoc-sigv3-stats">
+            <div class="uoc-sigv3-stat">
+              <span class="uoc-sigv3-stat-num">500<span class="uoc-sigv3-stat-plus">+</span></span>
+              <span class="uoc-sigv3-stat-label">Artisans</span>
+            </div>
+            <div class="uoc-sigv3-stat-divider"></div>
+            <div class="uoc-sigv3-stat">
+              <span class="uoc-sigv3-stat-num">12K<span class="uoc-sigv3-stat-plus">+</span></span>
+              <span class="uoc-sigv3-stat-label">Pieces Crafted</span>
+            </div>
+            <div class="uoc-sigv3-stat-divider"></div>
+            <div class="uoc-sigv3-stat">
+              <span class="uoc-sigv3-stat-num">4.9</span>
+              <span class="uoc-sigv3-stat-label">Avg Rating</span>
+            </div>
+          </div>
+
+          <div class="uoc-sigv3-actions">
+            <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="uoc-sigv3-btn">
+              Explore The Collection
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals" class="uoc-sigv3-btn-ghost">New Arrivals <span class="uoc-sigv3-btn-arrow">&rarr;</span></a>
           </div>
         </div>
 
-        <!-- Text Side -->
-        <div class="lux-ethos-text reveal-right">
-          <span class="lux-eyebrow">Ethos & Craftsmanship</span>
-          <h2 class="lux-section-title">Where Arya Heritage Meets<br><em>Urban Streetwear</em></h2>
-          <p class="lux-ethos-body">
-            At <strong>urban outfit</strong>, we fuse the intricate hand-block printing and tone-on-tone Chikankari of classic Indian couturiers with relaxed, drop-shoulder silhouettes of contemporary urban street culture.
-          </p>
+        <!-- Right: Image -->
+        <div class="uoc-sigv3-visual">
+          <div class="uoc-sigv3-img-main">
+            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&h=1100&fit=crop" alt="Signature Collection" loading="lazy">
+            <div class="uoc-sigv3-img-overlay"></div>
+          </div>
 
-          <div class="lux-ethos-features">
-            <div class="lux-feature">
-              <div class="lux-feature-icon">&#127807;</div>
-              <div class="lux-feature-text">
+          <!-- Floating badge -->
+          <div class="uoc-sigv3-badge">
+            <span class="uoc-sigv3-badge-ring">
+              <svg viewBox="0 0 100 100" class="uoc-sigv3-badge-svg">
+                <defs>
+                  <path id="circlePath" d="M 50,50 m -37,0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"/>
+                </defs>
+                <text>
+                  <textPath href="#circlePath" class="uoc-sigv3-badge-text">PREMIUM &#8226; ETHICAL &#8226; HERITAGE &#8226;</textPath>
+                </text>
+              </svg>
+            </span>
+            <span class="uoc-sigv3-badge-center">EST.<br>2024</span>
+          </div>
+
+          <!-- Free shipping card -->
+          <div class="uoc-sigv3-ship-card">
+            <div class="uoc-sigv3-ship-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="6" width="15" height="10" rx="1"/><path d="M16 10h4l3 3v3h-7V10z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div>
+              <span class="uoc-sigv3-ship-title">Complimentary Shipping</span>
+              <span class="uoc-sigv3-ship-sub">On all orders worldwide</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ETHOS & CRAFTSMANSHIP — NEW UI ===== -->
+  <section class="uoc-ethos">
+    <div class="aura-container">
+      <div class="uoc-ethos-grid">
+
+        <!-- Left: Visual -->
+        <div class="uoc-ethos-visual reveal">
+          <div class="uoc-ethos-img-main">
+            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&h=900&fit=crop" alt="Premium Craftsmanship" loading="lazy">
+          </div>
+          <div class="uoc-ethos-img-accent">
+            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&h=400&fit=crop" alt="Ethnic Fusion Fabric" loading="lazy">
+          </div>
+          <div class="uoc-ethos-badge">
+            <span class="uoc-ethos-badge-num">12+</span>
+            <span class="uoc-ethos-badge-text">Years of Heritage</span>
+          </div>
+        </div>
+
+        <!-- Right: Text -->
+        <div class="uoc-ethos-text reveal">
+          <span class="uoc-ethos-eyebrow">Ethos & Craftsmanship</span>
+          <h2 class="uoc-ethos-title">Where Arya Heritage Meets<br><em>Urban Streetwear</em></h2>
+          <p class="uoc-ethos-body">At <strong>urban outfit</strong>, we fuse the intricate hand-block printing and tone-on-tone Chikankari of classic Indian couturiers with relaxed, drop-shoulder silhouettes of contemporary urban street culture.</p>
+
+          <div class="uoc-ethos-features">
+            <div class="uoc-ethos-feat">
+              <div class="uoc-ethos-feat-icon">&#127807;</div>
+              <div class="uoc-ethos-feat-info">
                 <h4>Pure Organic Linen & Bio-Washed Cotton</h4>
                 <p>Gentle on skin, pre-shrunk, engineered for high-humidity breathability.</p>
               </div>
             </div>
-            <div class="lux-feature">
-              <div class="lux-feature-icon">&#128230;</div>
-              <div class="lux-feature-text">
+            <div class="uoc-ethos-feat">
+              <div class="uoc-ethos-feat-icon">&#128230;</div>
+              <div class="uoc-ethos-feat-info">
                 <h4>Plastic-Free Matte Packaging</h4>
                 <p>Dispatched in 100% recyclable bespoke paper mailers and boxes.</p>
               </div>
             </div>
-            <div class="lux-feature">
-              <div class="lux-feature-icon">&#129525;</div>
-              <div class="lux-feature-text">
+            <div class="uoc-ethos-feat">
+              <div class="uoc-ethos-feat-icon">&#129525;</div>
+              <div class="uoc-ethos-feat-info">
                 <h4>Handcrafted in India</h4>
                 <p>Every stitch by Lucknowi artisans keeping centuries-old craft alive.</p>
               </div>
             </div>
           </div>
 
-          <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="lux-ethos-btn">
-            <span>Explore Heritage Fusion Edit</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="uoc-ethos-btn">
+            Explore Heritage Fusion Edit
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
+
       </div>
     </div>
   </section>

@@ -1,47 +1,12 @@
   <!-- Main Footer -->
   <footer class="aura-footer">
     <div class="aura-container">
-      
-      <!-- Value Proposition Strip -->
-      <div class="footer-features">
-        <div class="footer-feature-item">
-          <div class="feature-icon-box">✈️</div>
-          <div>
-            <h4>Free Air Shipping</h4>
-            <p>On all domestic prepaid &amp; COD orders above ₹999.</p>
-          </div>
-        </div>
-
-        <div class="footer-feature-item">
-          <div class="feature-icon-box">🔄</div>
-          <div>
-            <h4>7-Day Easy Exchange</h4>
-            <p>Hassle-free doorstep reverse pickup service.</p>
-          </div>
-        </div>
-
-        <div class="footer-feature-item">
-          <div class="feature-icon-box">🛡️</div>
-          <div>
-            <h4>100% Genuine Fabrics</h4>
-            <p>Pure organic linen &amp; 260+ GSM combed French Terry.</p>
-          </div>
-        </div>
-
-        <div class="footer-feature-item">
-          <div class="feature-icon-box">💬</div>
-          <div>
-            <h4>24/7 Dedicated Care</h4>
-            <p>WhatsApp concierge support at +91 90237 21805.</p>
-          </div>
-        </div>
-      </div>
 
       <!-- Footer Grid -->
       <div class="footer-grid">
         <div class="footer-brand-col">
           <div class="aura-brand" style="display:flex;align-items:center;gap:10px;">
-            <span class="aura-logo-name" style="color: #FFFFFF; font-size: 18px; letter-spacing: 0.15em;">urban outfit</span>
+            <img src="<?= BASE_URL ?>/src/Logo.png" alt="urban outfit" style="height: 70px; filter: brightness(0) invert(1);">
           </div>
           <p>
             Crafting luxury streetwear drops and artisanal Chikankari heritage fusion for the modern aesthetic wardrobe. Designed &amp; manufactured in India.

@@ -1,29 +1,100 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
-$pageTitle = 'Contact Us — AURA & CO.';
-$pageDescription = 'Get in touch with AURA & CO. We would love to hear from you.';
+$pageTitle = 'Contact Us — urban outfit';
+$pageDescription = 'Get in touch with urban outfit. We would love to hear from you.';
 include dirname(__DIR__) . '/includes/header.php';
 
 $error = '';
 $success = '';
+$errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $name = sanitize($_POST['name'] ?? '');
-  $email = sanitize($_POST['email'] ?? '');
-  $phone = sanitize($_POST['phone'] ?? '');
-  $subject = sanitize($_POST['subject'] ?? '');
-  $message = sanitize($_POST['message'] ?? '');
 
-  if (empty($name) || empty($email) || empty($subject) || empty($message)) {
-    $error = 'Please fill in all required fields.';
-  } else {
-    $stmt = $mysqli->prepare('INSERT INTO enquiries (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)');
+  // 1. Honeypot check (bot detection)
+  if (isHoneypotFilled()) {
+    $success = 'Thank you for contacting us. We will get back to you within 24 hours.';
+    goto skipProcessing;
+  }
+
+  // 2. Rate limiting: max 5 submissions per IP in 5 minutes
+  if (rateLimit('contact_form', 5, 300)) {
+    $error = 'Too many attempts. Please wait 5 minutes before trying again.';
+    goto skipProcessing;
+  }
+
+  // 3. CSRF token validation
+  if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+    $error = 'Invalid form submission. Please refresh and try again.';
+    goto skipProcessing;
+  }
+
+  // 4. Sanitize all inputs (strip tags, control chars, enforce max length)
+  $name    = sanitizeInput($_POST['name'] ?? '', 100);
+  $email   = strtolower(trim($_POST['email'] ?? ''));
+  $phone   = sanitizeInput($_POST['phone'] ?? '', 15);
+  $subject = sanitizeInput($_POST['subject'] ?? '', 200);
+  $message = sanitizeInput($_POST['message'] ?? '', 2000);
+
+  // 5. Validate with regex
+  if (!validateName($name)) {
+    $errors[] = 'Name must be 2-100 characters (letters, spaces, hyphens only).';
+  }
+
+  if (!validateEmail($email)) {
+    $errors[] = 'Please enter a valid email address.';
+  }
+
+  if (!validatePhone($phone)) {
+    $errors[] = 'Phone must be a valid 10-digit Indian number (starting with 6-9).';
+  }
+
+  if (!validateSubject($subject)) {
+    $errors[] = 'Subject must be 2-200 characters.';
+  }
+
+  if (!validateMessage($message)) {
+    $errors[] = 'Message must be between 5 and 2000 characters.';
+  }
+
+  // 6. Check for spam patterns
+  $spamPatterns = ['/viagra|casino|lottery|bitcoin|crypto|click here|buy now|free money/i'];
+  $combinedInput = $name . ' ' . $email . ' ' . $subject . ' ' . $message;
+  foreach ($spamPatterns as $pattern) {
+    if (preg_match($pattern, $combinedInput)) {
+      $errors[] = 'Your submission was flagged as spam.';
+      break;
+    }
+  }
+
+  // 7. Check for excessive links (spam indicator)
+  if (preg_match_all('/https?:\/\//', $combinedInput) > 3) {
+    $errors[] = 'Too many links in your message.';
+  }
+
+  // 8. If validation passed, insert
+  if (empty($errors)) {
+    // Regenerate CSRF token after successful use
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+    $stmt = $mysqli->prepare('INSERT INTO enquiries (name, email, phone, subject, message, status, created_at) VALUES (?, ?, ?, ?, ?, "new", NOW())');
     $stmt->bind_param('sssss', $name, $email, $phone, $subject, $message);
     $stmt->execute();
+
     $success = 'Thank you for contacting us. We will get back to you within 24 hours.';
+    $_POST = []; // Clear form data after successful submit
+  } else {
+    $error = implode('<br>', $errors);
   }
+
+  skipProcessing:
 }
+
+// Generate fresh CSRF token for form
+$csrfToken = generateCSRFToken();
 ?>
+
+<!-- Honeypot field (hidden from humans, visible to bots) -->
+<style>.hp-field{position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;width:0;overflow:hidden;pointer-events:none;tabindex:-1;}</style>
 
 <style>
 .ct-page { padding-top: calc(var(--header-height, 80px) + 10px); }
@@ -292,6 +363,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 </style>
 
+<!-- Footer Color Override -->
+<style>
+.aura-footer {
+  background: linear-gradient(180deg, #0F0F0F 0%, #050505 100%) !important;
+  border-top: 1px solid rgba(201,168,76,0.15) !important;
+}
+.aura-footer::before {
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent) !important;
+}
+.aura-footer .footer-col h4 { color: #c9a84c !important; }
+.aura-footer .footer-links a { color: rgba(255,255,255,0.5) !important; }
+.aura-footer .footer-links a:hover { color: #c9a84c !important; }
+.aura-footer .footer-feature-item:hover .feature-icon-box {
+  background: rgba(201,168,76,0.15) !important;
+  border-color: rgba(201,168,76,0.3) !important;
+}
+.aura-footer .footer-social-links a:hover {
+  background: #c9a84c !important;
+  border-color: #c9a84c !important;
+}
+.aura-footer .footer-bottom {
+  border-top: 1px solid rgba(201,168,76,0.1) !important;
+}
+.aura-footer .footer-bottom-links a:hover { color: #c9a84c !important; }
+.aura-footer .btn-primary {
+  background: #c9a84c !important;
+  border-color: #c9a84c !important;
+}
+.aura-footer .btn-primary:hover {
+  background: #b8943f !important;
+  box-shadow: 0 8px 30px rgba(201,168,76,0.3) !important;
+}
+</style>
+
 <!-- ═══ SINGLE FULL-VIEWPORT CONTACT ═══ -->
 <section class="ct-main">
 
@@ -313,30 +418,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="ct-alert ct-alert-success" style="margin-top:16px;"><?= $success ?></div>
     <?php endif; ?>
 
-    <form method="POST" class="ct-form">
+    <form method="POST" class="ct-form" action="" autocomplete="off">
+      <?= getCSRFInput() ?>
+      <div class="hp-field" aria-hidden="true">
+        <label>Do not fill this</label>
+        <input type="text" name="website_url" tabindex="-1" autocomplete="off">
+      </div>
       <div class="ct-row">
         <div class="ct-fld">
           <label>Full Name <span>*</span></label>
-          <input type="text" name="name" required placeholder="Your name" value="<?= sanitize($_POST['name'] ?? '') ?>">
+          <input type="text" name="name" required placeholder="Your name" maxlength="100" pattern="[a-zA-Z\s.\-']+" title="Letters, spaces, hyphens only" value="<?= sanitize($_POST['name'] ?? '') ?>">
         </div>
         <div class="ct-fld">
           <label>Email <span>*</span></label>
-          <input type="email" name="email" required placeholder="you@email.com" value="<?= sanitize($_POST['email'] ?? '') ?>">
+          <input type="email" name="email" required placeholder="you@email.com" maxlength="254" value="<?= sanitize($_POST['email'] ?? '') ?>">
         </div>
       </div>
       <div class="ct-row">
         <div class="ct-fld">
           <label>Phone</label>
-          <input type="tel" name="phone" placeholder="+91 98765 43210" value="<?= sanitize($_POST['phone'] ?? '') ?>">
+          <input type="tel" name="phone" placeholder="+91 98765 43210" maxlength="15" pattern="[6-9]\d{9}" title="10-digit Indian mobile number" value="<?= sanitize($_POST['phone'] ?? '') ?>">
         </div>
         <div class="ct-fld">
           <label>Subject <span>*</span></label>
-          <input type="text" name="subject" required placeholder="How can we help?" value="<?= sanitize($_POST['subject'] ?? '') ?>">
+          <input type="text" name="subject" required placeholder="How can we help?" maxlength="200" value="<?= sanitize($_POST['subject'] ?? '') ?>">
         </div>
       </div>
       <div class="ct-fld">
         <label>Message <span>*</span></label>
-        <textarea name="message" rows="3" required placeholder="Tell us more..."><?= sanitize($_POST['message'] ?? '') ?></textarea>
+        <textarea name="message" rows="3" required placeholder="Tell us more..." maxlength="2000" minlength="5"><?= sanitize($_POST['message'] ?? '') ?></textarea>
       </div>
       <button type="submit" class="ct-submit">
         <span>Send Message</span>
@@ -352,7 +462,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <img class="ct-img-main" src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&auto=format&fit=crop&q=80" alt="Fashion Model">
         <img class="ct-img-sm" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80" alt="Model in Streetwear">
         <div class="ct-img-badge">
-          <h3>AURA & CO.</h3>
+          <h3>URBAN OUTFIT</h3>
           <p>Designed in India</p>
         </div>
       </div>

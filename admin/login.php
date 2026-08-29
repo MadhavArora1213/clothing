@@ -145,6 +145,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       font-weight: 600;
       margin-bottom: 18px;
     }
+    @media (max-width: 480px) {
+      body { padding: 16px; }
+      .admin-login-card { padding: 28px 20px; border-radius: 16px; }
+      .brand-center .aura-logo-name { font-size: 26px !important; }
+      .demo-box { font-size: 11px; padding: 12px; }
+    }
   </style>
 </head>
 <body>

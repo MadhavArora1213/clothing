@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <p style="text-align: center; margin-top: var(--space-6); font-size: var(--text-body-sm); color: var(--color-text-secondary);">
-          Don't have an account? <a href="/customer/register.php" style="color: var(--color-accent-primary); font-weight: 600;">Register</a>
+          Don't have an account? <a href="<?= BASE_URL ?>/customer/register.php" style="color: var(--color-accent-primary); font-weight: 600;">Register</a>
         </p>
       </div>
     </div>
