@@ -23,13 +23,22 @@ if ($action === 'add') {
   $stmt = $mysqli->prepare('INSERT IGNORE INTO wishlists (customer_id, product_id) VALUES (?, ?)');
   $stmt->bind_param('ii', $customerId, $productId);
   $stmt->execute();
-  echo json_encode(['success' => true, 'message' => 'Added to wishlist', 'count' => $mysqli->query("SELECT COUNT(*) as c FROM wishlists WHERE customer_id = $customerId")->fetch_assoc()['c']]);
+  echo json_encode(['success' => true, 'message' => 'Added to wishlist', 'count' => @$mysqli->query("SELECT COUNT(*) as c FROM wishlists WHERE customer_id = $customerId")->fetch_assoc()['c']]);
 } elseif ($action === 'remove') {
   $stmt = $mysqli->prepare('DELETE FROM wishlists WHERE customer_id = ? AND product_id = ?');
   $stmt->bind_param('ii', $customerId, $productId);
   $stmt->execute();
-  echo json_encode(['success' => true, 'message' => 'Removed from wishlist', 'count' => $mysqli->query("SELECT COUNT(*) as c FROM wishlists WHERE customer_id = $customerId")->fetch_assoc()['c']]);
+  echo json_encode(['success' => true, 'message' => 'Removed from wishlist', 'count' => @$mysqli->query("SELECT COUNT(*) as c FROM wishlists WHERE customer_id = $customerId")->fetch_assoc()['c']]);
 } elseif ($action === 'toggle') {
+  // Ensure wishlists table exists (without foreign keys to support any product_id)
+  @$mysqli->query("CREATE TABLE IF NOT EXISTS wishlists (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT UNSIGNED NOT NULL,
+    product_id INT UNSIGNED NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_wishlist_item (customer_id, product_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
   $check = $mysqli->prepare('SELECT id FROM wishlists WHERE customer_id = ? AND product_id = ?');
   $check->bind_param('ii', $customerId, $productId);
   $check->execute();
@@ -39,7 +48,7 @@ if ($action === 'add') {
     $del->execute();
     echo json_encode(['success' => true, 'status' => 'removed', 'message' => 'Removed from wishlist']);
   } else {
-    $ins = $mysqli->prepare('INSERT INTO wishlists (customer_id, product_id) VALUES (?, ?)');
+    $ins = $mysqli->prepare('INSERT IGNORE INTO wishlists (customer_id, product_id) VALUES (?, ?)');
     $ins->bind_param('ii', $customerId, $productId);
     $ins->execute();
     echo json_encode(['success' => true, 'status' => 'added', 'message' => 'Added to wishlist']);

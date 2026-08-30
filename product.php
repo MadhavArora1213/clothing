@@ -648,37 +648,151 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       <?php endif; ?>
     </section>
 
+    <!-- ═══════════ Related Items Section ═══════════ -->
+    <?php
+    $relatedProducts = [];
+    if (!empty($product['id']) && $mysqli) {
+      $catId = isset($product['category_id']) ? (int)$product['category_id'] : 0;
+      $pId = (int)$product['id'];
+      if ($catId > 0) {
+        $relRes = $mysqli->query("SELECT p.*, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order LIMIT 1) as thumb FROM products p WHERE p.category_id = $catId AND p.id != $pId AND p.is_active = 1 ORDER BY RAND() LIMIT 4");
+      } else {
+        $relRes = $mysqli->query("SELECT p.*, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order LIMIT 1) as thumb FROM products p WHERE p.id != $pId AND p.is_active = 1 ORDER BY RAND() LIMIT 4");
+      }
+      if ($relRes) $relatedProducts = $relRes->fetch_all(MYSQLI_ASSOC);
+    }
+
+    if (empty($relatedProducts)) {
+      $relatedProducts = array_filter($catalog ?? [], fn($p) => ($p['id'] ?? 0) != ($product['id'] ?? 0));
+      $relatedProducts = array_slice($relatedProducts, 0, 4);
+    }
+    ?>
+
+    <?php if (!empty($relatedProducts)): ?>
+    <style>
+      .rel-section { margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--color-border, #E8E2D8); }
+      .rel-title {
+        font-family: var(--font-display, 'Playfair Display');
+        font-size: clamp(22px, 2.5vw, 28px);
+        font-weight: 400;
+        font-style: italic;
+        color: #1a1a1a;
+        margin-bottom: 32px;
+      }
+      .rel-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+      .rel-card {
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #E8E2D8;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .rel-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      }
+      .rel-card-img {
+        aspect-ratio: 3/4;
+        overflow: hidden;
+        background: #F1F5F9;
+      }
+      .rel-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+      .rel-card:hover .rel-card-img img { transform: scale(1.05); }
+      .rel-card-info { padding: 14px 16px; }
+      .rel-card-brand {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-accent, #D4AF37);
+        margin-bottom: 4px;
+      }
+      .rel-card-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 6px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .rel-card-price {
+        font-family: var(--font-mono);
+        font-size: 15px;
+        font-weight: 700;
+        color: #0F172A;
+      }
+      .rel-card-price .old {
+        font-size: 12px;
+        color: #94A3B8;
+        text-decoration: line-through;
+        margin-left: 6px;
+        font-weight: 400;
+      }
+      @media (max-width: 768px) {
+        .rel-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .rel-section { margin-top: 40px; padding-top: 28px; }
+      }
+      @media (max-width: 480px) {
+        .rel-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .rel-card-info { padding: 10px 12px; }
+        .rel-card-name { font-size: 12px; }
+        .rel-card-price { font-size: 13px; }
+      }
+    </style>
+
+    <section class="rel-section">
+      <h2 class="rel-title">You May Also Like</h2>
+      <div class="rel-grid">
+        <?php foreach ($relatedProducts as $rp):
+          $rpSlug = $rp['slug'] ?? '#';
+          $rpName = $rp['name'] ?? 'Product';
+          $rpBrand = $rp['brand'] ?? '';
+          $rpPrice = $rp['price'] ?? 0;
+          $rpOrig = $rp['original_price'] ?? 0;
+          $rpImg = $rp['thumb'] ?? ($rp['images'][0] ?? 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=85');
+        ?>
+          <a href="<?= BASE_URL ?>/product.php?slug=<?= htmlspecialchars($rpSlug) ?>" class="rel-card">
+            <div class="rel-card-img">
+              <img src="<?= htmlspecialchars($rpImg) ?>" alt="<?= htmlspecialchars($rpName) ?>" loading="lazy">
+            </div>
+            <div class="rel-card-info">
+              <?php if ($rpBrand): ?>
+                <div class="rel-card-brand"><?= htmlspecialchars($rpBrand) ?></div>
+              <?php endif; ?>
+              <div class="rel-card-name"><?= htmlspecialchars($rpName) ?></div>
+              <div class="rel-card-price">
+                ₹<?= number_format($rpPrice) ?>
+                <?php if ($rpOrig > $rpPrice): ?>
+                  <span class="old">₹<?= number_format($rpOrig) ?></span>
+                <?php endif; ?>
+              </div>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </section>
+    <?php endif; ?>
+
   </div>
 </main>
 
 <style>
-/* Toast Notification */
-.shop-toast {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: #1a1a1a;
-  color: #fff;
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-  white-space: nowrap;
-}
-.shop-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  pointer-events: auto;
-}
+/* shop-toast removed - using global uoc-toast */
 </style>
 
 <script>
@@ -713,7 +827,7 @@ function handleAddToCart() {
       badges.forEach(b => b.textContent = data.cart_count || 1);
       showToast(<?= json_encode($product['name']) ?> + ' (Size ' + activeSize + ') added to your bag!');
     } else {
-      showToast(data.message || 'Failed to add to cart', true);
+      showToast(data.message || 'Failed to add to cart', 'error');
     }
   }).catch(() => {
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';
@@ -721,36 +835,47 @@ function handleAddToCart() {
 }
 
 function toggleProductWishlist() {
+  const isLoggedIn = <?= isset($_SESSION['customer_id']) ? 'true' : 'false' ?>;
+  if (!isLoggedIn) {
+    showToast('Please login first to add to wishlist', 'error');
+    setTimeout(() => {
+      window.location.href = '<?= BASE_URL ?>/customer/login.php?redirect=' + encodeURIComponent(window.location.href);
+    }, 1500);
+    return;
+  }
+  const btn = document.getElementById('productWishlistBtn');
+  const icon = document.getElementById('productWishlistIcon');
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.6';
+
   fetch('<?= BASE_URL ?>/api/wishlist.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'action=toggle&product_id=<?= $product['id'] ?>'
+    body: 'action=toggle&product_id=<?= (int)$product['id'] ?>'
   }).then(r => r.json()).then(data => {
+    btn.style.pointerEvents = 'auto';
+    btn.style.opacity = '1';
     if (data.action === 'login_required') {
-      window.location.href = '<?= BASE_URL ?>/customer/login.php';
+    showToast('Please login first to add to wishlist', 'error');
+      setTimeout(() => {
+        window.location.href = '<?= BASE_URL ?>/customer/login.php?redirect=' + encodeURIComponent(window.location.href);
+      }, 1500);
       return;
     }
     if (data.success) {
-      const btn = document.getElementById('productWishlistBtn');
-      const icon = document.getElementById('productWishlistIcon');
       const isAdded = data.status === 'added';
       btn.style.background = isAdded ? '#FEF2F2' : '#fff';
       icon.setAttribute('fill', isAdded ? '#dc2626' : 'none');
       icon.setAttribute('stroke', isAdded ? '#dc2626' : '#64748B');
       showToast(data.message);
+    } else {
+      showToast(data.error || 'Something went wrong', 'error');
     }
-  }).catch(() => {});
-}
-
-function showToast(msg, isError) {
-  const existing = document.querySelector('.shop-toast');
-  if (existing) existing.remove();
-  const t = document.createElement('div');
-  t.className = 'shop-toast';
-  t.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + (isError ? '#ef4444' : '#22c55e') + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + (isError ? '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>' : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>') + '</svg><span>' + msg + '</span>';
-  document.body.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+  }).catch(() => {
+    btn.style.pointerEvents = 'auto';
+    btn.style.opacity = '1';
+    showToast('Network error. Please try again.', 'error');
+  });
 }
 
 /* ── Reviews ── */

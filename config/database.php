@@ -37,6 +37,23 @@ define('ADMIN_URL', BASE_URL . '/admin');
 define('UPLOADS_PATH', BASE_PATH . '/uploads');
 define('UPLOADS_URL', BASE_URL . '/uploads');
 
+// Cashfree Payment Gateway Configuration
+$envFile = dirname(__DIR__) . '/.env';
+if (file_exists($envFile)) {
+  $envLines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+  foreach ($envLines as $line) {
+    if (strpos(trim($line), '#') === 0) continue;
+    if (strpos($line, '=') !== false) {
+      list($key, $value) = explode('=', $line, 2);
+      $_ENV[trim($key)] = trim($value);
+    }
+  }
+}
+define('CF_APP_ID', $_ENV['CF_APP_ID'] ?? '');
+define('CF_SECRET_KEY', $_ENV['CF_SECRET_KEY'] ?? '');
+define('CF_ENV', 'production');
+define('CF_API_URL', 'https://api.cashfree.com/pg');
+
 // Ensure uploads directory exists
 if (!is_dir(UPLOADS_PATH . '/products')) {
   @mkdir(UPLOADS_PATH . '/products', 0777, true);
@@ -93,6 +110,11 @@ if ($conn && !$conn->connect_error) {
     if ($checkLastLogin && $checkLastLogin->num_rows === 0) {
       $mysqli->query("ALTER TABLE customers ADD COLUMN last_login DATETIME NULL AFTER is_active");
     }
+    // Check if payment_session_id column exists in orders
+    $checkPsid = $mysqli->query("SHOW COLUMNS FROM orders LIKE 'payment_session_id'");
+    if ($checkPsid && $checkPsid->num_rows === 0) {
+      $mysqli->query("ALTER TABLE orders ADD COLUMN payment_session_id VARCHAR(255) NULL AFTER payment_method");
+    }
     // Check if carts table exists
     $checkCarts = $mysqli->query("SHOW TABLES LIKE 'carts'");
     if ($checkCarts && $checkCarts->num_rows === 0) {
@@ -103,6 +125,27 @@ if ($conn && !$conn->connect_error) {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+    // Check if wishlists table exists, recreate without foreign keys if needed
+    $checkWishlists = $mysqli->query("SHOW TABLES LIKE 'wishlists'");
+    if ($checkWishlists && $checkWishlists->num_rows > 0) {
+      $checkFk = $mysqli->query("SHOW CREATE TABLE wishlists");
+      if ($checkFk) {
+        $createSql = $checkFk->fetch_assoc()['Create Table'] ?? '';
+        if (strpos($createSql, 'FOREIGN KEY') !== false) {
+          $mysqli->query("DROP TABLE wishlists");
+          $checkWishlists = false;
+        }
+      }
+    }
+    if ($checkWishlists && $checkWishlists->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS wishlists (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT UNSIGNED NOT NULL,
+        product_id INT UNSIGNED NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_wishlist_item (customer_id, product_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
     // Check if cart_items table exists

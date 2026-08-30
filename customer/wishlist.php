@@ -20,12 +20,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_wishlist'])) {
 
 // Fetch wishlist items with product details
 $items = [];
-$stmt = $mysqli->prepare("SELECT w.id as wishlist_id, w.created_at as added_at, p.id, p.name, p.slug, p.price, p.original_price, p.discount_percent, p.image, p.is_active FROM wishlists w JOIN products p ON w.product_id = p.id WHERE w.customer_id = ? ORDER BY w.created_at DESC");
+$stmt = $mysqli->prepare("SELECT w.id as wishlist_id, w.created_at as added_at, w.product_id, p.name, p.slug, p.price, p.original_price, p.discount_percent, p.image, p.is_active FROM wishlists w LEFT JOIN products p ON w.product_id = p.id WHERE w.customer_id = ? ORDER BY w.created_at DESC");
 if ($stmt) {
   $stmt->bind_param('i', $customerId);
   $stmt->execute();
   $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
+
+// Fallback: fill in details for products not in DB (mock products)
+$mockCatalog = [
+  1 => ['name' => 'Vintage Nomad Acid-Wash Oversized Drop Tee', 'slug' => 'vintage-nomad-acid-wash-tee', 'price' => 1299, 'original_price' => 2499, 'discount_percent' => 48, 'image' => 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=85', 'category_name' => 'Oversized Drops'],
+  2 => ['name' => 'Artisanal Hand-Block Indigo Linen Kurta Set', 'slug' => 'artisanal-indigo-linen-kurta-set', 'price' => 2899, 'original_price' => 4999, 'discount_percent' => 42, 'image' => 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=85', 'category_name' => 'Ethnic Fusion'],
+  3 => ['name' => 'Sorrento Breathable Resort Linen Co-Ord', 'slug' => 'sorrento-resort-linen-co-ord', 'price' => 2499, 'original_price' => 4199, 'discount_percent' => 40, 'image' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&auto=format&fit=crop&q=85', 'category_name' => 'Co-Ord Sets'],
+];
+
+foreach ($items as &$item) {
+  if (empty($item['name']) && isset($mockCatalog[$item['product_id']])) {
+    $m = $mockCatalog[$item['product_id']];
+    $item['name'] = $m['name'];
+    $item['slug'] = $m['slug'];
+    $item['price'] = $m['price'];
+    $item['original_price'] = $m['original_price'];
+    $item['discount_percent'] = $m['discount_percent'];
+    $item['image'] = $m['image'];
+    $item['category_name'] = $m['category_name'];
+  }
+  if (empty($item['image'])) {
+    $item['image'] = 'https://via.placeholder.com/400x530?text=No+Image';
+  }
+}
+unset($item);
 
 $pageTitle = 'My Wishlist — ATELIER';
 include dirname(__DIR__) . '/includes/header.php';
@@ -389,10 +413,10 @@ include dirname(__DIR__) . '/includes/header.php';
 
               <!-- Quick Add Sizes -->
               <div class="wish-quick-add">
-                <button class="wish-size-btn" onclick="quickAdd(<?= $item['id'] ?>, 'S', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">S</button>
-                <button class="wish-size-btn" onclick="quickAdd(<?= $item['id'] ?>, 'M', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">M</button>
-                <button class="wish-size-btn" onclick="quickAdd(<?= $item['id'] ?>, 'L', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">L</button>
-                <button class="wish-size-btn" onclick="quickAdd(<?= $item['id'] ?>, 'XL', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">XL</button>
+                <button class="wish-size-btn" onclick="quickAdd(<?= $item['product_id'] ?>, 'S', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">S</button>
+                <button class="wish-size-btn" onclick="quickAdd(<?= $item['product_id'] ?>, 'M', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">M</button>
+                <button class="wish-size-btn" onclick="quickAdd(<?= $item['product_id'] ?>, 'L', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">L</button>
+                <button class="wish-size-btn" onclick="quickAdd(<?= $item['product_id'] ?>, 'XL', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">XL</button>
               </div>
             </div>
 
@@ -409,7 +433,7 @@ include dirname(__DIR__) . '/includes/header.php';
                   <span class="wish-price-off"><?= $item['discount_percent'] ?? 0 ?>% OFF</span>
                 <?php endif; ?>
               </div>
-              <button class="wish-add-btn" onclick="quickAdd(<?= $item['id'] ?>, 'M', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">
+              <button class="wish-add-btn" onclick="quickAdd(<?= $item['product_id'] ?>, 'M', '<?= addslashes($item['name']) ?>', <?= $item['price'] ?>, '<?= addslashes($img) ?>', '<?= $item['slug'] ?>')">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Add to Cart
               </button>
@@ -432,12 +456,12 @@ function quickAdd(productId, size, name, price, image, slug) {
     if (data.success) {
       const badges = document.querySelectorAll('.cart-count');
       badges.forEach(b => b.textContent = data.cart_count || 1);
-      alert('Added ' + name + ' (Size ' + size + ') to your bag!');
+      showToast(name + ' (Size ' + size + ') added to your bag!');
     } else {
-      alert(data.message || 'Failed to add to cart');
+      showToast(data.message || 'Failed to add to cart', 'error');
     }
   }).catch(() => {
-    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+    showToast('Network error. Please try again.', 'error');
   });
 }
 

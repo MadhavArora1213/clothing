@@ -10,9 +10,7 @@ if (!defined('BASE_URL')) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= $pageTitle ?? 'urban outfit — Modern Luxury & Streetwear Fashion' ?></title>
   <meta name="description" content="<?= $pageDescription ?? 'Discover premium oversized drops, handcrafted ethnic fusion kurtas, resort co-ords, and modern streetwear.' ?>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css?v=<?= filemtime(__DIR__ . '/../css/style.css') ?>">
 </head>
 <body>
@@ -122,15 +120,47 @@ if (!defined('BASE_URL')) {
         </button>
 
         <!-- Wishlist -->
-        <a href="<?= BASE_URL ?>/customer/wishlist.php" class="lux-icon-btn" title="Wishlist">
+        <a href="<?= BASE_URL ?>/customer/wishlist.php" class="lux-icon-btn" style="position:relative;" title="Wishlist">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.33.93-4.17 2.36a.75.75 0 0 1-1.33 0C10.33 3.93 8.76 3 7 3A5.5 5.5 0 0 0 1.5 8.5c0 2.3 1.51 4.04 3 5.5l7.5 7.5L19 14z"/></svg>
+          <?php if (isset($_SESSION['customer_id']) && $mysqli): ?>
+            <?php
+            $wlCount = 0;
+            $wlStmt = $mysqli->prepare('SELECT COUNT(*) as cnt FROM wishlists WHERE customer_id = ?');
+            if ($wlStmt) {
+              $wlStmt->bind_param('i', $_SESSION['customer_id']);
+              $wlStmt->execute();
+              $wlCount = $wlStmt->get_result()->fetch_assoc()['cnt'] ?? 0;
+            }
+            ?>
+            <?php if ($wlCount > 0): ?>
+              <span class="lux-bag-counter" style="position:absolute;top:-6px;right:-8px;background:#dc2626;color:#fff;font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:8px;padding:0 4px;font-weight:700;"><?= $wlCount ?></span>
+            <?php endif; ?>
+          <?php endif; ?>
         </a>
 
         <!-- Cart -->
         <a href="<?= BASE_URL ?>/customer/cart.php" class="lux-bag-btn" title="Cart">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           <span class="lux-bag-counter cart-count">
-            <?= isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0 ?>
+            <?php
+            $cartCount = 0;
+            if (isset($_SESSION['customer_id']) && $mysqli) {
+              $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity), 0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.customer_id = ?');
+              if ($ccStmt) {
+                $ccStmt->bind_param('i', $_SESSION['customer_id']);
+                $ccStmt->execute();
+                $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0;
+              }
+            } elseif (isset($mysqli) && $mysqli) {
+              $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity), 0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.session_id = ?');
+              if ($ccStmt) {
+                $ccStmt->bind_param('s', session_id());
+                $ccStmt->execute();
+                $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0;
+              }
+            }
+            echo $cartCount;
+            ?>
           </span>
         </a>
 
@@ -164,6 +194,96 @@ if (!defined('BASE_URL')) {
       </div>
     </div>
   </header>
+
+  <!-- Global Toast Notification -->
+  <style>
+    .uoc-toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-body, 'Plus Jakarta Sans');
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      transform: translateX(calc(100% + 40px));
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      max-width: 360px;
+    }
+    .uoc-toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .uoc-toast.success {
+      background: #fff;
+      border-left: 4px solid #22c55e;
+      color: #166534;
+    }
+    .uoc-toast.error {
+      background: #fff;
+      border-left: 4px solid #ef4444;
+      color: #991b1b;
+    }
+    .uoc-toast.info {
+      background: #fff;
+      border-left: 4px solid #D4AF37;
+      color: #1a1a1a;
+    }
+    .uoc-toast-icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .uoc-toast.success .uoc-toast-icon { background: #dcfce7; }
+    .uoc-toast.error .uoc-toast-icon { background: #fee2e2; }
+    .uoc-toast.info .uoc-toast-icon { background: #fef9c3; }
+    .uoc-toast-text { flex: 1; line-height: 1.4; }
+    .uoc-toast-close {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: inherit;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .uoc-toast-close:hover { opacity: 1; }
+    @media (max-width: 600px) {
+      .uoc-toast { top: 12px; right: 12px; left: 12px; max-width: none; }
+    }
+  </style>
+
+  <script>
+  function showToast(msg, type) {
+    type = type || 'success';
+    const old = document.querySelectorAll('.uoc-toast');
+    old.forEach(el => el.remove());
+
+    const icons = {
+      success: '<svg width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+      error: '<svg width="14" height="14" fill="none" stroke="#ef4444" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+      info: '<svg width="14" height="14" fill="none" stroke="#D4AF37" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+    };
+
+    const t = document.createElement('div');
+    t.className = 'uoc-toast ' + type;
+    t.innerHTML = '<span class="uoc-toast-icon">' + (icons[type] || icons.success) + '</span><span class="uoc-toast-text">' + msg + '</span><button class="uoc-toast-close" onclick="this.parentElement.remove()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+    document.body.appendChild(t);
+    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3500);
+  }
+  </script>
 
   <!-- Mobile Drawer Menu -->
   <div class="lux-drawer" id="mobileDrawer">
@@ -211,6 +331,11 @@ if (!defined('BASE_URL')) {
       gap: 8px;
       text-decoration: none;
       transition: opacity 0.2s;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      border: none;
+      background: transparent;
     }
     .lux-user-btn.logged-in:hover { opacity: 0.8; }
     .user-avatar-circle {

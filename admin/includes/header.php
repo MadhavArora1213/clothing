@@ -12,9 +12,7 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= sanitize($pageTitle) ?></title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="<?= siteUrl('css/style.css?v=' . time()) ?>">
   <link rel="stylesheet" href="<?= siteUrl('css/admin.css?v=' . time()) ?>">
 </head>

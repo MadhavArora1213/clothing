@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
-    if (!$error) {
+      if (!$error) {
       $grandTotal = $subtotal - $discountAmount + $shippingAmount;
       $orderNumber = generateOrderNumber();
 
@@ -118,7 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $mysqli->query("DELETE FROM cart_items WHERE cart_id = {$cart['id']}");
 
       $_SESSION['last_order_id'] = $orderId;
-      redirect('/customer/order-success.php');
+
+      if ($paymentMethod === 'online') {
+        redirect('/customer/payment.php?order_id=' . $orderId);
+      } else {
+        redirect('/customer/order-success.php');
+      }
     }
   }
 }
@@ -611,9 +616,9 @@ include dirname(__DIR__) . '/includes/header.php';
             <small>Pay at your doorstep</small>
           </label>
           <label class="ck-payment-opt">
-            <input type="radio" name="payment_method" value="online" disabled>
+            <input type="radio" name="payment_method" value="online">
             <span>Online Payment</span>
-            <small>Coming Soon</small>
+            <small>UPI / Cards / Netbanking</small>
           </label>
         </div>
       </div>

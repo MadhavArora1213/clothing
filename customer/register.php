@@ -5,6 +5,11 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+    $error = 'Invalid request. Please try again.';
+  } elseif (rateLimit('register', 3, 600)) {
+    $error = 'Too many registration attempts. Please try again after 10 minutes.';
+  } else {
   $firstName = sanitize($_POST['first_name'] ?? '');
   $lastName = sanitize($_POST['last_name'] ?? '');
   $email = sanitize($_POST['email'] ?? '');
@@ -14,6 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if (empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
     $error = 'Please fill in all required fields.';
+  } elseif (strlen($firstName) > 100 || strlen($lastName) > 100) {
+    $error = 'Name is too long.';
+  } elseif (strlen($email) > 254) {
+    $error = 'Email address is too long.';
+  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $error = 'Please enter a valid email address.';
+  } elseif (!empty($phone) && strlen($phone) > 20) {
+    $error = 'Phone number is too long.';
   } elseif ($password !== $confirmPassword) {
     $error = 'Passwords do not match.';
   } elseif (strlen($password) < 6) {
@@ -43,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
       }
     }
+  }
   }
 }
 
@@ -205,6 +219,31 @@ include dirname(__DIR__) . '/includes/header.php';
   }
   .reg-submit:hover { background: #333; transform: translateY(-1px); }
 
+  .password-field {
+    position: relative;
+  }
+  .password-field input {
+    padding-right: 44px !important;
+  }
+  .toggle-pass {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+  .toggle-pass:hover {
+    color: var(--color-text-main);
+  }
+
   .reg-footer {
     text-align: center;
     margin-top: var(--space-6);
@@ -267,6 +306,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <?php endif; ?>
 
       <form method="POST" class="reg-form">
+        <?= getCSRFInput() ?>
         <div class="form-row">
           <div class="field">
             <label>First Name <span class="req">*</span></label>
@@ -292,13 +332,25 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="form-row full">
           <div class="field">
             <label>Password <span class="req">*</span></label>
-            <input type="password" name="password" required minlength="6" placeholder="Min. 6 characters">
+            <div class="password-field">
+              <input type="password" name="password" required minlength="6" placeholder="Min. 6 characters">
+              <button type="button" class="toggle-pass" onclick="togglePassword(this)">
+                <svg class="eye-open" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <div class="form-row full">
           <div class="field">
             <label>Confirm Password <span class="req">*</span></label>
-            <input type="password" name="confirm_password" required placeholder="Re-enter password">
+            <div class="password-field">
+              <input type="password" name="confirm_password" required placeholder="Re-enter password">
+              <button type="button" class="toggle-pass" onclick="togglePassword(this)">
+                <svg class="eye-open" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-closed" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <button type="submit" class="reg-submit">Create Account</button>
@@ -310,5 +362,22 @@ include dirname(__DIR__) . '/includes/header.php';
     </div>
   </div>
 </div>
+
+<script>
+function togglePassword(btn) {
+  const input = btn.parentElement.querySelector('input');
+  const eyeOpen = btn.querySelector('.eye-open');
+  const eyeClosed = btn.querySelector('.eye-closed');
+  if (input.type === 'password') {
+    input.type = 'text';
+    eyeOpen.style.display = 'none';
+    eyeClosed.style.display = 'block';
+  } else {
+    input.type = 'password';
+    eyeOpen.style.display = 'block';
+    eyeClosed.style.display = 'none';
+  }
+}
+</script>
 
 <?php include dirname(__DIR__) . '/includes/footer.php'; ?>

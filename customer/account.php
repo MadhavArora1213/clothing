@@ -44,7 +44,7 @@ $orderCount = $ordCountResult ? ($ordCountResult->fetch_assoc()['cnt'] ?? 0) : 0
 $spentResult = $mysqli->query("SELECT COALESCE(SUM(grand_total),0) as total FROM orders WHERE customer_id = $customerId AND order_status != 'cancelled'");
 $totalSpent = $spentResult ? ($spentResult->fetch_assoc()['total'] ?? 0) : 0;
 $addressCount = count($addresses);
-$wishlistResult = $mysqli->query("SELECT COUNT(*) as cnt FROM wishlists WHERE customer_id = $customerId");
+$wishlistResult = @$mysqli->query("SELECT COUNT(*) as cnt FROM wishlists WHERE customer_id = $customerId");
 $wishlistCount = $wishlistResult ? ($wishlistResult->fetch_assoc()['cnt'] ?? 0) : 0;
 
 $pageTitle = 'My Account — ATELIER';

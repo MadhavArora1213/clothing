@@ -520,33 +520,7 @@ if ($category) {
   fill: #dc2626;
 }
 
-/* Toast Notification */
-.shop-toast {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: #1a1a1a;
-  color: #fff;
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-  white-space: nowrap;
-}
-.shop-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  pointer-events: auto;
-}
+/* shop-toast removed - using global uoc-toast */
 
 /* ─── BRAND STRIP ─── */
 .shop-brand-strip {
@@ -856,17 +830,6 @@ function toggleWishlist(btn, productId) {
       showToast(data.message);
     }
   }).catch(() => {});
-}
-
-function showToast(msg, isError) {
-  const existing = document.querySelector('.shop-toast');
-  if (existing) existing.remove();
-  const t = document.createElement('div');
-  t.className = 'shop-toast';
-  t.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + (isError ? '#ef4444' : '#22c55e') + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + (isError ? '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>' : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>') + '</svg><span>' + msg + '</span>';
-  document.body.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
 }
 
 function subscribeNewsletter(e) {

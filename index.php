@@ -717,17 +717,7 @@ function subscribeNewsletter() {
   document.getElementById('nlEmail').value = '';
 }
 
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'lux-toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.classList.add('lux-toast-show'), 10);
-  setTimeout(() => {
-    t.classList.remove('lux-toast-show');
-    setTimeout(() => t.remove(), 400);
-  }, 3000);
-}
+// showToast removed - using global uoc-toast
 
 // Scroll Reveal
 const revealObserver = new IntersectionObserver((entries) => {
