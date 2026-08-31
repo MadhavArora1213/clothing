@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Portal Login — AURA & CO.</title>
+  <title>Admin Portal Login — urban outfit</title>
 
   <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
   <style>
@@ -156,8 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="admin-login-card">
     <div class="brand-center">
       <div class="aura-brand">
-        <span class="aura-logo-name" style="font-size: 32px;">AURA</span>
-        <span class="aura-logo-sub" style="font-size: 12px;">&amp; CO.</span>
+        <span class="aura-logo-name" style="font-size: 32px;">urban</span>
+        <span class="aura-logo-sub" style="font-size: 12px;">outfit</span>
       </div>
       <p style="font-size: 13px; font-weight: 600; color: #64748B; margin-top: 4px;">Dynamic Admin Management Portal</p>
     </div>

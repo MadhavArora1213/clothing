@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $coupons = $mysqli->query('SELECT * FROM coupons ORDER BY created_at DESC')->fetch_all(MYSQLI_ASSOC);
 
-$pageTitle = 'Coupons Management — AURA & CO. Admin';
+$pageTitle = 'Coupons Management — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

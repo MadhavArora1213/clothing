@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$pageTitle = 'Store Settings — AURA & CO. Admin';
+$pageTitle = 'Store Settings — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

@@ -56,7 +56,7 @@ if ($cRes) {
   }
 }
 
-$pageTitle = 'Orders Management — AURA & CO. Admin';
+$pageTitle = 'Orders Management — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

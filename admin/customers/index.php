@@ -39,7 +39,7 @@ if (!empty($params)) {
   $customers = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }
 
-$pageTitle = 'Customers Management — AURA & CO. Admin';
+$pageTitle = 'Customers Management — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

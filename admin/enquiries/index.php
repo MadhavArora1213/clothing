@@ -26,7 +26,7 @@ if (!empty($params)) {
   $enquiries = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }
 
-$pageTitle = 'Customer Enquiries — AURA & CO. Admin';
+$pageTitle = 'Customer Enquiries — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

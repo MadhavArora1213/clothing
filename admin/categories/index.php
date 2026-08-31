@@ -63,7 +63,7 @@ $categories = $mysqli->query("
 
 $parentCategories = array_filter($categories, fn($c) => $c['parent_id'] == 0);
 
-$pageTitle = 'Categories Management — AURA & CO. Admin';
+$pageTitle = 'Categories Management — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

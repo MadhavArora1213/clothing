@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$pageTitle = 'Add New Product — AURA & CO. Admin';
+$pageTitle = 'Add New Product — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

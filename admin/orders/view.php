@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $shippingAddr = json_decode($order['shipping_address'] ?? '{}', true) ?: [];
 $billingAddr = json_decode($order['billing_address'] ?? '{}', true) ?: [];
 
-$pageTitle = 'Order ' . $order['order_number'] . ' — AURA & CO. Admin';
+$pageTitle = 'Order ' . $order['order_number'] . ' — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

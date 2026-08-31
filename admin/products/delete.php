@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['confirm'])) {
   redirect(adminUrl('products/?msg=Product+deleted+successfully'));
 }
 
-$pageTitle = 'Delete Product — AURA & CO. Admin';
+$pageTitle = 'Delete Product — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

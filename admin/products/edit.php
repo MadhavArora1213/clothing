@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$pageTitle = 'Edit Product: ' . $product['name'] . ' — AURA & CO. Admin';
+$pageTitle = 'Edit Product: ' . $product['name'] . ' — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

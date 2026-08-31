@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $enquiry['reply'] = $reply;
 }
 
-$pageTitle = 'Enquiry #' . $id . ' — AURA & CO. Admin';
+$pageTitle = 'Enquiry #' . $id . ' — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

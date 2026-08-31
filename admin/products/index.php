@@ -77,7 +77,7 @@ $products = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 // Fetch categories for filter
 $categories = $mysqli->query('SELECT * FROM categories ORDER BY parent_id, sort_order, name')->fetch_all(MYSQLI_ASSOC);
 
-$pageTitle = 'Products Management — AURA & CO. Admin';
+$pageTitle = 'Products Management — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 
