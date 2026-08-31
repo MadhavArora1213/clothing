@@ -189,9 +189,9 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
           <button type="button" onclick="handleAddToCart()" class="btn btn-primary" style="flex: 1; padding: 16px; font-size: 14px;">
             <span>Add to Bag</span>
           </button>
-          <a href="<?= BASE_URL ?>/customer/checkout.php" class="btn btn-dark" style="flex: 1; padding: 16px; font-size: 14px; text-align: center;">
+          <button type="button" onclick="handleBuyNow()" class="btn btn-dark" style="flex: 1; padding: 16px; font-size: 14px; text-align: center;">
             <span>Buy Now</span>
-          </a>
+          </button>
           <button type="button" id="productWishlistBtn" onclick="toggleProductWishlist()" class="pdp-wish-btn" style="width: 52px; height: 52px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: <?= $isWishlisted ? '#FEF2F2' : '#fff' ?>; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;">
             <svg id="productWishlistIcon" width="22" height="22" viewBox="0 0 24 24" fill="<?= $isWishlisted ? '#dc2626' : 'none' ?>" stroke="<?= $isWishlisted ? '#dc2626' : '#64748B' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -831,6 +831,24 @@ function handleAddToCart() {
     }
   }).catch(() => {
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+  });
+}
+
+function handleBuyNow() {
+  fetch('<?= BASE_URL ?>/api/cart.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=add&product_id=<?= $product['id'] ?>&size=' + encodeURIComponent(activeSize) + '&quantity=1&product_name=' + encodeURIComponent(<?= json_encode($product['name']) ?>) + '&product_price=<?= $product['price'] ?>&product_image=' + encodeURIComponent(<?= json_encode($imageUrls[0] ?? '') ?>) + '&product_slug=<?= $product['slug'] ?? '' ?>'
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      const badges = document.querySelectorAll('.cart-count');
+      badges.forEach(b => b.textContent = data.cart_count || 1);
+      window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
+    } else {
+      showToast(data.message || 'Failed to add to cart', 'error');
+    }
+  }).catch(() => {
+    window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
   });
 }
 
