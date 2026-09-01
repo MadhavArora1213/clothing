@@ -39,5 +39,29 @@ if ($check->get_result()->num_rows > 0) {
 $stmt = $mysqli->prepare("INSERT INTO reviews (product_id, customer_id, customer_name, rating, title, comment, is_approved) VALUES (?, ?, (SELECT CONCAT(first_name, ' ', last_name) FROM customers WHERE id = ?), ?, ?, ?, 1)");
 $stmt->bind_param('iiisss', $productId, $customerId, $customerId, $rating, $title, $comment);
 $stmt->execute();
+$reviewId = $mysqli->insert_id;
 
-echo json_encode(['success' => true, 'message' => 'Review submitted successfully!']);
+// Handle image uploads
+$imageUrls = [];
+if (!empty($_FILES['review_images']['name'][0])) {
+  $files = $_FILES['review_images'];
+  $count = min(count($files['name']), 5);
+  for ($i = 0; $i < $count; $i++) {
+    $fileArray = [
+      'name' => $files['name'][$i],
+      'type' => $files['type'][$i],
+      'tmp_name' => $files['tmp_name'][$i],
+      'error' => $files['error'][$i],
+      'size' => $files['size'][$i],
+    ];
+    $uploaded = handleImageUpload($fileArray, 'reviews');
+    if ($uploaded) {
+      $imgStmt = $mysqli->prepare("INSERT INTO review_images (review_id, image_url, sort_order) VALUES (?, ?, ?)");
+      $imgStmt->bind_param('isi', $reviewId, $uploaded, $i);
+      $imgStmt->execute();
+      $imageUrls[] = $uploaded;
+    }
+  }
+}
+
+echo json_encode(['success' => true, 'message' => 'Review submitted successfully!', 'images' => $imageUrls]);

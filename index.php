@@ -20,6 +20,26 @@ if ($mysqli) {
   if ($query) {
     $featured = $query->fetch_all(MYSQLI_ASSOC);
   }
+
+  // Fetch available sizes per product (stock > 0)
+  if (!empty($featured)) {
+    $featuredIds = array_column($featured, 'id');
+    $placeholders = implode(',', array_fill(0, count($featuredIds), '?'));
+    $sizeStmt = $mysqli->prepare("SELECT product_id, size FROM product_sizes WHERE product_id IN ($placeholders) AND stock > 0 ORDER BY product_id, size");
+    if ($sizeStmt) {
+      $sizeStmt->bind_param(str_repeat('i', count($featuredIds)), ...$featuredIds);
+      $sizeStmt->execute();
+      $sizeRows = $sizeStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $productSizes = [];
+      foreach ($sizeRows as $sr) {
+        $productSizes[$sr['product_id']][] = $sr['size'];
+      }
+      foreach ($featured as &$p) {
+        $p['sizes'] = $productSizes[$p['id']] ?? [];
+      }
+      unset($p);
+    }
+  }
 }
 
 // Fallback curated products if database is fresh
@@ -35,7 +55,8 @@ if (empty($featured)) {
       'category_name' => 'Oversized Drops',
       'image' => 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 1
+      'is_bestseller' => 1,
+      'sizes' => ['S', 'M', 'L', 'XL']
     ],
     [
       'id' => 2,
@@ -47,7 +68,8 @@ if (empty($featured)) {
       'category_name' => 'Ethnic Fusion',
       'image' => 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 1
+      'is_bestseller' => 1,
+      'sizes' => ['S', 'M', 'L', 'XL']
     ],
     [
       'id' => 3,
@@ -59,7 +81,8 @@ if (empty($featured)) {
       'category_name' => 'Co-Ord Sets',
       'image' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 0
+      'is_bestseller' => 0,
+      'sizes' => ['S', 'M', 'L', 'XL']
     ],
     [
       'id' => 4,
@@ -71,7 +94,8 @@ if (empty($featured)) {
       'category_name' => 'Streetwear',
       'image' => 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 1
+      'is_bestseller' => 1,
+      'sizes' => ['S', 'M', 'L', 'XL']
     ],
     [
       'id' => 5,
@@ -83,7 +107,8 @@ if (empty($featured)) {
       'category_name' => 'Women',
       'image' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 1
+      'is_bestseller' => 1,
+      'sizes' => ['XS', 'S', 'M', 'L', 'XL']
     ],
     [
       'id' => 6,
@@ -95,7 +120,8 @@ if (empty($featured)) {
       'category_name' => 'Streetwear',
       'image' => 'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 1
+      'is_bestseller' => 1,
+      'sizes' => ['S', 'M', 'L', 'XL']
     ],
     [
       'id' => 7,
@@ -107,7 +133,8 @@ if (empty($featured)) {
       'category_name' => 'Accessories',
       'image' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 0
+      'is_bestseller' => 0,
+      'sizes' => ['M', 'L', 'XL']
     ],
     [
       'id' => 8,
@@ -119,7 +146,8 @@ if (empty($featured)) {
       'category_name' => 'Ethnic Fusion',
       'image' => 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80',
       'hover_image' => 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&auto=format&fit=crop&q=80',
-      'is_bestseller' => 1
+      'is_bestseller' => 1,
+      'sizes' => ['S', 'M', 'L', 'XL']
     ]
   ];
 }
@@ -401,10 +429,9 @@ include __DIR__ . '/includes/header.php';
               <div class="uoc-t-quick">
                 <span>Quick Add</span>
                 <div class="uoc-t-sizes">
-                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'S')">S</button>
-                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'M')">M</button>
-                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'L')">L</button>
-                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, 'XL')">XL</button>
+                  <?php foreach (($item['sizes'] ?? []) as $sz): ?>
+                  <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $item['id'] ?>, '<?= htmlspecialchars($sz) ?>')"><?= htmlspecialchars($sz) ?></button>
+                  <?php endforeach; ?>
                 </div>
               </div>
             </div>
@@ -703,8 +730,26 @@ function quickAddToCart(productId, size) {
 }
 
 function toggleWishlist(productId, btn) {
-  btn.classList.toggle('active');
-  btn.querySelector('svg').setAttribute('fill', btn.classList.contains('active') ? 'currentColor' : 'none');
+  fetch('<?= BASE_URL ?>/api/wishlist.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=toggle&product_id=' + productId
+  }).then(r => r.json()).then(data => {
+    if (data.action === 'login_required') {
+      window.location.href = '<?= BASE_URL ?>/customer/login.php';
+      return;
+    }
+    if (data.success) {
+      btn.classList.toggle('active');
+      btn.querySelector('svg').setAttribute('fill', btn.classList.contains('active') ? 'currentColor' : 'none');
+      showToast(data.message);
+      const badge = document.getElementById('wishlistBadge');
+      if (badge && data.wishlist_count !== undefined) {
+        badge.textContent = data.wishlist_count;
+        badge.style.display = data.wishlist_count > 0 ? '' : 'none';
+      }
+    }
+  }).catch(() => {});
 }
 
 function subscribeNewsletter() {

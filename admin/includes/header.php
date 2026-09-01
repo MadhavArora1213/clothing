@@ -13,14 +13,16 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= sanitize($pageTitle) ?></title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= siteUrl('css/style.css?v=' . time()) ?>">
   <link rel="stylesheet" href="<?= siteUrl('css/admin.css?v=' . time()) ?>">
 </head>
 <body class="<?= $bodyClass ?? '' ?>">
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-header">
-      <a href="<?= adminUrl('index.php') ?>" class="sidebar-logo">A</a>
-      <span class="sidebar-brand">urban outfit<br><small>Admin Fashion Studio</small></span>
+      <a href="<?= adminUrl('index.php') ?>" class="sidebar-logo">UO</a>
+      <span class="sidebar-brand">urban outfit<br><small>Admin Panel</small></span>
     </div>
     <nav class="sidebar-nav">
       <a href="<?= adminUrl('index.php') ?>" class="<?= basename($_SERVER['PHP_SELF']) === 'index.php' && !str_contains($_SERVER['PHP_SELF'], 'products') && !str_contains($_SERVER['PHP_SELF'], 'categories') && !str_contains($_SERVER['PHP_SELF'], 'orders') && !str_contains($_SERVER['PHP_SELF'], 'customers') && !str_contains($_SERVER['PHP_SELF'], 'enquiries') && !str_contains($_SERVER['PHP_SELF'], 'coupons') && !str_contains($_SERVER['PHP_SELF'], 'reviews') && !str_contains($_SERVER['PHP_SELF'], 'settings') ? 'active' : '' ?>">
@@ -89,7 +91,7 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
       <div class="admin-topbar-right">
-        <a href="<?= siteUrl('index.php') ?>" target="_blank" class="btn btn-secondary" style="padding: var(--space-2) var(--space-4); font-size: var(--text-caption);">View Store &rarr;</a>
+        <a href="<?= siteUrl('index.php') ?>" target="_blank" class="btn btn-secondary btn-sm">View Store &rarr;</a>
         <div class="admin-user">
           <div class="admin-avatar"><?= $admin ? strtoupper(substr($admin['name'], 0, 1)) : 'A' ?></div>
           <span><?= $admin ? sanitize($admin['name']) : 'Admin' ?></span>

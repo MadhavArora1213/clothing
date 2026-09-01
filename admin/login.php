@@ -1,51 +1,61 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
+if (isAdminLoggedIn()) {
+  redirect(BASE_URL . '/admin/index.php');
+}
+
 $error = '';
-$success = '';
+$emailValue = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $email = sanitize($_POST['email'] ?? '');
-  $password = $_POST['password'] ?? '';
-
-  if (empty($email) || empty($password)) {
-    $error = 'Please enter both email and password.';
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    $error = 'Invalid request. Please try again.';
+  } elseif (rateLimit('admin_login', 5, 300)) {
+    $remaining = getRemainingAttempts('admin_login', 5, 300);
+    $error = 'Too many failed attempts. Please wait a few minutes.';
   } else {
-    // Check if matching admin exists or fallback to default demo admin
-    $admin = null;
-    if ($mysqli) {
-      $stmt = $mysqli->prepare('SELECT id, name, email, password, role, is_active FROM admins WHERE email = ?');
-      if ($stmt) {
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $admin = $stmt->get_result()->fetch_assoc();
-      }
-    }
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    $password = $_POST['password'] ?? '';
 
-    $valid = false;
-    if ($admin) {
-      if (password_verify($password, $admin['password']) || $password === 'admin123') {
-        $valid = true;
-      }
-    } elseif ($email === 'admin@atelier.com' || $email === 'admin@auraco.com') {
-      if ($password === 'admin123') {
-        $valid = true;
-        $admin = ['id' => 1, 'name' => 'Store Administrator', 'role' => 'super_admin', 'is_active' => 1];
-      }
-    }
-
-    if ($valid) {
-      $_SESSION['admin_id'] = $admin['id'] ?? 1;
-      $_SESSION['admin_name'] = $admin['name'] ?? 'Store Administrator';
-      $_SESSION['admin_role'] = $admin['role'] ?? 'super_admin';
-
-      if ($mysqli && !empty($admin['id'])) {
-        @$mysqli->query("UPDATE admins SET last_login = NOW() WHERE id = " . intval($admin['id']));
-      }
-
-      redirect(BASE_URL . '/admin/index.php');
+    if (empty($email) || empty($password)) {
+      $error = 'Please enter both email and password.';
+      $emailValue = htmlspecialchars($email);
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $error = 'Please enter a valid email address.';
+      $emailValue = htmlspecialchars($email);
     } else {
-      $error = 'Invalid credentials. Please use demo: admin@atelier.com / admin123';
+      $admin = null;
+      if ($mysqli) {
+        $stmt = $mysqli->prepare('SELECT id, name, email, password, role, is_active FROM admins WHERE email = ?');
+        if ($stmt) {
+          $stmt->bind_param('s', $email);
+          $stmt->execute();
+          $admin = $stmt->get_result()->fetch_assoc();
+          $stmt->close();
+        }
+      }
+
+      if ($admin && $admin['is_active'] && password_verify($password, $admin['password'])) {
+        session_regenerate_id(true);
+        $_SESSION['admin_id'] = $admin['id'];
+        $_SESSION['admin_name'] = $admin['name'];
+        $_SESSION['admin_role'] = $admin['role'];
+
+        if ($mysqli) {
+          $upd = $mysqli->prepare('UPDATE admins SET last_login = NOW() WHERE id = ?');
+          if ($upd) {
+            $upd->bind_param('i', $admin['id']);
+            $upd->execute();
+            $upd->close();
+          }
+        }
+
+        redirect(BASE_URL . '/admin/index.php');
+      } else {
+        $error = 'Invalid email or password.';
+        $emailValue = htmlspecialchars($email);
+      }
     }
   }
 }
@@ -55,154 +65,228 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Portal Login — urban outfit</title>
-
-  <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
+  <title>Admin Login — urban outfit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: #0F172A;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #0A0A0A;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
-    }
-    .admin-login-card {
-      background: #FFFFFF;
-      border-radius: var(--radius-xl);
-      max-width: 440px;
-      width: 100%;
-      padding: 40px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
       position: relative;
+      overflow: hidden;
     }
-    .brand-center {
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-brand {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 40px;
     }
-    .form-group {
-      margin-bottom: 18px;
+
+    .login-brand-name {
+      font-size: 28px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.5px;
     }
-    .form-group label {
+
+    .login-brand-name span {
+      color: #D4AF37;
+    }
+
+    .login-brand-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 6px;
+    }
+
+    .login-card {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 20px;
+      padding: 36px 32px;
+    }
+
+    .login-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFF;
+      margin-bottom: 4px;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    .field-label {
       display: block;
       font-size: 12px;
-      font-weight: 700;
-      color: #0F172A;
-      margin-bottom: 6px;
-    }
-    .form-group input {
-      width: 100%;
-      background: #F8FAFC;
-      border: 1.5px solid var(--color-border);
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      font-size: 13px;
-      color: #0F172A;
-      outline: none;
-      transition: var(--transition);
-    }
-    .form-group input:focus {
-      border-color: var(--color-accent);
-      background: #FFFFFF;
-      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
-    }
-    .btn-login {
-      width: 100%;
-      padding: 14px;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-    .demo-box {
-      background: #F8FAFC;
-      border: 1px dashed #CBD5E1;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      margin-top: 24px;
-      font-size: 12px;
-      color: #475569;
-    }
-    .demo-fill-btn {
-      background: #FFEDD5;
-      color: #C2410C;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 6px 12px;
-      border-radius: var(--radius-full);
-      margin-top: 8px;
-      cursor: pointer;
-      display: inline-block;
-      border: 1px solid #FDBA74;
-    }
-    .error-pill {
-      background: #FEF2F2;
-      border: 1px solid #FCA5A5;
-      color: #B91C1C;
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 12px;
       font-weight: 600;
-      margin-bottom: 18px;
+      color: #888;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+
+    .field-input {
+      width: 100%;
+      background: #1A1A1A;
+      border: 1.5px solid #2A2A2A;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #FFF;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field-input::placeholder {
+      color: #444;
+    }
+
+    .field-input:focus {
+      border-color: #D4AF37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #F87171;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-msg svg {
+      flex-shrink: 0;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: #D4AF37;
+      color: #0A0A0A;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover {
+      background: #E5C04A;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .login-footer a {
+      font-size: 13px;
+      font-weight: 600;
+      color: #D4AF37;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .login-footer a:hover {
+      color: #E5C04A;
+    }
+
     @media (max-width: 480px) {
       body { padding: 16px; }
-      .admin-login-card { padding: 28px 20px; border-radius: 16px; }
-      .brand-center .aura-logo-name { font-size: 26px !important; }
-      .demo-box { font-size: 11px; padding: 12px; }
+      .login-card { padding: 28px 20px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="admin-login-card">
-    <div class="brand-center">
-      <div class="aura-brand">
-        <span class="aura-logo-name" style="font-size: 32px;">urban</span>
-        <span class="aura-logo-sub" style="font-size: 12px;">outfit</span>
-      </div>
-      <p style="font-size: 13px; font-weight: 600; color: #64748B; margin-top: 4px;">Dynamic Admin Management Portal</p>
+  <div class="login-wrapper">
+    <div class="login-brand">
+      <div class="login-brand-name">urban <span>outfit</span></div>
+      <div class="login-brand-sub">Admin Panel</div>
     </div>
 
-    <?php if (!empty($error)): ?>
-      <div class="error-pill"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
+    <div class="login-card">
+      <h1 class="login-title">Welcome back</h1>
+      <p class="login-subtitle">Sign in to manage your store</p>
 
-    <form method="POST" action="">
-      <div class="form-group">
-        <label>Admin Email Address</label>
-        <input type="email" name="email" id="emailInput" value="admin@atelier.com" placeholder="admin@atelier.com" required>
-      </div>
+      <?php if (!empty($error)): ?>
+        <div class="error-msg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <?= htmlspecialchars($error) ?>
+        </div>
+      <?php endif; ?>
 
-      <div class="form-group">
-        <label>Secret Password</label>
-        <input type="password" name="password" id="passwordInput" value="admin123" placeholder="••••••••" required>
-      </div>
+      <form method="POST" action="">
+        <?= getCSRFInput() ?>
 
-      <button type="submit" class="btn btn-primary btn-login">
-        <span>Sign In to Admin Panel &rarr;</span>
-      </button>
-    </form>
+        <div class="field">
+          <label class="field-label" for="email">Email</label>
+          <input class="field-input" type="email" id="email" name="email" value="<?= $emailValue ?>" placeholder="you@example.com" required autofocus>
+        </div>
 
-    <div class="demo-box">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong>🔑 Default Admin Credentials:</strong>
-        <span class="demo-fill-btn" onclick="fillAdminDemo()">Autofill Demo</span>
-      </div>
-      <div style="font-family: var(--font-mono); margin-top: 6px; font-size: 11px;">
-        Email: <strong>admin@atelier.com</strong><br>
-        Password: <strong>admin123</strong>
-      </div>
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <input class="field-input" type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn-submit">Sign In</button>
+      </form>
     </div>
 
-    <div style="text-align: center; margin-top: 18px;">
-      <a href="<?= BASE_URL ?>/" style="font-size: 12px; font-weight: 700; color: var(--color-accent);">&larr; Return to Customer Storefront</a>
+    <div class="login-footer">
+      <a href="<?= BASE_URL ?>/">&larr; Back to store</a>
     </div>
   </div>
 
-  <script>
-    function fillAdminDemo() {
-      document.getElementById('emailInput').value = 'admin@atelier.com';
-      document.getElementById('passwordInput').value = 'admin123';
-    }
-  </script>
 </body>
 </html>

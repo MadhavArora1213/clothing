@@ -67,6 +67,26 @@ if ($mysqli) {
     $stmt->execute();
     $products = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
+
+  // Fetch available sizes per product (stock > 0)
+  if (!empty($products)) {
+    $productIds = array_column($products, 'id');
+    $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+    $sizeStmt = $mysqli->prepare("SELECT product_id, size FROM product_sizes WHERE product_id IN ($placeholders) AND stock > 0 ORDER BY product_id, size");
+    if ($sizeStmt) {
+      $sizeStmt->bind_param(str_repeat('i', count($productIds)), ...$productIds);
+      $sizeStmt->execute();
+      $sizeRows = $sizeStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $productSizes = [];
+      foreach ($sizeRows as $sr) {
+        $productSizes[$sr['product_id']][] = $sr['size'];
+      }
+      foreach ($products as &$p) {
+        $p['sizes'] = $productSizes[$p['id']] ?? [];
+      }
+      unset($p);
+    }
+  }
 }
 
 // Fetch wishlisted product IDs for logged-in user
@@ -726,10 +746,9 @@ if ($category) {
           <div class="shop-card-quick">
             <span class="shop-quick-label">Quick Add</span>
             <div class="shop-quick-sizes">
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'S', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">S</button>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'M', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">M</button>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'L', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">L</button>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, 'XL', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')">XL</button>
+              <?php foreach (($item['sizes'] ?? []) as $sz): ?>
+              <button onclick="quickAddToCart(<?= $item['id'] ?>, '<?= htmlspecialchars($sz) ?>', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')"><?= htmlspecialchars($sz) ?></button>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
@@ -828,6 +847,11 @@ function toggleWishlist(btn, productId) {
     if (data.success) {
       btn.classList.toggle('wishlisted');
       showToast(data.message);
+      const badge = document.getElementById('wishlistBadge');
+      if (badge && data.wishlist_count !== undefined) {
+        badge.textContent = data.wishlist_count;
+        badge.style.display = data.wishlist_count > 0 ? '' : 'none';
+      }
     }
   }).catch(() => {});
 }

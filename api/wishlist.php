@@ -46,12 +46,14 @@ if ($action === 'add') {
     $del = $mysqli->prepare('DELETE FROM wishlists WHERE customer_id = ? AND product_id = ?');
     $del->bind_param('ii', $customerId, $productId);
     $del->execute();
-    echo json_encode(['success' => true, 'status' => 'removed', 'message' => 'Removed from wishlist']);
+    $cnt = $mysqli->query("SELECT COUNT(*) as c FROM wishlists WHERE customer_id = $customerId")->fetch_assoc()['c'];
+    echo json_encode(['success' => true, 'status' => 'removed', 'message' => 'Removed from wishlist', 'wishlist_count' => (int)$cnt]);
   } else {
     $ins = $mysqli->prepare('INSERT IGNORE INTO wishlists (customer_id, product_id) VALUES (?, ?)');
     $ins->bind_param('ii', $customerId, $productId);
     $ins->execute();
-    echo json_encode(['success' => true, 'status' => 'added', 'message' => 'Added to wishlist']);
+    $cnt = $mysqli->query("SELECT COUNT(*) as c FROM wishlists WHERE customer_id = $customerId")->fetch_assoc()['c'];
+    echo json_encode(['success' => true, 'status' => 'added', 'message' => 'Added to wishlist', 'wishlist_count' => (int)$cnt]);
   }
 } elseif ($action === 'check') {
   $check = $mysqli->prepare('SELECT id FROM wishlists WHERE customer_id = ? AND product_id = ?');

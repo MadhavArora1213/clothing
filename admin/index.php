@@ -196,7 +196,7 @@ include __DIR__ . '/includes/header.php';
   <?php endif; ?>
 
   <!-- Recent Orders & Inventory -->
-  <div class="admin-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-4);">
+  <div class="admin-grid">
     <div class="admin-card fade-up" style="animation-delay: 0.5s;">
       <div class="admin-card-header">
         <h2>Recent Customer Orders</h2>

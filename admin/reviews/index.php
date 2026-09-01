@@ -18,6 +18,26 @@ $reviews = $mysqli->query("
   ORDER BY r.created_at DESC
 ")->fetch_all(MYSQLI_ASSOC);
 
+// Fetch review images
+if (!empty($reviews)) {
+  $revIds = array_column($reviews, 'id');
+  $placeholders = implode(',', array_fill(0, count($revIds), '?'));
+  $imgStmt = $mysqli->prepare("SELECT review_id, image_url FROM review_images WHERE review_id IN ($placeholders) ORDER BY review_id, sort_order");
+  if ($imgStmt) {
+    $imgStmt->bind_param(str_repeat('i', count($revIds)), ...$revIds);
+    $imgStmt->execute();
+    $imgRows = $imgStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $reviewImages = [];
+    foreach ($imgRows as $ir) {
+      $reviewImages[$ir['review_id']][] = $ir['image_url'];
+    }
+    foreach ($reviews as &$rev) {
+      $rev['images'] = $reviewImages[$rev['id']] ?? [];
+    }
+    unset($rev);
+  }
+}
+
 // Stats
 $totalCount = count($reviews);
 $approvedCount = 0;
@@ -167,6 +187,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <th>Product</th>
             <th>Rating</th>
             <th>Review</th>
+            <th>Photos</th>
             <th>Status</th>
             <th>Date</th>
             <th style="text-align: right;">Actions</th>
@@ -175,7 +196,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <tbody>
           <?php if (empty($reviews)): ?>
             <tr>
-              <td colspan="7" style="text-align: center; padding: 60px; color: var(--color-text-tertiary);">
+              <td colspan="8" style="text-align: center; padding: 60px; color: var(--color-text-tertiary);">
                 <?php if ($statusFilter): ?>
                   No <?= $statusFilter ?> reviews found.
                 <?php else: ?>
@@ -210,6 +231,19 @@ include dirname(__DIR__) . '/includes/header.php';
                     <div class="rev-title"><?= sanitize($review['title']) ?></div>
                   <?php endif; ?>
                   <div class="rev-comment"><?= sanitize($review['comment'] ?? '') ?></div>
+                </td>
+                <td>
+                  <?php if (!empty($review['images'])): ?>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                      <?php foreach ($review['images'] as $img): ?>
+                        <a href="<?= htmlspecialchars($img) ?>" target="_blank" style="display: block; width: 48px; height: 48px; border-radius: 6px; overflow: hidden; border: 1px solid #E5E7EB;">
+                          <img src="<?= htmlspecialchars($img) ?>" alt="Review photo" style="width: 100%; height: 100%; object-fit: cover;">
+                        </a>
+                      <?php endforeach; ?>
+                    </div>
+                  <?php else: ?>
+                    <span style="color: #9A8E7E; font-size: 12px;">No photos</span>
+                  <?php endif; ?>
                 </td>
                 <td>
                   <span class="status-badge <?= $review['is_approved'] ? 'status-active' : 'status-inactive' ?>">

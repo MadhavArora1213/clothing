@@ -73,10 +73,34 @@ if (!$product) {
   $product = $catalog[$slug] ?? $catalog['vintage-nomad-acid-wash-tee'];
 }
 
-$imageUrls = $product['images'] ?? [
-  'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1000&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1000&auto=format&fit=crop&q=85'
-];
+// Fetch images from product_images table for DB products
+$imageUrls = $product['images'] ?? [];
+if (empty($imageUrls) && !empty($product['id']) && $mysqli) {
+  $imgStmt = $mysqli->prepare("SELECT image_url FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC");
+  if ($imgStmt) {
+    $imgStmt->bind_param('i', $product['id']);
+    $imgStmt->execute();
+    $imgRows = $imgStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $imageUrls = array_column($imgRows, 'image_url');
+  }
+}
+if (empty($imageUrls)) {
+  $imageUrls = [
+    'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1000&auto=format&fit=crop&q=85',
+    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1000&auto=format&fit=crop&q=85'
+  ];
+}
+
+// Fetch available sizes with stock
+$availableSizes = [];
+if (!empty($product['id']) && $mysqli) {
+  $szResult = $mysqli->prepare("SELECT size, stock FROM product_sizes WHERE product_id = ? AND stock > 0 ORDER BY id");
+  if ($szResult) {
+    $szResult->bind_param('i', $product['id']);
+    $szResult->execute();
+    $availableSizes = $szResult->get_result()->fetch_all(MYSQLI_ASSOC);
+  }
+}
 
 // Fetch approved reviews for this product
 $reviews = [];
@@ -97,6 +121,25 @@ if (!empty($product['id']) && $mysqli) {
         if (isset($ratingCounts[$rating])) $ratingCounts[$rating]++;
       }
       $avgRating = round($sum / $totalReviews, 1);
+    }
+    // Fetch review images
+    if (!empty($reviews)) {
+      $revIds = array_column($reviews, 'id');
+      $placeholders = implode(',', array_fill(0, count($revIds), '?'));
+      $imgStmt = $mysqli->prepare("SELECT review_id, image_url FROM review_images WHERE review_id IN ($placeholders) ORDER BY review_id, sort_order");
+      if ($imgStmt) {
+        $imgStmt->bind_param(str_repeat('i', count($revIds)), ...$revIds);
+        $imgStmt->execute();
+        $imgRows = $imgStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $reviewImages = [];
+        foreach ($imgRows as $ir) {
+          $reviewImages[$ir['review_id']][] = $ir['image_url'];
+        }
+        foreach ($reviews as &$rev) {
+          $rev['images'] = $reviewImages[$rev['id']] ?? [];
+        }
+        unset($rev);
+      }
     }
   }
 }
@@ -168,21 +211,37 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
             <span style="font-size: 11px; font-weight: 600; color: var(--color-accent); cursor: pointer;">📏 Size Guide</span>
           </div>
 
-          <div style="display: flex; gap: 8px;" id="sizeOptions">
-            <?php foreach (['S', 'M', 'L', 'XL', 'XXL'] as $sz): ?>
-              <button type="button" onclick="selectSize(this, '<?= $sz ?>')" class="size-select-btn" style="min-width: 48px; height: 44px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); font-weight: 700; font-size: 13px; cursor: pointer; transition: var(--transition);">
-                <?= $sz ?>
-              </button>
-            <?php endforeach; ?>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="sizeOptions">
+            <?php if (!empty($availableSizes)): ?>
+              <?php foreach ($availableSizes as $idx => $sz): ?>
+                <button type="button" onclick="selectSize(this, '<?= htmlspecialchars($sz['size']) ?>')" class="size-select-btn" style="min-width: 48px; height: 44px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); font-weight: 700; font-size: 13px; cursor: pointer; transition: var(--transition);">
+                  <?= htmlspecialchars($sz['size']) ?>
+                </button>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <span style="font-size: 13px; color: #94A3B8;">One Size</span>
+            <?php endif; ?>
           </div>
-          <input type="hidden" id="selectedSize" value="M">
+          <input type="hidden" id="selectedSize" value="<?= !empty($availableSizes) ? htmlspecialchars($availableSizes[0]['size']) : '' ?>">
+          <!-- Stock Info -->
+          <div id="stockInfo" style="margin-top: 10px; font-size: 12px; font-weight: 600; color: #059669;">
+            <?php if (!empty($availableSizes)): ?>
+              <span id="stockText"><?= $availableSizes[0]['stock'] ?> in stock</span>
+            <?php endif; ?>
+          </div>
         </div>
 
         <!-- Stock Alert -->
+        <?php
+        $lowStockSizes = array_filter($availableSizes, fn($s) => $s['stock'] > 0 && $s['stock'] <= 5);
+        if (!empty($lowStockSizes)):
+          $lowStockMsgs = array_map(fn($s) => "Only {$s['stock']} left in {$s['size']}", $lowStockSizes);
+        ?>
         <div class="pdp-stock-alert" style="display: flex; align-items: center; gap: 8px; background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; padding: 10px 14px; border-radius: var(--radius-md); font-size: 12px; font-weight: 600; margin-bottom: 24px; overflow-wrap: break-word;">
           <span style="flex-shrink: 0;">⚡</span>
-          <span>Low Stock Alert: Only 4 pieces remaining in size M!</span>
+          <span>Low Stock Alert: <?= htmlspecialchars(implode(' | ', $lowStockMsgs)) ?>!</span>
         </div>
+        <?php endif; ?>
 
         <!-- Action Buttons -->
         <div class="pdp-actions" style="display: flex; gap: 12px; margin-bottom: 32px;">
@@ -604,6 +663,15 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
               <?php if (!empty($r['comment'])): ?>
                 <div class="rev-card-comment"><?= nl2br(sanitize($r['comment'])) ?></div>
               <?php endif; ?>
+              <?php if (!empty($r['images'])): ?>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                  <?php foreach ($r['images'] as $img): ?>
+                    <a href="<?= htmlspecialchars($img) ?>" target="_blank" style="display: block; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid #E5E7EB;">
+                      <img src="<?= htmlspecialchars($img) ?>" alt="Review photo" style="width: 100%; height: 100%; object-fit: cover;">
+                    </a>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
             </div>
           <?php endforeach; ?>
         </div>
@@ -634,6 +702,15 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
             <div class="rev-form-field">
               <label>Your Review</label>
               <textarea name="comment" placeholder="Tell others what you think about this product..." maxlength="2000" required></textarea>
+            </div>
+            <div class="rev-form-field">
+              <label>Add Photos (optional)</label>
+              <input type="file" name="review_images[]" id="reviewImages" accept="image/*" multiple style="display:none;" onchange="previewReviewImages(this)">
+              <label for="reviewImages" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px dashed #D1D5DB; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; color: #6B7280; transition: all 0.2s;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                Choose Images
+              </label>
+              <div id="reviewImagePreview" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;"></div>
             </div>
             <button type="submit" class="rev-submit-btn" id="reviewSubmitBtn">
               Submit Review
@@ -796,7 +873,8 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
 </style>
 
 <script>
-let activeSize = 'M';
+let activeSize = document.getElementById('selectedSize').value || '';
+const stockData = <?= json_encode(array_map(fn($s) => ['size' => $s['size'], 'stock' => $s['stock']], $availableSizes)) ?>;
 function selectSize(btn, sz) {
   document.querySelectorAll('.size-select-btn').forEach(b => {
     b.style.borderColor = 'var(--color-border)';
@@ -808,12 +886,23 @@ function selectSize(btn, sz) {
   btn.style.color = '#FFFFFF';
   activeSize = sz;
   document.getElementById('selectedSize').value = sz;
+  const stockEl = document.getElementById('stockText');
+  if (stockEl) {
+    const found = stockData.find(s => s.size === sz);
+    if (found) {
+      stockEl.textContent = found.stock + ' in stock';
+      stockEl.style.color = found.stock <= 5 ? '#DC2626' : '#059669';
+    } else {
+      stockEl.textContent = 'In stock';
+      stockEl.style.color = '#059669';
+    }
+  }
 }
 
-// initialize default size
+// initialize first size
 document.addEventListener('DOMContentLoaded', () => {
   const btns = document.querySelectorAll('.size-select-btn');
-  if (btns[1]) selectSize(btns[1], 'M');
+  if (btns[0]) selectSize(btns[0], btns[0].textContent.trim());
 });
 
 function handleAddToCart() {
@@ -886,6 +975,11 @@ function toggleProductWishlist() {
       icon.setAttribute('fill', isAdded ? '#dc2626' : 'none');
       icon.setAttribute('stroke', isAdded ? '#dc2626' : '#64748B');
       showToast(data.message);
+      const badge = document.getElementById('wishlistBadge');
+      if (badge && data.wishlist_count !== undefined) {
+        badge.textContent = data.wishlist_count;
+        badge.style.display = data.wishlist_count > 0 ? '' : 'none';
+      }
     } else {
       showToast(data.error || 'Something went wrong', 'error');
     }
@@ -894,6 +988,35 @@ function toggleProductWishlist() {
     btn.style.opacity = '1';
     showToast('Network error. Please try again.', 'error');
   });
+}
+
+function previewReviewImages(input) {
+  const container = document.getElementById('reviewImagePreview');
+  container.innerHTML = '';
+  const files = input.files;
+  for (let i = 0; i < files.length && i < 5; i++) {
+    const file = files[i];
+    if (!file.type.startsWith('image/')) continue;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'position:relative;width:70px;height:70px;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;';
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '×';
+      removeBtn.style.cssText = 'position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#000;color:#fff;border:none;font-size:12px;line-height:18px;text-align:center;cursor:pointer;padding:0;';
+      removeBtn.onclick = function() {
+        wrapper.remove();
+      };
+      wrapper.appendChild(img);
+      wrapper.appendChild(removeBtn);
+      container.appendChild(wrapper);
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 /* ── Reviews ── */
@@ -946,13 +1069,22 @@ function submitReview(e) {
   btn.textContent = 'Submitting...';
   btn.disabled = true;
 
+  const formData = new FormData();
+  formData.append('product_id', form.querySelector('[name=product_id]').value);
+  formData.append('rating', selectedRating);
+  formData.append('title', title);
+  formData.append('comment', comment);
+
+  const fileInput = document.getElementById('reviewImages');
+  if (fileInput.files) {
+    for (let i = 0; i < fileInput.files.length && i < 5; i++) {
+      formData.append('review_images[]', fileInput.files[i]);
+    }
+  }
+
   fetch('<?= BASE_URL ?>/api/review.php', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'product_id=' + form.querySelector('[name=product_id]').value +
-          '&rating=' + selectedRating +
-          '&title=' + encodeURIComponent(title) +
-          '&comment=' + encodeURIComponent(comment)
+    body: formData
   }).then(r => r.json()).then(data => {
     if (data.success) {
       msg.style.color = '#166534';

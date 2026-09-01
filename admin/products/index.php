@@ -92,7 +92,7 @@ include dirname(__DIR__) . '/includes/header.php';
     <div class="admin-actions">
       <a href="<?= adminUrl('products/add.php') ?>" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        + Add New Product
+        Add New Product
       </a>
     </div>
   </div>

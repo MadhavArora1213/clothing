@@ -133,7 +133,9 @@ if (!defined('BASE_URL')) {
             }
             ?>
             <?php if ($wlCount > 0): ?>
-              <span class="lux-bag-counter" style="position:absolute;top:-6px;right:-8px;background:#dc2626;color:#fff;font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:8px;padding:0 4px;font-weight:700;"><?= $wlCount ?></span>
+              <span id="wishlistBadge" class="lux-bag-counter" style="position:absolute;top:-6px;right:-8px;background:#dc2626;color:#fff;font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:8px;padding:0 4px;font-weight:700;"><?= $wlCount ?></span>
+            <?php else: ?>
+              <span id="wishlistBadge" class="lux-bag-counter" style="display:none;position:absolute;top:-6px;right:-8px;background:#dc2626;color:#fff;font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:8px;padding:0 4px;font-weight:700;">0</span>
             <?php endif; ?>
           <?php endif; ?>
         </a>
@@ -154,7 +156,8 @@ if (!defined('BASE_URL')) {
             } elseif (isset($mysqli) && $mysqli) {
               $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity), 0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.session_id = ?');
               if ($ccStmt) {
-                $ccStmt->bind_param('s', session_id());
+                $sid = session_id();
+                $ccStmt->bind_param('s', $sid);
                 $ccStmt->execute();
                 $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0;
               }

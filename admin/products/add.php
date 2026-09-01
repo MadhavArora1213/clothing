@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $name = sanitize($_POST['name'] ?? '');
   $slug = sanitize($_POST['slug'] ?? '');
   $sku = sanitize($_POST['sku'] ?? '');
-  $brand = sanitize($_POST['brand'] ?? 'AURA & CO.');
+  $brand = sanitize($_POST['brand'] ?? 'urban outfit');
   $gender = sanitize($_POST['gender'] ?? 'women');
   $category_id = (int)($_POST['category_id'] ?? 0);
   $subcategory_id = !empty($_POST['subcategory_id']) ? (int)$_POST['subcategory_id'] : null;
@@ -161,7 +161,7 @@ include dirname(__DIR__) . '/includes/header.php';
     <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
       <div>
         <h1 style="margin: 0; font-size: 26px;">Add New Product</h1>
-        <p style="margin: 4px 0 0 0; color: #64748b;">Fill in details on Left and Right sides to create your fashion product.</p>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Add any product — shirts, dresses, kurtas, co-ords, kids wear, accessories, anything.</p>
       </div>
       <div class="page-header-actions" style="display: flex; gap: 8px;">
         <a href="<?= adminUrl('products/') ?>" class="btn btn-secondary">&larr; Back to Products</a>
@@ -194,17 +194,17 @@ include dirname(__DIR__) . '/includes/header.php';
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Product Title / Name <span class="required" style="color: #ef4444;">*</span></label>
-              <input type="text" name="name" id="productName" required placeholder="e.g. Pure Georgette Embroidered Anarkali Suit Set" value="<?= sanitize($_POST['name'] ?? '') ?>" oninput="autoGenerateSlug(this.value)">
+              <input type="text" name="name" id="productName" required placeholder="e.g. Oversized Graphic Tee / Silk Kurta Set / Linen Co-Ord" value="<?= sanitize($_POST['name'] ?? '') ?>" oninput="autoGenerateSlug(this.value)">
             </div>
 
             <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group" style="margin: 0;">
                 <label>Brand</label>
-                <input type="text" name="brand" value="<?= sanitize($_POST['brand'] ?? 'AURA & CO.') ?>">
+                <input type="text" name="brand" value="<?= sanitize($_POST['brand'] ?? 'urban outfit') ?>">
               </div>
               <div class="form-group" style="margin: 0;">
                 <label>SKU (Product Code)</label>
-                <input type="text" name="sku" placeholder="e.g. AUR-WOM-ST-001" value="<?= sanitize($_POST['sku'] ?? '') ?>">
+                <input type="text" name="sku" placeholder="e.g. UO-MEN-TEE-001" value="<?= sanitize($_POST['sku'] ?? '') ?>">
               </div>
             </div>
 
@@ -215,14 +215,14 @@ include dirname(__DIR__) . '/includes/header.php';
 
             <div class="form-group" style="margin: 0;">
               <label>Product Description</label>
-              <textarea name="description" rows="4" placeholder="Detailed product description, fabric composition, embroidery work, styling tips..."><?= sanitize($_POST['description'] ?? '') ?></textarea>
+              <textarea name="description" rows="4" placeholder="Product description, fabric details, fit, styling tips..."><?= sanitize($_POST['description'] ?? '') ?></textarea>
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>Key Features / Highlights</label>
               <div id="featuresList">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                  <input type="text" name="features[]" placeholder="e.g. Includes Embroidered Dupatta & Matching Bottom" style="flex: 1;">
+                  <input type="text" name="features[]" placeholder="e.g. 260 GSM Premium Cotton / Breathable Linen" style="flex: 1;">
                   <button type="button" class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()">✕</button>
                 </div>
               </div>
@@ -238,7 +238,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 1 0 7 7"/></svg>
               2. Color Variations (Square Swatches)
             </h3>
-            <span style="font-size: 11px; color: #64748b;">White, Pink, Black, Purple, etc.</span>
+            <span style="font-size: 11px; color: #64748b;">Click to add common colors</span>
           </div>
 
           <!-- Preset Color Palette -->
@@ -285,7 +285,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Fabric / Material</label>
-              <input type="text" name="material" placeholder="e.g. Pure Chanderi Silk with Santoon Lining" value="<?= sanitize($_POST['material'] ?? '') ?>">
+              <input type="text" name="material" placeholder="e.g. 100% Cotton / Linen Blend / Silk" value="<?= sanitize($_POST['material'] ?? '') ?>">
             </div>
 
             <div class="form-group" style="margin: 0;">
@@ -305,7 +305,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="admin-card-section-header">
             <h3>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-              4. Product Photos &amp; Gallery
+              4. Product Photos
             </h3>
             <span style="font-size: 11px; color: #64748b;">Main + Sub-images</span>
           </div>
@@ -313,19 +313,12 @@ include dirname(__DIR__) . '/includes/header.php';
           <!-- Primary Image -->
           <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; padding: 14px; border-radius: 8px; margin-bottom: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <strong style="color: #0f172a; font-size: 12px;">Primary / Main Photo (Thumbnail)</strong>
+              <strong style="color: #0f172a; font-size: 12px;">Main Product Photo</strong>
               <span style="font-size: 10px; font-weight: 700; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">Main</span>
             </div>
             
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div class="form-group" style="margin: 0;">
-                <label style="font-size: 11px;">Upload Main Photo File</label>
-                <input type="file" name="main_image_file" accept="image/*" onchange="previewMainFile(this)">
-              </div>
-              <div class="form-group" style="margin: 0;">
-                <label style="font-size: 11px;">Or Direct Image URL</label>
-                <input type="url" name="main_image_url" placeholder="https://..." oninput="previewMainUrl(this.value)">
-              </div>
+            <div class="form-group" style="margin: 0;">
+              <input type="file" name="main_image_file" accept="image/*" onchange="previewMainFile(this)" style="font-size: 12px;">
             </div>
 
             <div id="mainImagePreviewContainer" style="margin-top: 10px; display: none;">
@@ -336,26 +329,22 @@ include dirname(__DIR__) . '/includes/header.php';
           <!-- Sub-Images Gallery -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <strong style="color: #0f172a; font-size: 12px;">Sub-Images (Suit, Salwar, Dupatta, Back View)</strong>
-              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 6px;" onclick="addSubImageRow()">+ Add URL</button>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 10px;">
-              <label style="font-size: 11px;">Upload Multiple Sub-Images Files:</label>
-              <input type="file" name="subimage_files[]" multiple accept="image/*">
+              <strong style="color: #0f172a; font-size: 12px;">Additional Product Images</strong>
+              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 6px;" onclick="addSubImageRow()">+ Add Image</button>
             </div>
 
             <div id="subImagesContainer">
               <div class="subimage-input-row" style="padding: 8px 10px; gap: 8px;">
-                <input type="url" name="subimage_urls[]" placeholder="Sub-image URL (e.g. https://.../salwar.jpg)" style="font-size: 12px;">
+                <input type="file" name="subimage_files[]" accept="image/*" style="font-size: 12px; flex: 1;">
                 <select name="subimage_labels[]" style="font-size: 12px;">
-                  <option value="Salwar / Bottom View">Salwar / Bottom</option>
-                  <option value="Dupatta / Scarf">Dupatta View</option>
-                  <option value="Suit Front / Kurti">Suit Front</option>
                   <option value="Back View">Back View</option>
-                  <option value="Fabric & Embroidery Detail">Fabric Detail</option>
-                  <option value="Side / Angle View">Side View</option>
-                  <option value="Styling / Model Shot">Model Shot</option>
+                  <option value="Front View">Front View</option>
+                  <option value="Side View">Side / Angle View</option>
+                  <option value="Detail Close-up">Detail / Close-up</option>
+                  <option value="On Model">On Model</option>
+                  <option value="Flat Lay">Flat Lay</option>
+                  <option value="Packaging">Packaging</option>
+                  <option value="Lifestyle Shot">Lifestyle Shot</option>
                 </select>
                 <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.subimage-input-row').remove()" style="padding: 2px 6px;">✕</button>
               </div>
@@ -368,7 +357,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="admin-card-section-header">
             <h3>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              5. Pricing &amp; Discounts
+              5. Pricing
             </h3>
           </div>
 
@@ -395,7 +384,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="admin-card-section-header">
             <h3>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-              6. Categories (Kids/Men/Women)
+              6. Department &amp; Category
             </h3>
           </div>
 
@@ -423,7 +412,7 @@ include dirname(__DIR__) . '/includes/header.php';
             </div>
 
             <div class="form-group" style="margin: 0;">
-              <label style="font-size: 11px;">Sub-Category (Suits, Sarees, Shirts, etc.)</label>
+              <label style="font-size: 11px;">Sub-Category</label>
               <select name="subcategory_id" id="subCategorySelect">
                 <option value="">-- Select Sub-Category --</option>
                 <?php foreach ($subCategories as $sCat): ?>
@@ -441,14 +430,15 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="admin-card-section-header">
             <h3>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
-              7. Sizes &amp; Stock Inventory
+              7. Sizes &amp; Stock
             </h3>
           </div>
 
           <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
-            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('standard')">Standard</button>
-            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('ethnic')">Ethnic/Suits</button>
-            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('kids')">Kids</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('standard')">Standard (XS-XXL)</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('free')">Free Size</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('kids')">Kids (Age)</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('numeric')">Numeric (38-46)</button>
           </div>
 
           <div id="sizesContainer" class="sizes-inventory-list">
@@ -543,13 +533,6 @@ function previewMainFile(input) {
   }
 }
 
-function previewMainUrl(url) {
-  if (url && url.length > 5) {
-    document.getElementById('mainImagePreview').src = url;
-    document.getElementById('mainImagePreviewContainer').style.display = 'block';
-  }
-}
-
 function addSubImageRow() {
   const container = document.getElementById('subImagesContainer');
   const div = document.createElement('div');
@@ -557,15 +540,16 @@ function addSubImageRow() {
   div.style.padding = '8px 10px';
   div.style.gap = '8px';
   div.innerHTML = `
-    <input type="url" name="subimage_urls[]" placeholder="Sub-image URL (e.g. https://.../dupatta.jpg)" style="font-size: 12px;">
+    <input type="file" name="subimage_files[]" accept="image/*" style="font-size: 12px; flex: 1;">
     <select name="subimage_labels[]" style="font-size: 12px;">
-      <option value="Salwar / Bottom View">Salwar / Bottom</option>
-      <option value="Dupatta / Scarf">Dupatta View</option>
-      <option value="Suit Front / Kurti">Suit Front</option>
       <option value="Back View">Back View</option>
-      <option value="Fabric & Embroidery Detail">Fabric Detail</option>
-      <option value="Side / Angle View">Side View</option>
-      <option value="Styling / Model Shot">Model Shot</option>
+      <option value="Front View">Front View</option>
+      <option value="Side View">Side / Angle View</option>
+      <option value="Detail Close-up">Detail / Close-up</option>
+      <option value="On Model">On Model</option>
+      <option value="Flat Lay">Flat Lay</option>
+      <option value="Packaging">Packaging</option>
+      <option value="Lifestyle Shot">Lifestyle Shot</option>
     </select>
     <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.subimage-input-row').remove()" style="padding: 2px 6px;">✕</button>
   `;
@@ -619,10 +603,12 @@ function applySizePreset(type) {
   container.innerHTML = '';
   if (type === 'standard') {
     ['XS', 'S', 'M', 'L', 'XL', 'XXL'].forEach(s => addSizeRow(s, 10));
-  } else if (type === 'ethnic') {
-    ['Unstitched / Free Size', 'S', 'M', 'L', 'XL', 'XXL'].forEach(s => addSizeRow(s, 10));
+  } else if (type === 'free') {
+    ['Free Size'].forEach(s => addSizeRow(s, 15));
   } else if (type === 'kids') {
-    ['2-3Y', '4-5Y', '6-7Y', '8-9Y', '10-11Y'].forEach(s => addSizeRow(s, 8));
+    ['2-3Y', '4-5Y', '6-7Y', '8-9Y', '10-11Y', '12-13Y'].forEach(s => addSizeRow(s, 8));
+  } else if (type === 'numeric') {
+    ['38', '40', '42', '44', '46'].forEach(s => addSizeRow(s, 10));
   }
 }
 
