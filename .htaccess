@@ -1,0 +1,47 @@
+RewriteEngine On
+
+# Force HTTPS (uncomment when deployed to production)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Remove trailing slash
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteRule ^ %1 [L,R=301]
+
+# Prevent directory listing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "\.(env|json|lock|log|sql)$">
+  Require all denied
+</FilesMatch>
+
+# Protect database folder
+RewriteRule ^database/ - [F,L]
+
+# Allow assets
+RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ [OR]
+RewriteCond %{REQUEST_URI} ^/(src|uploads|dist)/
+RewriteRule ^ - [L]
+
+# Handle API routes
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^ - [L]
+
+# Handle admin routes
+RewriteCond %{REQUEST_URI} ^/admin/
+RewriteRule ^ - [L]
+
+# Handle customer routes
+RewriteCond %{REQUEST_URI} ^/customer/
+RewriteRule ^ - [L]
+
+# Handle pages routes
+RewriteCond %{REQUEST_URI} ^/pages/
+RewriteRule ^ - [L]
