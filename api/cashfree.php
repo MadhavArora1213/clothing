@@ -1,41 +1,51 @@
 <?php
-// Suppress all errors, log them instead
+// ─── STANDALONE - No database.php dependency ───
 error_reporting(0);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-// Start output buffer to catch any stray output
-ob_start();
+// Clean output buffer
+if (ob_get_level()) ob_end_clean();
 
-// Set JSON header first
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Load database and config (may output warnings)
-require_once __DIR__ . '/../config/database.php';
-
-// Flush all output buffers - discard any PHP warnings/errors
-while (ob_get_level()) {
-  ob_end_clean();
-}
-
-// Re-set headers after buffer flush
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
-
-// Handle OPTIONS preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   http_response_code(200);
   exit;
 }
 
-// Create a new Cashfree Order
+// Load .env directly
+$envFile = dirname(__DIR__) . '/.env';
+if (file_exists($envFile)) {
+  $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+  foreach ($lines as $line) {
+    if (strpos(trim($line), '#') === 0) continue;
+    if (strpos($line, '=') !== false) {
+      list($key, $value) = explode('=', $line, 2);
+      $value = trim($value);
+      if (($value[0] ?? '') === '"' && substr($value, -1) === '"') {
+        $value = substr($value, 1, -1);
+      }
+      $_ENV[trim($key)] = $value;
+    }
+  }
+}
+
+$cfAppId = $_ENV['CF_APP_ID'] ?? '';
+$cfSecret = $_ENV['CF_SECRET_KEY'] ?? '';
+$cfApiUrl = 'https://api.cashfree.com/pg';
+
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+// ─── CREATE ORDER ───
 if ($action === 'create_order') {
-  if (!isset($_SESSION['customer_id'])) {
+  // Start session
+  if (session_status() === PHP_SESSION_NONE) session_start();
+
+  if (empty($_SESSION['customer_id'])) {
     echo json_encode(['success' => false, 'message' => 'Please login first']);
     exit;
   }
@@ -46,71 +56,97 @@ if ($action === 'create_order') {
     exit;
   }
 
-  $customerId = $_SESSION['customer_id'];
+  // Connect to DB directly
+  $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
+  $dbName = $_ENV['DB_NAME'] ?? 'cloths';
+  $dbUser = $_ENV['DB_USER'] ?? 'root';
+  $dbPass = $_ENV['DB_PASS'] ?? '';
 
-  if (!$mysqli) {
-    echo json_encode(['success' => false, 'message' => 'Database not connected']);
+  $mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+  if ($mysqli->connect_error) {
+    echo json_encode(['success' => false, 'message' => 'Database error']);
     exit;
   }
+  $mysqli->set_charset('utf8mb4');
 
+  $customerId = $_SESSION['customer_id'];
   $stmt = $mysqli->prepare('SELECT id, order_number, grand_total, customer_name, customer_email, customer_phone FROM orders WHERE id = ? AND customer_id = ?');
   if (!$stmt) {
-    echo json_encode(['success' => false, 'message' => 'Database query error']);
+    echo json_encode(['success' => false, 'message' => 'Query error']);
+    $mysqli->close();
     exit;
   }
-
   $stmt->bind_param('ii', $orderId, $customerId);
   $stmt->execute();
   $order = $stmt->get_result()->fetch_assoc();
 
   if (!$order) {
     echo json_encode(['success' => false, 'message' => 'Order not found']);
+    $mysqli->close();
     exit;
   }
 
-  // Generate unique CF order ID
+  // Clean phone
+  $phone = preg_replace('/[^0-9]/', '', $order['customer_phone'] ?? '9999999999');
+  if (strlen($phone) > 10) $phone = substr($phone, -10);
+  if (strlen($phone) !== 10) $phone = '9999999999';
+
+  // Build CF order
   $cfOrderId = $order['order_number'] . '_' . time();
+  $host = $_SERVER['HTTP_HOST'] ?? '';
+  $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+  $protocol = $isHttps ? 'https' : 'http';
+  $baseUrl = $protocol . '://' . $host;
 
-  // Clean phone number - remove +91, spaces, dashes
-  $phone = $order['customer_phone'] ?? '9999999999';
-  $phone = preg_replace('/[^0-9]/', '', $phone);
-  if (strlen($phone) > 10) {
-    $phone = substr($phone, -10);
-  }
-  if (strlen($phone) !== 10) {
-    $phone = '9999999999';
-  }
-
-  // Clean customer_id - alphanumeric only
-  $custId = 'CUST_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)$customerId);
-
-  // Customer details
-  $customerDetails = [
-    'customer_id' => $custId,
-    'customer_name' => $order['customer_name'],
-    'customer_email' => $order['customer_email'],
-    'customer_phone' => $phone,
-  ];
-
-  // Build return URL
-  $isLocalhost = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '::1']);
-  $returnUrl = $isLocalhost
-    ? BASE_URL . '/customer/order-success.php'
-    : BASE_URL . '/api/cashfree.php?action=callback&order_id=' . $order['id'];
+  // Calculate script directory for base URL
+  $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+  $baseFolder = preg_replace('#/api$#', '', $scriptDir);
+  $baseUrl .= $baseFolder;
 
   $payload = [
     'order_id' => $cfOrderId,
     'order_amount' => (float)$order['grand_total'],
     'order_currency' => 'INR',
-    'customer_details' => $customerDetails,
+    'customer_details' => [
+      'customer_id' => 'CUST_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)$customerId),
+      'customer_name' => $order['customer_name'],
+      'customer_email' => $order['customer_email'],
+      'customer_phone' => $phone,
+    ],
     'order_meta' => [
-      'return_url' => $returnUrl,
-      'notify_url' => $isLocalhost ? $returnUrl : BASE_URL . '/api/cashfree_webhook.php',
+      'return_url' => $baseUrl . '/api/cashfree.php?action=callback&order_id=' . $order['id'],
+      'notify_url' => $baseUrl . '/api/cashfree_webhook.php',
     ],
     'order_note' => "Order #{$order['order_number']}",
   ];
 
-  $result = cashfreeApiCall('/orders', 'POST', $payload);
+  // Call Cashfree API
+  $ch = curl_init($cfApiUrl . '/orders');
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 30,
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => json_encode($payload),
+    CURLOPT_HTTPHEADER => [
+      'Content-Type: application/json',
+      'x-client-id: ' . $cfAppId,
+      'x-client-secret: ' . $cfSecret,
+      'x-api-version: 2023-08-01',
+    ],
+  ]);
+
+  $response = curl_exec($ch);
+  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $curlErr = curl_error($ch);
+  curl_close($ch);
+
+  if ($curlErr) {
+    echo json_encode(['success' => false, 'message' => 'Connection failed: ' . $curlErr]);
+    $mysqli->close();
+    exit;
+  }
+
+  $result = json_decode($response, true);
 
   if (isset($result['cf_order_id'])) {
     $upd = $mysqli->prepare('UPDATE orders SET payment_session_id = ? WHERE id = ?');
@@ -118,136 +154,32 @@ if ($action === 'create_order') {
       $upd->bind_param('si', $result['cf_order_id'], $orderId);
       $upd->execute();
     }
+    $mysqli->close();
 
     echo json_encode([
       'success' => true,
-      'cf_order_id' => $result['cf_order_id'],
       'payment_session_id' => $result['payment_session_id'] ?? '',
       'order_id' => $orderId,
-      'order_amount' => $order['grand_total'],
     ]);
   } else {
-    $errMsg = $result['message'] ?? $result['error_description'] ?? 'Failed to create payment order';
+    $errMsg = $result['message'] ?? $result['error_description'] ?? 'Payment gateway error';
     echo json_encode(['success' => false, 'message' => $errMsg]);
+    $mysqli->close();
   }
   exit;
 }
 
-// Handle callback return from Cashfree
+// ─── CALLBACK ───
 if ($action === 'callback') {
+  if (session_status() === PHP_SESSION_NONE) session_start();
   $orderId = (int)($_GET['order_id'] ?? 0);
   if ($orderId > 0) {
-    // Update order status to confirmed on successful payment
-    if ($mysqli) {
-      $stmt = $mysqli->prepare('UPDATE orders SET order_status = "confirmed" WHERE id = ? AND payment_status = "completed"');
-      if ($stmt) {
-        $stmt->bind_param('i', $orderId);
-        $stmt->execute();
-      }
-    }
     $_SESSION['last_order_id'] = $orderId;
-    header('Location: ' . BASE_URL . '/customer/order-success.php');
+    $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+    header('Location: ' . $baseUrl . '/clothing/customer/order-success.php');
     exit;
-  }
-  header('Location: ' . BASE_URL . '/customer/cart.php');
-  exit;
-}
-
-// Verify payment status
-if ($action === 'verify') {
-  $orderId = (int)($_GET['order_id'] ?? $_POST['order_id'] ?? 0);
-  if ($orderId <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Invalid order']);
-    exit;
-  }
-
-  $stmt = $mysqli->prepare('SELECT id, order_number, payment_session_id, payment_status FROM orders WHERE id = ?');
-  $stmt->bind_param('i', $orderId);
-  $stmt->execute();
-  $order = $stmt->get_result()->fetch_assoc();
-
-  if (!$order) {
-    echo json_encode(['success' => false, 'message' => 'Order not found']);
-    exit;
-  }
-
-  if (empty($order['payment_session_id'])) {
-    echo json_encode(['success' => false, 'message' => 'No payment session found', 'status' => 'pending']);
-    exit;
-  }
-
-  $result = cashfreeApiCall("/orders/{$order['order_number']}", 'GET');
-
-  if (isset($result['order_status'])) {
-    $cfStatus = $result['order_status'];
-    $newPaymentStatus = 'pending';
-
-    switch ($cfStatus) {
-      case 'PAID':
-        $newPaymentStatus = 'completed';
-        break;
-      case 'EXPIRED':
-      case 'TERMINATED':
-        $newPaymentStatus = 'failed';
-        break;
-    }
-
-    $upd = $mysqli->prepare('UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ? AND payment_status != "completed"');
-    if ($upd) {
-      $orderStatus = $newPaymentStatus === 'completed' ? 'confirmed' : 'pending';
-      $upd->bind_param('ssi', $newPaymentStatus, $orderStatus, $orderId);
-      $upd->execute();
-    }
-
-    echo json_encode(['success' => true, 'status' => $newPaymentStatus, 'cf_status' => $cfStatus]);
-  } else {
-    echo json_encode(['success' => false, 'message' => 'Could not verify payment', 'status' => $order['payment_status']]);
   }
   exit;
 }
 
-echo json_encode(['success' => false, 'message' => 'Invalid action']);
-
-// ─── Cashfree API Helper ───
-function cashfreeApiCall($endpoint, $method = 'POST', $data = []) {
-  if (!function_exists('curl_init')) {
-    return ['message' => 'cURL not enabled on server'];
-  }
-
-  $appId = $_ENV['CF_APP_ID'] ?? '';
-  $secret = $_ENV['CF_SECRET_KEY'] ?? '';
-  $url = 'https://api.cashfree.com/pg' . $endpoint;
-
-  $headers = [
-    'Content-Type: application/json',
-    'x-client-id: ' . $appId,
-    'x-client-secret: ' . $secret,
-    'x-api-version: 2023-08-01',
-  ];
-
-  $ch = curl_init();
-  curl_setopt_array($ch, [
-    CURLOPT_URL => $url,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT => 30,
-    CURLOPT_SSL_VERIFYPEER => true,
-    CURLOPT_HTTPHEADER => $headers,
-  ]);
-
-  if ($method === 'POST') {
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-  }
-
-  $response = curl_exec($ch);
-  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-  $curlError = curl_error($ch);
-  curl_close($ch);
-
-  if ($curlError) {
-    return ['message' => 'Network error: ' . $curlError];
-  }
-
-  $decoded = json_decode($response, true);
-  return $decoded ?? ['message' => 'Invalid API response'];
-}
+echo json_encode(['success' => false, 'message' => 'Invalid request']);

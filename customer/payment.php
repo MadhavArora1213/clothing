@@ -190,12 +190,15 @@ function startPayment() {
   btn.innerHTML = '<span class="pay-spinner"></span>Creating payment...';
   showStatus('Connecting to Cashfree...');
 
-  fetch('<?= BASE_URL ?>/api/cashfree.php', {
+  fetch('../api/cashfree.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'action=create_order&order_id=' + ORDER_ID
   })
-  .then(r => r.json())
+  .then(r => {
+    if (!r.ok) throw new Error('Server returned ' + r.status);
+    return r.json();
+  })
   .then(data => {
     if (!data.success) {
       showStatus('Error: ' + (data.message || 'Failed to create payment order'));
@@ -216,7 +219,7 @@ function startPayment() {
     });
   })
   .catch(err => {
-    showStatus('Network error. Please try again.');
+    showStatus('Network error: ' + err.message);
     btn.disabled = false;
     btn.innerHTML = 'Pay ₹' + AMOUNT.toLocaleString('en-IN', {minimumFractionDigits: 2});
   });
