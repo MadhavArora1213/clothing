@@ -24,6 +24,7 @@ if (!$order) {
 
 // If already paid, go to success
 if ($order['payment_status'] === 'completed' || $order['payment_status'] === 'paid') {
+  $_SESSION['last_order_id'] = $orderId;
   redirect('/customer/order-success.php');
 }
 

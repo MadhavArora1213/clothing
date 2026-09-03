@@ -137,6 +137,14 @@ if ($action === 'create_order') {
 if ($action === 'callback') {
   $orderId = (int)($_GET['order_id'] ?? 0);
   if ($orderId > 0) {
+    // Update order status to confirmed on successful payment
+    if ($mysqli) {
+      $stmt = $mysqli->prepare('UPDATE orders SET order_status = "confirmed" WHERE id = ? AND payment_status = "completed"');
+      if ($stmt) {
+        $stmt->bind_param('i', $orderId);
+        $stmt->execute();
+      }
+    }
     $_SESSION['last_order_id'] = $orderId;
     header('Location: ' . BASE_URL . '/customer/order-success.php');
     exit;

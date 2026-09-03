@@ -8,6 +8,15 @@ $orderId = $_SESSION['last_order_id'] ?? null;
 $order = null;
 if ($orderId) {
   $order = $mysqli->query("SELECT * FROM orders WHERE id = $orderId")->fetch_assoc();
+  
+  // For online orders - only show if payment is completed
+  if ($order && $order['payment_method'] === 'online' && $order['payment_status'] !== 'completed') {
+    // Payment not completed - redirect back to payment
+    unset($_SESSION['last_order_id']);
+    header('Location: ' . BASE_URL . '/customer/payment.php?order_id=' . $orderId);
+    exit;
+  }
+  
   unset($_SESSION['last_order_id']);
 }
 ?>

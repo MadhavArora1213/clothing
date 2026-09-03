@@ -115,15 +115,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mysqli->query("UPDATE coupons SET usage_count = usage_count + 1 WHERE id = $couponId");
       }
 
-      $mysqli->query("DELETE FROM cart_items WHERE cart_id = {$cart['id']}");
+$mysqli->query("DELETE FROM cart_items WHERE cart_id = {$cart['id']}");
 
-      $_SESSION['last_order_id'] = $orderId;
-
-      if ($paymentMethod === 'online') {
-        redirect('/customer/payment.php?order_id=' . $orderId);
-      } else {
-        redirect('/customer/order-success.php');
-      }
+// For COD orders - set session and go to success
+// For Online orders - DON'T set session yet, payment.php will set it after payment
+if ($paymentMethod === 'online') {
+  // Store order_id temporarily for payment.php to access
+  $_SESSION['pending_payment_order_id'] = $orderId;
+  redirect('/customer/payment.php?order_id=' . $orderId);
+} else {
+  // COD - order confirmed immediately
+  $mysqli->query("UPDATE orders SET payment_status = 'pending', order_status = 'confirmed' WHERE id = $orderId");
+  $_SESSION['last_order_id'] = $orderId;
+  redirect('/customer/order-success.php');
+}
     }
   }
 }
