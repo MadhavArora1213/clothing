@@ -26,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $price = (float)($_POST['price'] ?? 0);
   $original_price = !empty($_POST['original_price']) ? (float)$_POST['original_price'] : null;
   $discount_percent = (int)($_POST['discount_percent'] ?? 0);
+  $shipping_charge = (float)($_POST['shipping_charge'] ?? 0);
+  $free_shipping = isset($_POST['free_shipping']) ? 1 : 0;
+  $shipping_days = sanitize($_POST['shipping_days'] ?? '3-5');
   $is_featured = isset($_POST['is_featured']) ? 1 : 0;
   $is_active = isset($_POST['is_active']) ? 1 : 0;
 
@@ -67,12 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $featuresJson = json_encode(array_values($features));
 
     $stmt = $mysqli->prepare("INSERT INTO products 
-      (name, slug, sku, brand, gender, description, features, material, care_instructions, price, original_price, discount_percent, category_id, subcategory_id, image, is_featured, is_active) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      (name, slug, sku, brand, gender, description, features, material, care_instructions, price, original_price, discount_percent, shipping_charge, free_shipping, shipping_days, category_id, subcategory_id, image, is_featured, is_active) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $stmt->bind_param('sssssssssddiiisii', 
+    $stmt->bind_param('sssssssssdiiisiiiisii', 
       $name, $slug, $sku, $brand, $gender, $description, $featuresJson, $material, $care_instructions, 
-      $price, $original_price, $discount_percent, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active);
+      $price, $original_price, $discount_percent, $shipping_charge, $free_shipping, $shipping_days, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active);
 
     if ($stmt->execute()) {
       $productId = $mysqli->insert_id;
@@ -379,6 +382,34 @@ include dirname(__DIR__) . '/includes/header.php';
           </div>
         </div>
 
+        <!-- 3. Shipping -->
+        <div class="admin-card-section">
+          <div class="admin-card-section-header">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11M14 9h4l4 4v4c0 .6-.4 1-1 1h-2M7 18H3c-.6 0-1-.4-1-1v-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+              3. Shipping Configuration
+            </h3>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="free_shipping" value="1" <?= isset($_POST['free_shipping']) || !isset($_POST['price']) ? 'checked' : '' ?>>
+              <span style="font-size: 13px; font-weight: 500;">Free Shipping for this product</span>
+            </label>
+
+            <div id="shippingChargeGroup" style="display: none;">
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 11px;">Shipping Charge (₹)</label>
+                <input type="number" step="0.01" min="0" name="shipping_charge" placeholder="0" value="<?= sanitize($_POST['shipping_charge'] ?? '0') ?>">
+              </div>
+              <div class="form-group" style="margin: 0; margin-top: 8px;">
+                <label style="font-size: 11px;">Delivery Days</label>
+                <input type="text" name="shipping_days" placeholder="3-5" value="<?= sanitize($_POST['shipping_days'] ?? '3-5') ?>">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 3. Department & Category -->
         <div class="admin-card-section">
           <div class="admin-card-section-header">
@@ -624,6 +655,15 @@ function addFeatureRow() {
   `;
   list.appendChild(div);
 }
+
+// Shipping toggle
+const freeShipCb = document.querySelector('input[name="free_shipping"]');
+const shipGroup = document.getElementById('shippingChargeGroup');
+function toggleShipping() {
+  shipGroup.style.display = freeShipCb.checked ? 'none' : 'block';
+}
+freeShipCb.addEventListener('change', toggleShipping);
+toggleShipping();
 </script>
 
 <?php include dirname(__DIR__) . '/includes/footer.php'; ?>

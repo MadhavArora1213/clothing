@@ -175,8 +175,13 @@ if ($action === 'callback') {
   $orderId = (int)($_GET['order_id'] ?? 0);
   if ($orderId > 0) {
     $_SESSION['last_order_id'] = $orderId;
-    $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-    header('Location: ' . $baseUrl . '/clothing/customer/order-success.php');
+    // Calculate base URL dynamically
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'];
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+    $baseFolder = preg_replace('#/api$#', '', $scriptDir);
+    $baseUrl = $protocol . '://' . $host . $baseFolder;
+    header('Location: ' . $baseUrl . '/customer/order-success.php');
     exit;
   }
   exit;
