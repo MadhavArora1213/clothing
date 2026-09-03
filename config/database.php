@@ -148,6 +148,46 @@ if ($conn && !$conn->connect_error) {
         UNIQUE KEY unique_wishlist_item (customer_id, product_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
+    // Check if mega_menu_items table exists
+    $checkMegaMenu = $mysqli->query("SHOW TABLES LIKE 'mega_menu_items'");
+    if ($checkMegaMenu && $checkMegaMenu->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS mega_menu_items (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        department ENUM('men', 'women', 'kids', 'explore') NOT NULL,
+        name VARCHAR(150) NOT NULL,
+        slug VARCHAR(150) NOT NULL,
+        url VARCHAR(500) NULL,
+        image VARCHAR(500) NULL,
+        sort_order INT DEFAULT 0,
+        is_active TINYINT(1) DEFAULT 1,
+        is_sale TINYINT(1) DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+      // Seed default mega menu items
+      $mysqli->query("INSERT INTO mega_menu_items (department, name, slug, url, sort_order, is_active, is_sale) VALUES
+        ('men', 'Oversized Drop Tees', 'oversized-tees', NULL, 1, 1, 0),
+        ('men', 'Streetwear', 'streetwear', NULL, 2, 1, 0),
+        ('men', 'Ethnic Fusion Kurtas', 'kurtas', NULL, 3, 1, 0),
+        ('men', 'Resort Co-Ords', 'co-ords', NULL, 4, 1, 0),
+        ('men', 'Shirts', 'shirts', NULL, 5, 1, 0),
+        ('men', 'Bottoms', 'bottoms', NULL, 6, 1, 0),
+        ('women', 'Chikankari Edit', 'chikankari', NULL, 1, 1, 0),
+        ('women', 'Dresses & Co-Ords', 'dresses', NULL, 2, 1, 0),
+        ('women', 'Kurtis & Sets', 'kurtis', NULL, 3, 1, 0),
+        ('women', 'Streetwear', 'streetwear', NULL, 4, 1, 0),
+        ('women', 'Linen Collection', 'linen', NULL, 5, 1, 0),
+        ('women', 'Bottoms', 'bottoms', NULL, 6, 1, 0),
+        ('kids', 'Boys', 'boys', NULL, 1, 1, 0),
+        ('kids', 'Girls', 'girls', NULL, 2, 1, 0),
+        ('kids', 'Ethnic Wear', 'ethnic', NULL, 3, 1, 0),
+        ('kids', 'Matching Co-Ords', 'co-ords', NULL, 4, 1, 0),
+        ('explore', 'New Arrivals', 'new-arrivals', NULL, 1, 1, 0),
+        ('explore', 'Bestsellers', 'bestsellers', NULL, 2, 1, 0),
+        ('explore', 'Heritage Fusion', 'ethnic-fusion', NULL, 3, 1, 0),
+        ('explore', 'Sale', 'sale', NULL, 4, 1, 1)
+      ");
+    }
     // Check if cart_items table exists
     $checkCartItems = $mysqli->query("SHOW TABLES LIKE 'cart_items'");
     if ($checkCartItems && $checkCartItems->num_rows === 0) {

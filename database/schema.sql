@@ -306,9 +306,8 @@ CREATE TABLE IF NOT EXISTS settings (
 -- INITIAL SEED DATA
 -- ============================================
 
--- Default admin login: admin@atelier.com / admin123
 INSERT INTO admins (name, email, password, role) VALUES
-('Super Admin', 'admin@atelier.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin')
+('Super Admin', 'admin@urbanoutfit.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin')
 ON DUPLICATE KEY UPDATE id=id;
 
 -- Top-level Categories: Women, Men, Kids, Accessories
@@ -351,5 +350,6 @@ INSERT INTO settings (`key`, value, type, group_name) VALUES
 ('site_tagline', 'Luxury Fashion & Ethnic Couture', 'text', 'general'),
 ('site_email', 'contact@auraclothing.com', 'email', 'general'),
 ('site_phone', '+91 98765 43210', 'text', 'general'),
-('currency_symbol', '₹', 'text', 'general')
+('currency_symbol', '₹', 'text', 'general'),
+('site_address', 'Maharana Partap Chowk opposite Shri Guru Nanak Girls School, Mukerian', 'text', 'general')
 ON DUPLICATE KEY UPDATE `key`=`key`;

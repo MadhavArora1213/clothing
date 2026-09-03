@@ -5,6 +5,7 @@ $pageDescription = 'Browse our complete collection of oversized drop tees, resor
 $currentPage = 'shop';
 
 $category = $_GET['category'] ?? null;
+$subcategory = $_GET['subcategory'] ?? null;
 $sale = isset($_GET['sale']);
 $newArrivals = isset($_GET['new']);
 $sort = $_GET['sort'] ?? 'newest';
@@ -25,6 +26,20 @@ if ($mysqli) {
       if ($cat) {
         $where[] = 'p.category_id = ?';
         $params[] = $cat['id'];
+        $types .= 'i';
+      }
+    }
+  }
+
+  if ($subcategory && $mysqli) {
+    $subStmt = $mysqli->prepare("SELECT id FROM categories WHERE slug = ?");
+    if ($subStmt) {
+      $subStmt->bind_param('s', $subcategory);
+      $subStmt->execute();
+      $sub = $subStmt->get_result()->fetch_assoc();
+      if ($sub) {
+        $where[] = 'p.subcategory_id = ?';
+        $params[] = $sub['id'];
         $types .= 'i';
       }
     }
@@ -180,7 +195,15 @@ if (empty($products)) {
 include __DIR__ . '/includes/header.php';
 
 $pageName = '';
-if ($category) {
+if ($subcategory && $mysqli) {
+  $subNameStmt = $mysqli->prepare("SELECT name FROM categories WHERE slug = ?");
+  if ($subNameStmt) {
+    $subNameStmt->bind_param('s', $subcategory);
+    $subNameStmt->execute();
+    $subNameRow = $subNameStmt->get_result()->fetch_assoc();
+    $pageName = $subNameRow ? $subNameRow['name'] : ucwords(str_replace('-', ' ', $subcategory));
+  }
+} elseif ($category) {
   $pageName = ucwords(str_replace('-', ' ', $category));
 } elseif ($sale) {
   $pageName = 'Flash Sale';
@@ -662,6 +685,7 @@ if ($category) {
       <div class="shop-hero-right">
         <form method="GET" action="">
           <?php if ($category): ?><input type="hidden" name="category" value="<?= htmlspecialchars($category) ?>"><?php endif; ?>
+          <?php if ($subcategory): ?><input type="hidden" name="subcategory" value="<?= htmlspecialchars($subcategory) ?>"><?php endif; ?>
           <?php if ($sale): ?><input type="hidden" name="sale" value="1"><?php endif; ?>
           <?php if ($newArrivals): ?><input type="hidden" name="new" value="1"><?php endif; ?>
           <select name="sort" onchange="this.form.submit()" class="shop-hero-sort">
@@ -683,35 +707,28 @@ if ($category) {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <div class="shop-filters-inner" id="filterScroll">
-      <a href="<?= BASE_URL ?>/shop.php" class="shop-filter-pill <?= empty($category) && !$sale && !$newArrivals ? 'active' : '' ?>">All Drops</a>
+      <a href="<?= BASE_URL ?>/shop.php" class="shop-filter-pill <?= empty($category) && !$sale && !$newArrivals && !$subcategory ? 'active' : '' ?>">All Drops</a>
       <a href="<?= BASE_URL ?>/shop.php?new=1" class="shop-filter-pill <?= $newArrivals ? 'active' : '' ?>">New Arrivals</a>
+      <?php
+      $pillDepts = ['men' => 'Men', 'women' => 'Women', 'kids' => 'Kids'];
+      foreach ($pillDepts as $pSlug => $pLabel):
+        $pillSubs = [];
+        if ($mysqli) {
+          $pillStmt = $mysqli->prepare("SELECT name, slug FROM categories WHERE department = ? AND parent_id > 0 AND is_active = 1 ORDER BY sort_order ASC, name ASC");
+          if ($pillStmt) {
+            $pillStmt->bind_param('s', $pSlug);
+            $pillStmt->execute();
+            $pillSubs = $pillStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+          }
+        }
+      ?>
       <span class="shop-filter-divider"></span>
-      <a href="<?= BASE_URL ?>/shop.php?category=men" class="shop-filter-pill <?= $category === 'men' ? 'active' : '' ?>">Men</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=oversized-tees" class="shop-filter-pill <?= ($category === 'men' && ($_GET['subcategory'] ?? '') === 'oversized-tees') ? 'active' : '' ?>">Men Oversized</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=streetwear" class="shop-filter-pill <?= ($category === 'men' && ($_GET['subcategory'] ?? '') === 'streetwear') ? 'active' : '' ?>">Men Streetwear</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=kurtas" class="shop-filter-pill <?= ($category === 'men' && ($_GET['subcategory'] ?? '') === 'kurtas') ? 'active' : '' ?>">Men Kurtas</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=shirts" class="shop-filter-pill <?= ($category === 'men' && ($_GET['subcategory'] ?? '') === 'shirts') ? 'active' : '' ?>">Men Shirts</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=bottoms" class="shop-filter-pill <?= ($category === 'men' && ($_GET['subcategory'] ?? '') === 'bottoms') ? 'active' : '' ?>">Men Bottoms</a>
+      <a href="<?= BASE_URL ?>/shop.php?category=<?= $pSlug ?>" class="shop-filter-pill <?= ($category === $pSlug && !$subcategory) ? 'active' : '' ?>"><?= $pLabel ?></a>
+      <?php foreach ($pillSubs as $ps): ?>
+      <a href="<?= BASE_URL ?>/shop.php?category=<?= $pSlug ?>&subcategory=<?= $ps['slug'] ?>" class="shop-filter-pill <?= ($category === $pSlug && $subcategory === $ps['slug']) ? 'active' : '' ?>"><?= htmlspecialchars($ps['name']) ?></a>
+      <?php endforeach; ?>
+      <?php endforeach; ?>
       <span class="shop-filter-divider"></span>
-      <a href="<?= BASE_URL ?>/shop.php?category=women" class="shop-filter-pill <?= $category === 'women' ? 'active' : '' ?>">Women</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=chikankari" class="shop-filter-pill <?= ($category === 'women' && ($_GET['subcategory'] ?? '') === 'chikankari') ? 'active' : '' ?>">Women Chikankari</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=dresses" class="shop-filter-pill <?= ($category === 'women' && ($_GET['subcategory'] ?? '') === 'dresses') ? 'active' : '' ?>">Women Dresses</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=kurtis" class="shop-filter-pill <?= ($category === 'women' && ($_GET['subcategory'] ?? '') === 'kurtis') ? 'active' : '' ?>">Women Kurtis</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=streetwear" class="shop-filter-pill <?= ($category === 'women' && ($_GET['subcategory'] ?? '') === 'streetwear') ? 'active' : '' ?>">Women Streetwear</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=linen" class="shop-filter-pill <?= ($category === 'women' && ($_GET['subcategory'] ?? '') === 'linen') ? 'active' : '' ?>">Women Linen</a>
-      <span class="shop-filter-divider"></span>
-      <a href="<?= BASE_URL ?>/shop.php?category=kids" class="shop-filter-pill <?= $category === 'kids' ? 'active' : '' ?>">Kids</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=boys" class="shop-filter-pill <?= ($category === 'kids' && ($_GET['subcategory'] ?? '') === 'boys') ? 'active' : '' ?>">Boys</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=girls" class="shop-filter-pill <?= ($category === 'kids' && ($_GET['subcategory'] ?? '') === 'girls') ? 'active' : '' ?>">Girls</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=ethnic" class="shop-filter-pill <?= ($category === 'kids' && ($_GET['subcategory'] ?? '') === 'ethnic') ? 'active' : '' ?>">Kids Ethnic</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=co-ords" class="shop-filter-pill <?= ($category === 'kids' && ($_GET['subcategory'] ?? '') === 'co-ords') ? 'active' : '' ?>">Kids Co-Ords</a>
-      <span class="shop-filter-divider"></span>
-      <a href="<?= BASE_URL ?>/shop.php?category=oversized" class="shop-filter-pill <?= $category === 'oversized' ? 'active' : '' ?>">Oversized Tees</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=streetwear" class="shop-filter-pill <?= $category === 'streetwear' ? 'active' : '' ?>">Streetwear</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion" class="shop-filter-pill <?= $category === 'ethnic-fusion' ? 'active' : '' ?>">Ethnic Fusion</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=co-ords" class="shop-filter-pill <?= $category === 'co-ords' ? 'active' : '' ?>">Co-Ords</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=linen" class="shop-filter-pill <?= $category === 'linen' ? 'active' : '' ?>">Linen</a>
-      <a href="<?= BASE_URL ?>/shop.php?category=chikankari" class="shop-filter-pill <?= $category === 'chikankari' ? 'active' : '' ?>">Chikankari</a>
       <a href="<?= BASE_URL ?>/shop.php?category=accessories" class="shop-filter-pill <?= $category === 'accessories' ? 'active' : '' ?>">Accessories</a>
       <a href="<?= BASE_URL ?>/shop.php?sale=1" class="shop-filter-pill sale <?= $sale ? 'active' : '' ?>">50% OFF Sale</a>
       </div>

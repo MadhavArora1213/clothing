@@ -64,35 +64,26 @@ if (!defined('BASE_URL')) {
           </a>
           <div class="lux-mega-dropdown">
             <div class="lux-mega-inner">
-              <!-- Men -->
+              <?php
+              $megaDepts = ['men' => 'Men', 'women' => 'Women', 'kids' => 'Kids'];
+              foreach ($megaDepts as $deptSlug => $deptLabel):
+                $megaSubs = [];
+                if (isset($mysqli) && $mysqli) {
+                  $megaStmt = $mysqli->prepare("SELECT name, slug FROM categories WHERE department = ? AND parent_id > 0 AND is_active = 1 ORDER BY sort_order ASC, name ASC");
+                  if ($megaStmt) {
+                    $megaStmt->bind_param('s', $deptSlug);
+                    $megaStmt->execute();
+                    $megaSubs = $megaStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                  }
+                }
+              ?>
               <div class="lux-mega-col">
-                <h4 class="lux-mega-heading">Men</h4>
-                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=oversized-tees" class="lux-mega-link">Oversized Drop Tees</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=streetwear" class="lux-mega-link">Streetwear</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=kurtas" class="lux-mega-link">Ethnic Fusion Kurtas</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=co-ords" class="lux-mega-link">Resort Co-Ords</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=shirts" class="lux-mega-link">Shirts</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=bottoms" class="lux-mega-link">Bottoms</a>
+                <h4 class="lux-mega-heading"><?= $deptLabel ?></h4>
+                <?php foreach ($megaSubs as $sub): ?>
+                  <a href="<?= BASE_URL ?>/shop.php?category=<?= $deptSlug ?>&subcategory=<?= $sub['slug'] ?>" class="lux-mega-link"><?= htmlspecialchars($sub['name']) ?></a>
+                <?php endforeach; ?>
               </div>
-              <!-- Women -->
-              <div class="lux-mega-col">
-                <h4 class="lux-mega-heading">Women</h4>
-                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=chikankari" class="lux-mega-link">Chikankari Edit</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=dresses" class="lux-mega-link">Dresses & Co-Ords</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=kurtis" class="lux-mega-link">Kurtis & Sets</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=streetwear" class="lux-mega-link">Streetwear</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=linen" class="lux-mega-link">Linen Collection</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=bottoms" class="lux-mega-link">Bottoms</a>
-              </div>
-              <!-- Kids -->
-              <div class="lux-mega-col">
-                <h4 class="lux-mega-heading">Kids</h4>
-                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=boys" class="lux-mega-link">Boys</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=girls" class="lux-mega-link">Girls</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=ethnic" class="lux-mega-link">Ethnic Wear</a>
-                <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=co-ords" class="lux-mega-link">Matching Co-Ords</a>
-              </div>
-              <!-- Quick Links -->
+              <?php endforeach; ?>
               <div class="lux-mega-col lux-mega-highlight">
                 <h4 class="lux-mega-heading">Explore</h4>
                 <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals" class="lux-mega-link">New Arrivals</a>
@@ -313,9 +304,25 @@ if (!defined('BASE_URL')) {
           <div class="lux-drawer-sub">
             <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals">New Arrivals</a>
             <a href="<?= BASE_URL ?>/shop.php?category=bestsellers">Bestsellers</a>
-            <a href="<?= BASE_URL ?>/shop.php?category=men">Men</a>
-            <a href="<?= BASE_URL ?>/shop.php?category=women">Women</a>
-            <a href="<?= BASE_URL ?>/shop.php?category=kids">Kids</a>
+            <?php
+            $drawerDepts = ['men' => 'Men', 'women' => 'Women', 'kids' => 'Kids'];
+            foreach ($drawerDepts as $dSlug => $dLabel):
+              $drawerSubs = [];
+              if (isset($mysqli) && $mysqli) {
+                $drawerStmt = $mysqli->prepare("SELECT name, slug FROM categories WHERE department = ? AND parent_id > 0 AND is_active = 1 ORDER BY sort_order ASC, name ASC");
+                if ($drawerStmt) {
+                  $drawerStmt->bind_param('s', $dSlug);
+                  $drawerStmt->execute();
+                  $drawerSubs = $drawerStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                }
+              }
+              if (!empty($drawerSubs)):
+            ?>
+            <a href="<?= BASE_URL ?>/shop.php?category=<?= $dSlug ?>" style="font-weight:700;margin-top:8px;"><?= $dLabel ?></a>
+            <?php foreach ($drawerSubs as $ds): ?>
+            <a href="<?= BASE_URL ?>/shop.php?category=<?= $dSlug ?>&subcategory=<?= $ds['slug'] ?>" style="padding-left:16px;"><?= htmlspecialchars($ds['name']) ?></a>
+            <?php endforeach; ?>
+            <?php endif; endforeach; ?>
             <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion">Heritage Fusion</a>
             <a href="<?= BASE_URL ?>/shop.php?category=sale">Sale</a>
           </div>
