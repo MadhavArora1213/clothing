@@ -62,11 +62,11 @@ if (!is_dir(UPLOADS_PATH . '/categories')) {
   @mkdir(UPLOADS_PATH . '/categories', 0777, true);
 }
 
-// Database Credentials (from .env or defaults for local)
-$dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
-$dbName = $_ENV['DB_NAME'] ?? 'cloths';
-$dbUser = $_ENV['DB_USER'] ?? 'root';
-$dbPass = $_ENV['DB_PASS'] ?? '';
+// Database Credentials
+$dbHost = '127.0.0.1';
+$dbName = 'cloths';
+$dbUser = 'root';
+$dbPass = '';
 
 // Connect to MySQL server
 $conn = @new mysqli($dbHost, $dbUser, $dbPass);

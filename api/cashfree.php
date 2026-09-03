@@ -32,12 +32,25 @@ if ($action === 'create_order') {
   // Generate unique CF order ID
   $cfOrderId = $order['order_number'] . '_' . time();
 
-  // Customer details
+  // Clean phone number - remove +91, spaces, dashes
+  $phone = $order['customer_phone'] ?? '9999999999';
+  $phone = preg_replace('/[^0-9]/', '', $phone);
+  if (strlen($phone) > 10) {
+    $phone = substr($phone, -10); // Last 10 digits
+  }
+  if (strlen($phone) !== 10) {
+    $phone = '9999999999'; // Fallback
+  }
+
+  // Clean customer_id - alphanumeric only
+  $custId = 'CUST_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)$customerId);
+
+  // Customer details (Cashfree requires exactly 10 digit phone)
   $customerDetails = [
-    'customer_id' => (string)$customerId,
+    'customer_id' => $custId,
     'customer_name' => $order['customer_name'],
     'customer_email' => $order['customer_email'],
-    'customer_phone' => $order['customer_phone'] ?? '9999999999',
+    'customer_phone' => $phone,
   ];
 
   // Order meta
@@ -159,6 +172,11 @@ echo json_encode(['success' => false, 'message' => 'Invalid action']);
 
 // ─── Cashfree API Helper ───
 function cashfreeApiCall($endpoint, $method = 'POST', $data = []) {
+  if (!function_exists('curl_init')) {
+    error_log("Cashfree: cURL not available on this server");
+    return ['error' => 'cURL not enabled on server', 'message' => 'Payment gateway requires cURL PHP extension'];
+  }
+
   $url = CF_API_URL . $endpoint;
 
   $headers = [
@@ -173,6 +191,7 @@ function cashfreeApiCall($endpoint, $method = 'POST', $data = []) {
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 30,
+    CURLOPT_SSL_VERIFYPEER => true,
     CURLOPT_HTTPHEADER => $headers,
   ]);
 
@@ -186,7 +205,13 @@ function cashfreeApiCall($endpoint, $method = 'POST', $data = []) {
 
   $response = curl_exec($ch);
   $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $curlError = curl_error($ch);
   curl_close($ch);
+
+  if ($curlError) {
+    error_log("Cashfree cURL Error: $curlError");
+    return ['error' => 'Network error', 'message' => $curlError];
+  }
 
   $decoded = json_decode($response, true);
 
