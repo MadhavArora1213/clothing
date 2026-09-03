@@ -1,7 +1,16 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
+if (ob_get_level()) ob_end_clean();
+
 require_once dirname(__DIR__) . '/config/database.php';
 
 if (!isset($_SESSION['customer_id'])) {
+  if (isset($_POST['ajax'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Please login first']);
+    exit;
+  }
   redirect('/customer/login.php?redirect=' . urlencode('/customer/checkout.php'));
 }
 
@@ -24,19 +33,16 @@ if ($cart) {
   }
 }
 
-if (empty($items)) {
-  redirect('/customer/cart.php');
-}
+if (empty($items)) redirect('/customer/cart.php');
 
 $taxAmount = 0;
 $discountAmount = 0;
 $couponCode = '';
 $grandTotal = $subtotal - $discountAmount + $shippingAmount;
 
-$error = '';
-
-// Handle AJAX order creation + payment
+// ─── AJAX: Create Order + Cashfree ───
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+  while (ob_get_level()) ob_end_clean();
   header('Content-Type: application/json');
 
   $shippingName = sanitize($_POST['shipping_name'] ?? '');
@@ -51,13 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
     exit;
   }
 
+  // 1. Create order in DB
   $orderNumber = generateOrderNumber();
-
-  $billingAddress = json_encode([
-    'name' => $shippingName, 'phone' => $shippingPhone,
-    'address' => $shippingAddress, 'city' => $shippingCity,
-    'state' => $shippingState, 'postal_code' => $shippingPostal
-  ]);
+  $billingAddress = json_encode(['name' => $shippingName, 'phone' => $shippingPhone, 'address' => $shippingAddress, 'city' => $shippingCity, 'state' => $shippingState, 'postal_code' => $shippingPostal]);
 
   $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
   $paymentStatus = 'pending';
@@ -68,14 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   foreach ($items as $item) {
     $totalPrice = $item['unit_price'] * $item['quantity'];
-    $stmt = $mysqli->prepare('INSERT INTO order_items (order_id, product_id, product_name, product_sku, size, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-    $stmt->bind_param('iisssidd', $orderId, $item['product_id'], $item['name'], $item['sku'], $item['size'], $item['quantity'], $item['unit_price'], $totalPrice);
-    $stmt->execute();
+    $ist = $mysqli->prepare('INSERT INTO order_items (order_id, product_id, product_name, product_sku, size, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    $ist->bind_param('iisssidd', $orderId, $item['product_id'], $item['name'], $item['sku'], $item['size'], $item['quantity'], $item['unit_price'], $totalPrice);
+    $ist->execute();
   }
 
   $mysqli->query("DELETE FROM cart_items WHERE cart_id = {$cart['id']}");
 
-  // Now call Cashfree API directly
+  // 2. Load .env
   $envFile = dirname(__DIR__) . '/.env';
   if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -84,16 +86,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
       if (strpos($line, '=') !== false) {
         list($k, $v) = explode('=', $line, 2);
         $v = trim($v);
-        if (($v[0] ?? '') === '"') $v = substr($v, 1, -1);
+        if (($v[0] ?? '') === '"' && substr($v, -1) === '"') $v = substr($v, 1, -1);
         $_ENV[trim($k)] = $v;
       }
     }
   }
 
+  // 3. Call Cashfree API
   $cfOrderId = $orderNumber . '_' . time();
   $phone = preg_replace('/[^0-9]/', '', $shippingPhone);
   if (strlen($phone) > 10) $phone = substr($phone, -10);
   if (strlen($phone) !== 10) $phone = '9999999999';
+
+  $host = $_SERVER['HTTP_HOST'];
+  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+  $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+  $baseFolder = preg_replace('#/customer$#', '', $scriptDir);
+  $baseUrl = $protocol . '://' . $host . $baseFolder;
 
   $payload = [
     'order_id' => $cfOrderId,
@@ -106,8 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
       'customer_phone' => $phone,
     ],
     'order_meta' => [
-      'return_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/clothing/api/cashfree.php?action=callback&order_id=' . $orderId,
-      'notify_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/clothing/api/cashfree_webhook.php',
+      'return_url' => $baseUrl . '/api/cashfree.php?action=callback&order_id=' . $orderId,
+      'notify_url' => $baseUrl . '/api/cashfree_webhook.php',
     ],
   ];
 
@@ -125,10 +134,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   $response = curl_exec($ch);
   $curlErr = curl_error($ch);
+  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
   curl_close($ch);
 
   if ($curlErr) {
-    echo json_encode(['success' => false, 'message' => 'Payment gateway error: ' . $curlErr]);
+    echo json_encode(['success' => false, 'message' => 'Network error: ' . $curlErr]);
     exit;
   }
 
@@ -138,41 +148,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
     $upd = $mysqli->prepare('UPDATE orders SET payment_session_id = ? WHERE id = ?');
     if ($upd) { $upd->bind_param('si', $result['cf_order_id'], $orderId); $upd->execute(); }
 
-    echo json_encode([
-      'success' => true,
-      'payment_session_id' => $result['payment_session_id'] ?? '',
-      'order_id' => $orderId,
-    ]);
+    echo json_encode(['success' => true, 'payment_session_id' => $result['payment_session_id'] ?? '', 'order_id' => $orderId]);
   } else {
-    $errMsg = $result['message'] ?? $result['error_description'] ?? 'Payment gateway error';
+    $errMsg = $result['message'] ?? $result['error_description'] ?? 'Payment gateway error (HTTP ' . $httpCode . ')';
     echo json_encode(['success' => false, 'message' => $errMsg]);
   }
   exit;
 }
 
-// Normal form submit (fallback)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $shippingName = sanitize($_POST['shipping_name'] ?? '');
-  $shippingPhone = sanitize($_POST['shipping_phone'] ?? '');
-  $shippingAddress = sanitize($_POST['shipping_address'] ?? '');
-  $shippingCity = sanitize($_POST['shipping_city'] ?? '');
-  $shippingState = sanitize($_POST['shipping_state'] ?? '');
-  $shippingPostal = sanitize($_POST['shipping_postal'] ?? '');
-
-  if (empty($shippingName) || empty($shippingPhone) || empty($shippingAddress) || empty($shippingCity) || empty($shippingState) || empty($shippingPostal)) {
-    $error = 'Please fill in all shipping details.';
-  }
-}
-
+// ─── HTML PAGE ───
 $pageTitle = 'Checkout — urban outfit';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <style>
-.ck-page {
-  min-height: calc(100vh - var(--header-height, 80px));
-  display: grid; grid-template-columns: 1fr 420px; background: var(--color-bg);
-}
+.ck-page { min-height: calc(100vh - var(--header-height, 80px)); display: grid; grid-template-columns: 1fr 420px; background: var(--color-bg); }
 .ck-left { padding: 40px 40px 40px 60px; display: flex; flex-direction: column; }
 .ck-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-text-muted); margin-bottom: 20px; }
 .ck-breadcrumb a { color: var(--color-text-muted); text-decoration: none; }
@@ -241,17 +231,10 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <div class="ck-right">
     <form method="POST" id="checkoutForm" onsubmit="return handleCheckout(event)" style="display: flex; flex-direction: column; flex: 1;">
-
-      <?php if ($error): ?>
-        <div class="ck-alert-error"><?= $error ?></div>
-      <?php endif; ?>
-
       <div class="ck-section">
         <div class="ck-section-header"><h3><span class="ck-section-num">1</span> Customer</h3></div>
         <div class="ck-customer-card">
-          <div class="ck-customer-avatar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
+          <div class="ck-customer-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           <div class="ck-customer-info">
             <h4><?= sanitize($customer['first_name'] . ' ' . $customer['last_name']) ?></h4>
             <p><?= sanitize($customer['email'] ?? '') ?></p>
@@ -263,7 +246,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="ck-section-header"><h3><span class="ck-section-num">2</span> Shipping</h3></div>
         <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= sanitize($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'])) ?>"></div>
         <div class="ck-field"><label>Phone <span>*</span></label><input type="tel" name="shipping_phone" required value="<?= sanitize($_POST['shipping_phone'] ?? $customer['phone'] ?? '') ?>"></div>
-        <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= sanitize($_POST['shipping_address'] ?? '') ?></textarea></div>
+        <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= sanitize($_POST['shipping_address'] ?? '') ?>"></textarea></div>
         <div class="ck-row">
           <div class="ck-field"><label>City <span>*</span></label><input type="text" name="shipping_city" required value="<?= sanitize($_POST['shipping_city'] ?? '') ?>"></div>
           <div class="ck-field"><label>State <span>*</span></label><input type="text" name="shipping_state" required value="<?= sanitize($_POST['shipping_state'] ?? '') ?>"></div>
@@ -305,8 +288,12 @@ async function handleCheckout(e) {
   formData.append('ajax', '1');
 
   try {
-    const res = await fetch(window.location.href, { method: 'POST', body: formData });
-    const data = await res.json();
+    const res = await fetch('<?= BASE_URL ?>/customer/checkout.php', {
+      method: 'POST',
+      body: formData
+    });
+    const text = await res.text();
+    const data = JSON.parse(text);
 
     if (!data.success) {
       alert(data.message || 'Error placing order');
@@ -321,7 +308,7 @@ async function handleCheckout(e) {
     cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: '_self' });
 
   } catch (err) {
-    alert('Network error: ' + err.message);
+    alert('Error: ' + err.message);
     btn.disabled = false;
     btn.innerHTML = 'Pay <?= formatPrice($grandTotal) ?>';
   }
