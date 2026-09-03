@@ -26,9 +26,15 @@ if (empty($items)) {
   redirect('/customer/cart.php');
 }
 
-$shippingStandard = (float)getSetting('shipping_standard', 149);
-$shippingFreeMin = (float)getSetting('shipping_free_min', 1999);
-$shippingAmount = $subtotal >= $shippingFreeMin ? 0 : $shippingStandard;
+$freeShipping = (int)getSetting('free_shipping', 1);
+$shippingStandard = (float)getSetting('shipping_standard', 0);
+$shippingFreeMin = (float)getSetting('shipping_free_min', 0);
+
+if ($freeShipping || ($shippingFreeMin > 0 && $subtotal >= $shippingFreeMin)) {
+  $shippingAmount = 0;
+} else {
+  $shippingAmount = $shippingStandard;
+}
 $taxAmount = 0;
 $discountAmount = 0;
 $couponCode = '';
@@ -647,7 +653,11 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
         <div class="ck-summary-row">
           <span>Shipping</span>
-          <span class="free">Free</span>
+          <?php if ($shippingAmount > 0): ?>
+            <span><?= formatPrice($shippingAmount) ?></span>
+          <?php else: ?>
+            <span class="free">Free</span>
+          <?php endif; ?>
         </div>
         <?php if ($discountAmount > 0): ?>
           <div class="ck-summary-row" style="color: #16A34A;">

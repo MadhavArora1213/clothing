@@ -351,5 +351,9 @@ INSERT INTO settings (`key`, value, type, group_name) VALUES
 ('site_email', 'contact@auraclothing.com', 'email', 'general'),
 ('site_phone', '+91 98765 43210', 'text', 'general'),
 ('currency_symbol', '₹', 'text', 'general'),
-('site_address', 'Maharana Partap Chowk opposite Shri Guru Nanak Girls School, Mukerian', 'text', 'general')
+('site_address', 'Maharana Partap Chowk opposite Shri Guru Nanak Girls School, Mukerian', 'text', 'general'),
+('shipping_standard', '0', 'number', 'shipping'),
+('shipping_express', '0', 'number', 'shipping'),
+('shipping_free_min', '0', 'number', 'shipping'),
+('free_shipping', '1', 'number', 'shipping')
 ON DUPLICATE KEY UPDATE `key`=`key`;

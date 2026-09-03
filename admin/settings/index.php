@@ -31,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strlen($newPass) < 6) {
       $error = 'New password must be at least 6 characters.';
     } else {
-      $admin = getAdmin();
       $hash = password_hash($newPass, PASSWORD_DEFAULT);
       $pStmt = $mysqli->prepare('UPDATE admins SET password = ? WHERE id = ?');
       $pStmt->bind_param('si', $hash, $_SESSION['admin_id']);
@@ -52,6 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Store Settings — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
+
+$groupLabels = [
+  'general' => 'Store Brand & Contact Info',
+  'shipping' => 'Shipping Configuration',
+  'payment' => 'Payment Settings',
+];
+
+$groupDescriptions = [
+  'general' => 'Manage business contact, brand name, currency symbol, and admin credentials.',
+  'shipping' => 'Configure shipping charges, free shipping threshold, and delivery options.',
+  'payment' => 'Manage payment gateway settings.',
+];
 ?>
 
 <div class="admin-content">
@@ -59,7 +70,7 @@ include dirname(__DIR__) . '/includes/header.php';
     <div>
       <h1>Store Configuration &amp; Settings</h1>
       <p style="color: var(--color-text-secondary); margin-top: 4px;">
-        Manage business contact, brand name, currency symbol, and admin credentials.
+        Manage business contact, brand name, shipping, and admin credentials.
       </p>
     </div>
   </div>
@@ -77,19 +88,32 @@ include dirname(__DIR__) . '/includes/header.php';
   <?php endif; ?>
 
   <form method="POST" action="">
-    <div class="admin-card" style="margin-bottom: var(--space-6); padding: var(--space-6);">
-      <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; border-bottom: 1px solid var(--color-bg-elevated); padding-bottom: 8px;">
-        Store Brand &amp; Contact Info
-      </h2>
-      <div class="form-grid">
-        <?php foreach ($settings as $setting): ?>
-          <div class="form-group">
-            <label><?= ucwords(str_replace('_', ' ', $setting['key'])) ?></label>
-            <input type="text" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
-          </div>
-        <?php endforeach; ?>
+    <?php foreach ($settingsByGroup as $groupName => $groupSettings): ?>
+      <div class="admin-card" style="margin-bottom: var(--space-6); padding: var(--space-6);">
+        <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 4px; border-bottom: 1px solid var(--color-bg-elevated); padding-bottom: 8px;">
+          <?= $groupLabels[$groupName] ?? ucwords(str_replace('_', ' ', $groupName)) ?>
+        </h2>
+        <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 16px;">
+          <?= $groupDescriptions[$groupName] ?? '' ?>
+        </p>
+        <div class="form-grid">
+          <?php foreach ($groupSettings as $setting): ?>
+            <div class="form-group">
+              <label><?= ucwords(str_replace('_', ' ', $setting['key'])) ?></label>
+              <?php if ($setting['type'] === 'number'): ?>
+                <input type="number" step="0.01" min="0" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
+              <?php elseif ($setting['type'] === 'email'): ?>
+                <input type="email" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
+              <?php elseif ($setting['type'] === 'textarea'): ?>
+                <textarea name="settings[<?= $setting['key'] ?>]" rows="3"><?= sanitize($setting['value']) ?></textarea>
+              <?php else: ?>
+                <input type="text" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
       </div>
-    </div>
+    <?php endforeach; ?>
 
     <!-- Admin Account Security -->
     <div class="admin-card" style="margin-bottom: var(--space-6); padding: var(--space-6);">
