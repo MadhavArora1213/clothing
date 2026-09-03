@@ -169,8 +169,8 @@ include dirname(__DIR__) . '/includes/header.php';
   </div>
 </section>
 
-<!-- Cashfree SDK -->
-<script src="https://sdk.cashfree.com/js/ui/2.0.2/cashfree.js"></script>
+<!-- Cashfree JS SDK v3 -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <script>
 const CF_APP_ID = '<?= CF_APP_ID ?>';
