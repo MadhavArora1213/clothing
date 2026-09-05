@@ -66,6 +66,7 @@
 
           foreach ($deptLabels as $dept => $label):
             if (empty($footerDepts[$dept])) continue;
+            if ($dept === 'kids') continue;
           ?>
           <h4 style="margin-top: <?= $dept === 'men' ? '0' : '18px' ?>;"><?= $label ?></h4>
           <ul class="footer-links" style="margin-bottom: 0;">
@@ -78,10 +79,6 @@
             <?php endforeach; ?>
           </ul>
           <?php endforeach; ?>
-          <ul class="footer-links" style="margin-top: 18px;">
-            <li><a href="<?= BASE_URL ?>/shop.php?category=new-arrivals">✦ New Arrivals</a></li>
-            <li><a href="<?= BASE_URL ?>/shop.php?sale=1" style="color:#EF4444;font-weight:700;">🔥 Sale</a></li>
-          </ul>
         </div>
 
         <div class="footer-col">
