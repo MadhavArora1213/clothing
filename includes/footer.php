@@ -96,7 +96,6 @@
         <div class="footer-col">
           <h4>Customer Care</h4>
           <ul class="footer-links">
-            <li><a href="<?= BASE_URL ?>/customer/order-tracking.php">Track Your Order</a></li>
             <li><a href="<?= BASE_URL ?>/pages/shipping.php">Shipping Policy</a></li>
             <li><a href="<?= BASE_URL ?>/pages/returns.php">Returns &amp; Exchanges</a></li>
             <li><a href="<?= BASE_URL ?>/pages/contact.php">Contact &amp; Concierge</a></li>
