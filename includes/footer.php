@@ -35,52 +35,64 @@
           </div>
         </div>
 
-        <div class="footer-col">
-          <?php
-          // Pull all active categories grouped by department
-          $footerDepts = ['men' => [], 'women' => [], 'kids' => []];
-          $deptLabels  = ['men' => 'Men', 'women' => 'Women', 'kids' => 'Kids'];
-          if (!empty($mysqli)) {
-            $fcResult = $mysqli->query(
-              "SELECT name, slug, department, parent_id
-               FROM categories
-               WHERE is_active = 1 AND parent_id != 0
-               AND department IN ('men','women','kids')
-               ORDER BY department, sort_order ASC"
-            );
-            if ($fcResult) {
-              while ($fc = $fcResult->fetch_assoc()) {
-                $footerDepts[$fc['department']][] = $fc;
-              }
+        <?php
+        // Pull all active categories grouped by department
+        $footerDepts = ['men' => [], 'women' => []];
+        if (!empty($mysqli)) {
+          $fcResult = $mysqli->query(
+            "SELECT name, slug, department FROM categories
+             WHERE is_active = 1 AND parent_id != 0
+             AND department IN ('men','women')
+             ORDER BY department, sort_order ASC"
+          );
+          if ($fcResult) {
+            while ($fc = $fcResult->fetch_assoc()) {
+              $footerDepts[$fc['department']][] = $fc;
             }
           }
+        }
+        // Fallback
+        if (empty($footerDepts['men'])) {
+          $footerDepts['men'] = [
+            ['name'=>'Kurta Sets & Sherwanis','slug'=>'men-kurta-sets','department'=>'men'],
+            ['name'=>'Shirts','slug'=>'men-shirts','department'=>'men'],
+            ['name'=>'T-Shirts & Polos','slug'=>'men-tshirts','department'=>'men'],
+            ['name'=>'Trousers & Jeans','slug'=>'men-trousers-jeans','department'=>'men'],
+            ['name'=>'Jackets & Blazers','slug'=>'men-jackets-blazers','department'=>'men'],
+          ];
+        }
+        if (empty($footerDepts['women'])) {
+          $footerDepts['women'] = [
+            ['name'=>'Suits & Salwars','slug'=>'suits-salwars','department'=>'women'],
+            ['name'=>'Kurtis & Tunics','slug'=>'kurtis-tunics','department'=>'women'],
+            ['name'=>'Sarees','slug'=>'sarees','department'=>'women'],
+            ['name'=>'Lehengas','slug'=>'lehengas','department'=>'women'],
+            ['name'=>'Western Wear & Tops','slug'=>'women-western-tops','department'=>'women'],
+          ];
+        }
+        ?>
 
-          // Fallback if DB empty
-          if (empty($footerDepts['men']) && empty($footerDepts['women'])) {
-            $footerDepts = [
-              'men'   => [['name'=>'Kurta Sets & Sherwanis','slug'=>'men-kurta-sets','department'=>'men'],['name'=>'Shirts','slug'=>'men-shirts','department'=>'men'],['name'=>'T-Shirts & Polos','slug'=>'men-tshirts','department'=>'men'],['name'=>'Trousers & Jeans','slug'=>'men-trousers-jeans','department'=>'men'],['name'=>'Jackets & Blazers','slug'=>'men-jackets-blazers','department'=>'men']],
-              'women' => [['name'=>'Suits & Salwars','slug'=>'suits-salwars','department'=>'women'],['name'=>'Kurtis & Tunics','slug'=>'kurtis-tunics','department'=>'women'],['name'=>'Sarees','slug'=>'sarees','department'=>'women'],['name'=>'Lehengas','slug'=>'lehengas','department'=>'women'],['name'=>'Western Wear & Tops','slug'=>'women-western-tops','department'=>'women']],
-              'kids'  => [['name'=>'Boys Ethnic Wear','slug'=>'boys-ethnic-wear','department'=>'kids'],['name'=>'Girls Ethnic & Frocks','slug'=>'girls-ethnic-frocks','department'=>'kids'],['name'=>'Boys Casuals','slug'=>'boys-casuals','department'=>'kids'],['name'=>'Girls Casuals','slug'=>'girls-casuals','department'=>'kids']],
-            ];
-          }
-
-          foreach ($deptLabels as $dept => $label):
-            if (empty($footerDepts[$dept])) continue;
-            if ($dept === 'kids') continue;
-          ?>
-          <h4 style="margin-top: <?= $dept === 'men' ? '0' : '18px' ?>;"><?= $label ?></h4>
-          <ul class="footer-links" style="margin-bottom: 0;">
-            <?php foreach ($footerDepts[$dept] as $cat): ?>
-              <li>
-                <a href="<?= BASE_URL ?>/shop.php?category=<?= urlencode($cat['department']) ?>&subcategory=<?= urlencode($cat['slug']) ?>">
-                  <?= htmlspecialchars($cat['name']) ?>
-                </a>
-              </li>
+        <!-- Men column -->
+        <div class="footer-col">
+          <h4>Men</h4>
+          <ul class="footer-links">
+            <?php foreach ($footerDepts['men'] as $cat): ?>
+              <li><a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=<?= urlencode($cat['slug']) ?>"><?= htmlspecialchars($cat['name']) ?></a></li>
             <?php endforeach; ?>
           </ul>
-          <?php endforeach; ?>
         </div>
 
+        <!-- Women column -->
+        <div class="footer-col">
+          <h4>Women</h4>
+          <ul class="footer-links">
+            <?php foreach ($footerDepts['women'] as $cat): ?>
+              <li><a href="<?= BASE_URL ?>/shop.php?category=women&subcategory=<?= urlencode($cat['slug']) ?>"><?= htmlspecialchars($cat['name']) ?></a></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+
+        <!-- Customer Care column -->
         <div class="footer-col">
           <h4>Customer Care</h4>
           <ul class="footer-links">
@@ -93,8 +105,6 @@
           </ul>
         </div>
 
-        <div class="footer-col">
-        </div>
       </div>
 
       <!-- Bottom Bar -->
