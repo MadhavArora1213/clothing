@@ -24,7 +24,7 @@ $items = [];
 $subtotal = 0;
 $shippingAmount = 0;
 if ($cart) {
-  $items = $mysqli->query("SELECT ci.*, p.name, p.price, p.image, p.shipping_charge, p.free_shipping, p.shipping_days FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = {$cart['id']}")->fetch_all(MYSQLI_ASSOC);
+  $items = $mysqli->query("SELECT ci.*, p.name, p.sku, p.price, p.image, p.shipping_charge, p.free_shipping, p.shipping_days FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = {$cart['id']}")->fetch_all(MYSQLI_ASSOC);
   foreach ($items as $item) {
     $subtotal += $item['unit_price'] * $item['quantity'];
     if (!$item['free_shipping']) {
@@ -59,20 +59,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   // 1. Create order in DB
   $orderNumber = generateOrderNumber();
-  $billingAddress = json_encode(['name' => $shippingName, 'phone' => $shippingPhone, 'address' => $shippingAddress, 'city' => $shippingCity, 'state' => $shippingState, 'postal_code' => $shippingPostal]);
+  $addressJson = json_encode(['name' => $shippingName, 'phone' => $shippingPhone, 'address' => $shippingAddress, 'city' => $shippingCity, 'state' => $shippingState, 'postal_code' => $shippingPostal]);
 
   $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  if (!$stmt) {
+    echo json_encode(['success' => false, 'message' => 'DB error: ' . $mysqli->error]);
+    exit;
+  }
   $paymentStatus = 'pending';
   $orderStatus = 'pending';
-  $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customer['email'], $shippingPhone, $billingAddress, $shippingAddress, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, 'online', $paymentStatus, $orderStatus);
-  $stmt->execute();
+  $paymentMethod = 'online';
+  $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customer['email'], $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+  if (!$stmt->execute()) {
+    echo json_encode(['success' => false, 'message' => 'Order creation failed: ' . $stmt->error]);
+    exit;
+  }
   $orderId = $mysqli->insert_id;
 
   foreach ($items as $item) {
     $totalPrice = $item['unit_price'] * $item['quantity'];
+    $productSku = $item['sku'] ?? null;
     $ist = $mysqli->prepare('INSERT INTO order_items (order_id, product_id, product_name, product_sku, size, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-    $ist->bind_param('iisssidd', $orderId, $item['product_id'], $item['name'], $item['sku'], $item['size'], $item['quantity'], $item['unit_price'], $totalPrice);
-    $ist->execute();
+    if ($ist) {
+      $ist->bind_param('iisssidd', $orderId, $item['product_id'], $item['name'], $productSku, $item['size'], $item['quantity'], $item['unit_price'], $totalPrice);
+      $ist->execute();
+    }
   }
 
   $mysqli->query("DELETE FROM cart_items WHERE cart_id = {$cart['id']}");
@@ -143,6 +154,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
   }
 
   $result = json_decode($response, true);
+
+  if (empty($response)) {
+    echo json_encode(['success' => false, 'message' => 'Empty response from payment gateway (HTTP ' . $httpCode . ')']);
+    exit;
+  }
+
+  if (json_last_error() !== JSON_ERROR_NONE) {
+    echo json_encode(['success' => false, 'message' => 'Invalid payment gateway response']);
+    exit;
+  }
 
   if (isset($result['cf_order_id'])) {
     $upd = $mysqli->prepare('UPDATE orders SET payment_session_id = ? WHERE id = ?');
@@ -246,7 +267,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="ck-section-header"><h3><span class="ck-section-num">2</span> Shipping</h3></div>
         <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= sanitize($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'])) ?>"></div>
         <div class="ck-field"><label>Phone <span>*</span></label><input type="tel" name="shipping_phone" required value="<?= sanitize($_POST['shipping_phone'] ?? $customer['phone'] ?? '') ?>"></div>
-        <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= sanitize($_POST['shipping_address'] ?? '') ?>"></textarea></div>
+        <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= sanitize($_POST['shipping_address'] ?? '') ?></textarea></div>
         <div class="ck-row">
           <div class="ck-field"><label>City <span>*</span></label><input type="text" name="shipping_city" required value="<?= sanitize($_POST['shipping_city'] ?? '') ?>"></div>
           <div class="ck-field"><label>State <span>*</span></label><input type="text" name="shipping_state" required value="<?= sanitize($_POST['shipping_state'] ?? '') ?>"></div>
