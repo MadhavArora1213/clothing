@@ -433,34 +433,106 @@ function handleImageUpload($fileArray, $subfolder = 'products') {
 }
 
 /**
- * Auto git add + commit + push after an image is uploaded.
- * Runs in background (non-blocking) so it doesn't slow down the upload response.
+ * Auto push uploaded image to GitHub via REST API.
+ * Works on ANY hosted server — no git, no shell_exec needed.
+ * Requires in .env:
+ *   GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+ *   GITHUB_REPO=MadhavArora1213/clothing
+ *   GITHUB_BRANCH=main
  *
  * @param string $filePath  Absolute path to the newly uploaded file
  */
 function gitPushUpload($filePath) {
-  $repoRoot = dirname(__DIR__); // /path/to/clothing
+  // ── Load GitHub credentials from .env ──
+  $token  = $_ENV['GITHUB_TOKEN']  ?? '';
+  $repo   = $_ENV['GITHUB_REPO']   ?? 'MadhavArora1213/clothing';
+  $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
 
-  // Relative path inside repo for git add
-  $relPath = 'uploads/' . ltrim(str_replace($repoRoot, '', $filePath), '/\\');
-  $relPath = str_replace('\\', '/', $relPath);
-
-  $commitMsg = 'chore: upload image ' . basename($filePath) . ' [' . date('Y-m-d H:i:s') . ']';
-
-  // Build shell command — run in background so PHP doesn't wait
-  // Uses & (Linux/Mac) for non-blocking background execution
-  $cmd = sprintf(
-    'cd %s && git add %s && git diff --cached --quiet || (git commit -m %s && git push origin main) >> /tmp/git_upload.log 2>&1 &',
-    escapeshellarg($repoRoot),
-    escapeshellarg($relPath),
-    escapeshellarg($commitMsg)
-  );
-
-  // Only run if git is available on server
-  if (function_exists('shell_exec') && !in_array('shell_exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
-    @shell_exec($cmd);
-  } elseif (function_exists('exec')) {
-    @exec($cmd);
+  if (empty($token)) {
+    error_log('gitPushUpload: GITHUB_TOKEN not set in .env — skipping push');
+    return;
   }
-  // Silently skip if shell functions are disabled (shared hosting restriction)
+
+  if (!file_exists($filePath)) {
+    error_log('gitPushUpload: file not found: ' . $filePath);
+    return;
+  }
+
+  // ── Build relative path for GitHub API (use forward slashes) ──
+  $repoRoot = str_replace('\\', '/', dirname(__DIR__));
+  $absPath  = str_replace('\\', '/', $filePath);
+  $relPath  = ltrim(str_replace($repoRoot, '', $absPath), '/');
+  // e.g. "uploads/products/img_abc123.jpg"
+
+  // ── Encode file content as base64 ──
+  $content = base64_encode(file_get_contents($filePath));
+
+  // ── GitHub API endpoint ──
+  $apiUrl = "https://api.github.com/repos/{$repo}/contents/{$relPath}";
+
+  // ── Check if file already exists (need its SHA for update) ──
+  $sha = null;
+  $ch = curl_init($apiUrl . '?ref=' . urlencode($branch));
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT        => 15,
+    CURLOPT_HTTPHEADER     => [
+      'Authorization: token ' . $token,
+      'Accept: application/vnd.github.v3+json',
+      'User-Agent: UrbanOutfitCollection-AutoPush/1.0',
+      'X-GitHub-Api-Version: 2022-11-28',
+    ],
+  ]);
+  $existing = curl_exec($ch);
+  curl_close($ch);
+  if ($existing) {
+    $existingData = json_decode($existing, true);
+    $sha = $existingData['sha'] ?? null;
+  }
+
+  // ── Build request body ──
+  $filename  = basename($filePath);
+  $timestamp = date('Y-m-d H:i:s');
+  $body = [
+    'message' => "upload: {$filename} [{$timestamp}]",
+    'content' => $content,
+    'branch'  => $branch,
+  ];
+  if ($sha) {
+    $body['sha'] = $sha; // required for updating existing file
+  }
+
+  // ── PUT request to GitHub API ──
+  $ch = curl_init($apiUrl);
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT        => 30,
+    CURLOPT_CUSTOMREQUEST  => 'PUT',
+    CURLOPT_POSTFIELDS     => json_encode($body),
+    CURLOPT_HTTPHEADER     => [
+      'Authorization: token ' . $token,
+      'Accept: application/vnd.github.v3+json',
+      'Content-Type: application/json',
+      'User-Agent: UrbanOutfitCollection-AutoPush/1.0',
+      'X-GitHub-Api-Version: 2022-11-28',
+    ],
+  ]);
+
+  $response = curl_exec($ch);
+  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $curlErr  = curl_error($ch);
+  curl_close($ch);
+
+  if ($curlErr) {
+    error_log("gitPushUpload: curl error for {$filename}: {$curlErr}");
+    return;
+  }
+
+  if (in_array($httpCode, [200, 201])) {
+    error_log("gitPushUpload: SUCCESS pushed {$relPath} to GitHub (HTTP {$httpCode})");
+  } else {
+    $result = json_decode($response, true);
+    $msg    = $result['message'] ?? $response;
+    error_log("gitPushUpload: FAILED {$filename} — HTTP {$httpCode}: {$msg}");
+  }
 }
