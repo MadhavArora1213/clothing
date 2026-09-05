@@ -1,8 +1,11 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
-$pageTitle = 'Privacy Policy — ATELIER';
-$pageDescription = 'Learn how we collect, use, and protect your personal information.';
+$pageTitle       = 'Privacy Policy — Urban Outfit Collection';
+$pageDescription = 'Your privacy matters to us. Read how Urban Outfit Collection collects, uses and protects your personal information when you shop with us.';
+$pageKeywords    = 'urban outfit privacy policy, data protection fashion india, customer privacy clothing brand';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/privacy.php';
+$pageRobots      = 'noindex, follow';
 include dirname(__DIR__) . '/includes/header.php';
 
 $siteEmail = 'hello@atelier.com';

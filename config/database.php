@@ -420,8 +420,47 @@ function handleImageUpload($fileArray, $subfolder = 'products') {
 
   $targetPath = $targetDir . '/' . $filename;
   if (move_uploaded_file($fileArray['tmp_name'], $targetPath)) {
-    return BASE_URL . '/uploads/' . trim($subfolder, '/') . '/' . $filename;
+    $uploadedUrl = BASE_URL . '/uploads/' . trim($subfolder, '/') . '/' . $filename;
+
+    // ── Auto git push to GitHub after every upload ──
+    gitPushUpload($targetPath);
+
+    return $uploadedUrl;
+  }
   }
 
   return null;
+}
+
+/**
+ * Auto git add + commit + push after an image is uploaded.
+ * Runs in background (non-blocking) so it doesn't slow down the upload response.
+ *
+ * @param string $filePath  Absolute path to the newly uploaded file
+ */
+function gitPushUpload($filePath) {
+  $repoRoot = dirname(__DIR__); // /path/to/clothing
+
+  // Relative path inside repo for git add
+  $relPath = 'uploads/' . ltrim(str_replace($repoRoot, '', $filePath), '/\\');
+  $relPath = str_replace('\\', '/', $relPath);
+
+  $commitMsg = 'chore: upload image ' . basename($filePath) . ' [' . date('Y-m-d H:i:s') . ']';
+
+  // Build shell command — run in background so PHP doesn't wait
+  // Uses & (Linux/Mac) for non-blocking background execution
+  $cmd = sprintf(
+    'cd %s && git add %s && git diff --cached --quiet || (git commit -m %s && git push origin main) >> /tmp/git_upload.log 2>&1 &',
+    escapeshellarg($repoRoot),
+    escapeshellarg($relPath),
+    escapeshellarg($commitMsg)
+  );
+
+  // Only run if git is available on server
+  if (function_exists('shell_exec') && !in_array('shell_exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
+    @shell_exec($cmd);
+  } elseif (function_exists('exec')) {
+    @exec($cmd);
+  }
+  // Silently skip if shell functions are disabled (shared hosting restriction)
 }

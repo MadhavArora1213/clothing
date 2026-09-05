@@ -60,8 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$pageTitle = 'Register — ATELIER';
-$pageDescription = 'Create your account.';
+$pageTitle       = 'Create Account — Urban Outfit Collection';
+$pageDescription = 'Create your free account to track orders, save your wishlist and enjoy faster checkout.';
+$pageRobots      = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

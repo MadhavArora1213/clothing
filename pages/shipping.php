@@ -1,8 +1,10 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
-$pageTitle = 'Shipping Policy — ATELIER';
-$pageDescription = 'Learn about our shipping policies, delivery timelines, and shipping charges.';
+$pageTitle       = 'Shipping Policy — Urban Outfit Collection | Delivery & Charges';
+$pageDescription = 'Free express shipping on orders above ₹999. Standard delivery 3-7 days across India. Track your order anytime. Read our full shipping policy.';
+$pageKeywords    = 'urban outfit shipping policy, free shipping india, delivery charges clothing, fast shipping fashion india';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/shipping.php';
 include dirname(__DIR__) . '/includes/header.php';
 
 $freeThreshold = formatPrice(getSetting('shipping_free_min', 1999));

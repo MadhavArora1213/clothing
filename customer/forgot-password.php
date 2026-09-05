@@ -33,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$pageTitle = 'Forgot Password';
-$pageDescription = 'Reset your account password.';
+$pageTitle    = 'Reset Password — Urban Outfit Collection';
+$pageDescription = 'Reset your Urban Outfit Collection account password securely.';
+$pageRobots   = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

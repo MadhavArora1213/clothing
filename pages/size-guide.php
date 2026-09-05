@@ -1,7 +1,9 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
-$pageTitle = 'Size Guide';
-$pageDescription = 'Find your perfect fit with our comprehensive size guide.';
+$pageTitle       = 'Size Guide — Find Your Perfect Fit | Urban Outfit Collection';
+$pageDescription = 'Find your perfect size with our comprehensive size guide for men, women & kids. Chest, waist, hip measurements for tees, kurtas, co-ords & more.';
+$pageKeywords    = 'size guide fashion india, clothing size chart, how to measure size kurta tshirt, urban outfit sizes';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/size-guide.php';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

@@ -53,8 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$pageTitle = 'Login — ATELIER';
-$pageDescription = 'Sign in to your account.';
+$pageTitle       = 'Sign In — Urban Outfit Collection';
+$pageDescription = 'Sign in to your Urban Outfit Collection account to track orders, manage wishlist and checkout faster.';
+$pageRobots      = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

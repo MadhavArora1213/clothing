@@ -1,15 +1,62 @@
 <?php
 require_once __DIR__ . '/config/database.php';
-$pageTitle = 'Shop Collection — urban outfit';
-$pageDescription = 'Browse our complete collection of oversized drop tees, resort co-ords, and artisanal ethnic fusion kurtas.';
 $currentPage = 'shop';
 
-$category = $_GET['category'] ?? null;
+$category    = $_GET['category']    ?? null;
 $subcategory = $_GET['subcategory'] ?? null;
-$sale = isset($_GET['sale']);
+$sale        = isset($_GET['sale']);
 $newArrivals = isset($_GET['new']);
-$sort = $_GET['sort'] ?? 'newest';
-$search = $_GET['search'] ?? null;
+$sort        = $_GET['sort']   ?? 'newest';
+$search      = $_GET['search'] ?? null;
+
+// ── Dynamic SEO based on filter context ──
+$siteUrl = 'https://urbanoutfitshop.com';
+
+$categoryMeta = [
+  'men'          => ['Men\'s Fashion Online India',         'Shop men\'s oversized tees, streetwear shirts, ethnic kurtas & co-ord sets. Premium quality, affordable prices. Free shipping above ₹999.', 'mens fashion india, mens oversized tshirt, mens kurta online, streetwear men india'],
+  'women'        => ['Women\'s Fashion Online India',        'Shop women\'s dresses, co-ord sets, Chikankari kurtis, linen collections & more. Handcrafted in India. Free shipping above ₹999.', 'womens fashion india, womens kurta online, co-ord sets women, chikankari kurti'],
+  'kids'         => ['Kids\' Fashion Online India',          'Adorable ethnic wear, matching co-ords & casual styles for kids. Soft fabrics, safe dyes. Shop kids fashion online.', 'kids fashion india, kids ethnic wear, kids co-ord set, childrens clothing online india'],
+  'new-arrivals' => ['New Arrivals — Latest Fashion Drops',  'Fresh new drops every day. Be the first to shop our latest oversized tees, ethnic fusion kurtas & resort co-ords.', 'new arrivals fashion india, latest fashion drops, new clothing collection'],
+  'bestsellers'  => ['Bestsellers — Most Loved Styles',      'Shop our most popular and top-rated styles. Customer favourites in streetwear, ethnic fusion & resort wear.', 'bestseller clothes india, popular fashion online, top rated clothing'],
+  'ethnic-fusion'=> ['Ethnic Fusion Collection',             'Handcrafted Indo-Western fusion — Chikankari kurtas, block-print sets, linen co-ords. Heritage meets modern design.', 'ethnic fusion fashion, indo western clothes, chikankari kurta online, block print kurta'],
+  'sale'         => ['Sale — Up to 50% Off on Fashion',      'Huge discounts on premium streetwear, ethnic fusion & resort wear. Up to 50% off. Limited time deals.', 'fashion sale india, clothes on sale, discount kurta, oversized tee sale'],
+  'oversized'    => ['Oversized Drop Tees',                  'Premium 260 GSM heavyweight oversized drop tees. Boxy fits, acid washes & graphic prints. Made in India.', 'oversized tshirt india, drop shoulder tee, heavyweight tshirt, boxy tshirt online'],
+  'co-ords'      => ['Co-Ord Sets — Matching Sets Online',   'Shop matching resort co-ords, palazzo sets & linen sets. Effortlessly put-together looks.', 'co-ord sets online india, matching sets women, resort co-ord, palazzo co-ord'],
+  'streetwear'   => ['Streetwear India — Urban Fashion',     'India\'s best streetwear collection. Cargo sets, graphic tees, relaxed fits & more.', 'streetwear india, urban fashion, cargo pants india, graphic tee india'],
+];
+
+if ($search) {
+  $pageTitle       = 'Search results for "' . htmlspecialchars($search) . '" — Urban Outfit Collection';
+  $pageDescription = 'Find "' . htmlspecialchars($search) . '" in our collection of premium streetwear, ethnic fusion & resort wear. Shop online with free shipping above ₹999.';
+  $pageKeywords    = htmlspecialchars($search) . ', urban outfit, buy clothes india, fashion online';
+  $pageRobots      = 'noindex, follow';
+  $pageCanonical   = $siteUrl . '/shop.php?search=' . urlencode($search);
+} elseif ($sale) {
+  [$titleSuffix, $desc, $kw] = $categoryMeta['sale'];
+  $pageTitle       = $titleSuffix . ' — Urban Outfit Collection';
+  $pageDescription = $desc;
+  $pageKeywords    = $kw;
+  $pageCanonical   = $siteUrl . '/shop.php?sale=1';
+} elseif ($category && isset($categoryMeta[$category])) {
+  [$titleSuffix, $desc, $kw] = $categoryMeta[$category];
+  $pageTitle       = $titleSuffix . ' — Urban Outfit Collection';
+  $pageDescription = $desc;
+  $pageKeywords    = $kw;
+  $pageCanonical   = $siteUrl . '/shop.php?category=' . urlencode($category) . ($subcategory ? '&subcategory=' . urlencode($subcategory) : '');
+} else {
+  $pageTitle       = 'Shop All Collections — Urban Outfit | Streetwear, Ethnic Fusion & Resort Wear India';
+  $pageDescription = 'Browse our complete collection — oversized drop tees, Chikankari ethnic fusion kurtas, resort co-ords & streetwear. New arrivals daily. Free shipping above ₹999.';
+  $pageKeywords    = 'shop clothes online india, urban outfit collection, streetwear ethnic fusion resort wear india, buy fashion online';
+  $pageCanonical   = $siteUrl . '/shop.php';
+}
+
+$pageSchema = '{
+  "@type": "CollectionPage",
+  "name": ' . json_encode($pageTitle) . ',
+  "description": ' . json_encode($pageDescription) . ',
+  "url": ' . json_encode($pageCanonical) . ',
+  "isPartOf": { "@id": "' . $siteUrl . '/#website" }
+}';
 
 $products = [];
 if ($mysqli) {

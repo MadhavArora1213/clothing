@@ -5,7 +5,8 @@ if (!isset($_SESSION['customer_id'])) {
   redirect('/customer/login.php');
 }
 
-$pageTitle = 'Order Tracking — ATELIER';
+$pageTitle    = 'Order Tracking — Urban Outfit Collection';
+$pageRobots   = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 
 $customerId = $_SESSION['customer_id'];

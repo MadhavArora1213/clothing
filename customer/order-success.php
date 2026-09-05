@@ -1,7 +1,8 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
-$pageTitle = 'Order Confirmed — ATELIER';
+$pageTitle    = 'Order Confirmed — Urban Outfit Collection';
+$pageRobots   = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 
 $orderId = $_SESSION['last_order_id'] ?? null;

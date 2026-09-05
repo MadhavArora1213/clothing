@@ -47,7 +47,8 @@ $addressCount = count($addresses);
 $wishlistResult = @$mysqli->query("SELECT COUNT(*) as cnt FROM wishlists WHERE customer_id = $customerId");
 $wishlistCount = $wishlistResult ? ($wishlistResult->fetch_assoc()['cnt'] ?? 0) : 0;
 
-$pageTitle = 'My Account — ATELIER';
+$pageTitle    = 'My Account — Urban Outfit Collection';
+$pageRobots   = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

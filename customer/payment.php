@@ -28,7 +28,8 @@ if ($order['payment_status'] === 'completed' || $order['payment_status'] === 'pa
   redirect('/customer/order-success.php');
 }
 
-$pageTitle = 'Payment — urban outfit';
+$pageTitle    = 'Secure Payment — Urban Outfit Collection';
+$pageRobots   = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

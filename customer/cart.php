@@ -1,8 +1,8 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
-$pageTitle = 'Shopping Cart — ATELIER';
-$pageDescription = 'Review your cart items.';
+$pageTitle    = 'Shopping Cart — Urban Outfit Collection';
+$pageRobots   = 'noindex, nofollow';
 
 $customerId = $_SESSION['customer_id'] ?? null;
 $sessionId = session_id();

@@ -8,8 +8,132 @@ if (!defined('BASE_URL')) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= $pageTitle ?? 'urban outfit — Modern Luxury & Streetwear Fashion' ?></title>
-  <meta name="description" content="<?= $pageDescription ?? 'Discover premium oversized drops, handcrafted ethnic fusion kurtas, resort co-ords, and modern streetwear.' ?>">
+
+  <?php
+  // ── SEO Variables (pages can override before including header) ──
+  $siteUrl     = 'https://urbanoutfitshop.com';
+  $siteName    = 'Urban Outfit Collection';
+  $siteHandle  = '@urbanoutfitshop';
+  $defaultImg  = $siteUrl . '/src/og-default.jpg';
+
+  $seoTitle    = $pageTitle       ?? 'Urban Outfit Collection — Modern Luxury & Streetwear Fashion India';
+  $seoDesc     = $pageDescription ?? 'Discover premium oversized drop tees, handcrafted Chikankari ethnic fusion kurtas, resort co-ords & streetwear. Free shipping above ₹999. Made in India.';
+  $seoImage    = $pageOgImage     ?? $defaultImg;
+  $seoType     = $pageOgType      ?? 'website';
+  $seoKeywords = $pageKeywords    ?? 'urban outfit, streetwear india, ethnic fusion kurta, oversized tee, resort co-ord, chikankari, indo western, fashion online india';
+
+  // Canonical URL: strip query params for non-shop pages, keep them for shop/product
+  $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+  $host       = $_SERVER['HTTP_HOST'] ?? 'urbanoutfitshop.com';
+  $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+  // Use HTTPS on production
+  if ($host === 'urbanoutfitshop.com') $protocol = 'https';
+  $canonicalUrl = $pageCanonical ?? ($protocol . '://' . $host . strtok($requestUri, '?'));
+  // For shop pages, include the query string in canonical
+  if (isset($pageCanonical)) $canonicalUrl = $pageCanonical;
+
+  // Clean values for HTML output
+  $seoTitleClean = htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8');
+  $seoDescClean  = htmlspecialchars($seoDesc,  ENT_QUOTES, 'UTF-8');
+  $seoImageClean = htmlspecialchars($seoImage, ENT_QUOTES, 'UTF-8');
+  $canonicalClean= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8');
+  ?>
+
+  <!-- ═══ PRIMARY META ═══ -->
+  <title><?= $seoTitleClean ?></title>
+  <meta name="description" content="<?= $seoDescClean ?>">
+  <meta name="keywords"    content="<?= htmlspecialchars($seoKeywords, ENT_QUOTES, 'UTF-8') ?>">
+  <meta name="author"      content="Urban Outfit Collection">
+  <meta name="robots"      content="<?= $pageRobots ?? 'index, follow' ?>">
+  <link rel="canonical"    href="<?= $canonicalClean ?>">
+
+  <!-- ═══ OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ═══ -->
+  <meta property="og:type"        content="<?= htmlspecialchars($seoType, ENT_QUOTES, 'UTF-8') ?>">
+  <meta property="og:title"       content="<?= $seoTitleClean ?>">
+  <meta property="og:description" content="<?= $seoDescClean ?>">
+  <meta property="og:image"       content="<?= $seoImageClean ?>">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"   content="<?= $seoTitleClean ?>">
+  <meta property="og:url"         content="<?= $canonicalClean ?>">
+  <meta property="og:site_name"   content="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>">
+  <meta property="og:locale"      content="en_IN">
+
+  <!-- ═══ TWITTER / X CARD ═══ -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        content="<?= htmlspecialchars($siteHandle, ENT_QUOTES, 'UTF-8') ?>">
+  <meta name="twitter:creator"     content="<?= htmlspecialchars($siteHandle, ENT_QUOTES, 'UTF-8') ?>">
+  <meta name="twitter:title"       content="<?= $seoTitleClean ?>">
+  <meta name="twitter:description" content="<?= $seoDescClean ?>">
+  <meta name="twitter:image"       content="<?= $seoImageClean ?>">
+
+  <!-- ═══ MOBILE / PWA ═══ -->
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Urban Outfit">
+
+  <!-- ═══ FAVICONS ═══ -->
+  <link rel="icon"             type="image/png" href="<?= BASE_URL ?>/src/Logo.png">
+  <link rel="apple-touch-icon" href="<?= BASE_URL ?>/src/Logo.png">
+
+  <!-- ═══ PERFORMANCE ═══ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://images.unsplash.com">
+
+  <!-- ═══ SCHEMA: Organization + WebSite (every page) ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "<?= $siteUrl ?>/#organization",
+        "name": "<?= $siteName ?>",
+        "url": "<?= $siteUrl ?>",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "<?= $siteUrl ?>/src/Logo.png",
+          "width": 200,
+          "height": 60
+        },
+        "sameAs": [
+          "https://instagram.com/urbanoutfitshop",
+          "https://twitter.com/urbanoutfitshop"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "availableLanguage": ["English", "Hindi"]
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "IN"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "<?= $siteUrl ?>/#website",
+        "url": "<?= $siteUrl ?>",
+        "name": "<?= $siteName ?>",
+        "publisher": { "@id": "<?= $siteUrl ?>/#organization" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "<?= $siteUrl ?>/shop.php?search={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+      <?php if (isset($pageSchema)): ?>,
+      <?= $pageSchema ?>
+      <?php endif; ?>
+    ]
+  }
+  </script>
 
   <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css?v=<?= filemtime(__DIR__ . '/../css/style.css') ?>">
 </head>

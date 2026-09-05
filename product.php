@@ -144,11 +144,57 @@ if (!empty($product['id']) && $mysqli) {
   }
 }
 
-$pageTitle = $product['name'] . ' — urban outfit';
-$pageDescription = $product['description'] ?? '';
-include __DIR__ . '/includes/header.php';
+// ── SEO Meta ──
+$siteUrl      = 'https://urbanoutfitshop.com';
+$productName  = $product['name'] ?? 'Fashion';
+$productDesc  = trim(strip_tags($product['description'] ?? ''));
+$productDesc  = mb_substr($productDesc, 0, 155);
+$productPrice = number_format((float)($product['price'] ?? 0), 2);
+$productImg   = !empty($imageUrls[0]) ? $imageUrls[0] : $siteUrl . '/src/og-default.jpg';
+$productSlug  = $product['slug'] ?? $slug;
+$productBrand = $product['brand'] ?? 'Urban Outfit Collection';
+$productSku   = $product['sku']   ?? '';
+$productCat   = $product['category_name'] ?? 'Fashion';
+$inStock      = !empty($availableSizes) ? 'InStock' : 'OutOfStock';
 
-$isWishlisted = false;
+$pageTitle       = $productName . ' | Buy Online India — Urban Outfit Collection';
+$pageDescription = $productDesc ?: ('Buy ' . $productName . ' online in India. Premium quality, fast shipping. Shop at Urban Outfit Collection.');
+$pageKeywords    = strtolower($productName) . ', buy online india, ' . strtolower($productCat) . ', urban outfit, fashion india';
+$pageOgType      = 'product';
+$pageOgImage     = $productImg;
+$pageCanonical   = $siteUrl . '/product.php?slug=' . urlencode($productSlug);
+
+// Offer & rating schema fragments
+$offerExtra = '';
+if (!empty($product['original_price']) && $product['original_price'] > $product['price']) {
+  $offerExtra = '"priceValidUntil": "' . date('Y-12-31') . '",';
+}
+$ratingSchema = '';
+if ($totalReviews > 0) {
+  $ratingSchema = ',"aggregateRating":{"@type":"AggregateRating","ratingValue":"' . $avgRating . '","reviewCount":"' . $totalReviews . '","bestRating":"5","worstRating":"1"}';
+}
+
+$pageSchema = '{
+  "@type": "Product",
+  "name": ' . json_encode($productName) . ',
+  "description": ' . json_encode($productDesc) . ',
+  "image": ' . json_encode($imageUrls) . ',
+  "sku": ' . json_encode($productSku) . ',
+  "brand": {"@type":"Brand","name":' . json_encode($productBrand) . '},
+  "category": ' . json_encode($productCat) . ',
+  "url": ' . json_encode($pageCanonical) . ',
+  "offers": {
+    "@type": "Offer",
+    "url": ' . json_encode($pageCanonical) . ',
+    "priceCurrency": "INR",
+    "price": "' . $productPrice . '",
+    ' . $offerExtra . '
+    "availability": "https://schema.org/' . $inStock . '",
+    "seller": {"@type":"Organization","name":"Urban Outfit Collection"}
+  }' . $ratingSchema . '
+}';
+
+include __DIR__ . '/includes/header.php';
 if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
   $wlCheck = $mysqli->prepare('SELECT id FROM wishlists WHERE customer_id = ? AND product_id = ?');
   if ($wlCheck) {

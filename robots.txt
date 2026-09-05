@@ -1,0 +1,46 @@
+User-agent: *
+Allow: /
+
+# Block customer account & transaction pages
+Disallow: /customer/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /config/
+Disallow: /database/
+Disallow: /data/
+
+# Block utility/internal files
+Disallow: /sitemap.xml.php
+Disallow: /*.env$
+Disallow: /*.sql$
+Disallow: /*.json$
+
+# Allow key public pages explicitly
+Allow: /index.php
+Allow: /shop.php
+Allow: /product.php
+Allow: /pages/
+Allow: /css/
+Allow: /js/
+Allow: /src/
+Allow: /uploads/
+
+# Crawl-delay for non-Google bots
+User-agent: Bingbot
+Crawl-delay: 5
+
+User-agent: Yandex
+Crawl-delay: 10
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Sitemap
+Sitemap: https://urbanoutfitshop.com/sitemap.xml

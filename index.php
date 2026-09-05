@@ -1,8 +1,20 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 
-$pageTitle = 'urban outfit — Modern Luxury Streetwear & Ethnic Fusion';
-$pageDescription = 'Discover premium oversized drops, handcrafted ethnic fusion kurtas, resort co-ords, and modern streetwear.';
+$pageTitle       = 'Urban Outfit Collection — Streetwear, Ethnic Fusion & Modern Fashion India';
+$pageDescription = 'Shop premium oversized drop tees, Chikankari ethnic fusion kurtas, resort co-ords & streetwear. Handcrafted in India. Free shipping above ₹999. New arrivals daily.';
+$pageKeywords    = 'urban outfit collection, oversized tshirt india, ethnic fusion kurta, chikankari kurta online, resort co-ord set, streetwear india, indo western fashion, buy clothes online india, handcrafted fashion india';
+$pageOgImage     = 'https://urbanoutfitshop.com/src/og-default.jpg';
+$pageCanonical   = 'https://urbanoutfitshop.com/';
+$pageSchema      = '{
+  "@type": "WebPage",
+  "@id": "https://urbanoutfitshop.com/#webpage",
+  "url": "https://urbanoutfitshop.com/",
+  "name": "Urban Outfit Collection — Streetwear, Ethnic Fusion & Modern Fashion India",
+  "isPartOf": { "@id": "https://urbanoutfitshop.com/#website" },
+  "about": { "@id": "https://urbanoutfitshop.com/#organization" },
+  "description": "Shop premium oversized drop tees, Chikankari ethnic fusion kurtas, resort co-ords & streetwear. Handcrafted in India."
+}';
 $currentPage = 'home';
 
 // Fetch Featured & Trending products

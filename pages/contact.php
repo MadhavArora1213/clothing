@@ -1,7 +1,9 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
-$pageTitle = 'Contact Us — urban outfit';
-$pageDescription = 'Get in touch with urban outfit. We would love to hear from you.';
+$pageTitle       = 'Contact Us — Urban Outfit Collection | Customer Support';
+$pageDescription = 'Reach out to Urban Outfit Collection for order support, returns, product queries or collaborations. We respond within 24 hours. Email, phone & WhatsApp support available.';
+$pageKeywords    = 'contact urban outfit, customer support fashion india, clothing brand contact, order help india';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/contact.php';
 include dirname(__DIR__) . '/includes/header.php';
 
 $error = '';

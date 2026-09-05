@@ -51,7 +51,8 @@ foreach ($items as &$item) {
 }
 unset($item);
 
-$pageTitle = 'My Wishlist — ATELIER';
+$pageTitle   = 'My Wishlist — Urban Outfit Collection';
+$pageRobots  = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

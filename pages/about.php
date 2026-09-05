@@ -1,7 +1,9 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
-$pageTitle = 'About Us — urban outfit';
-$pageDescription = 'Learn about urban outfit — our story, craft, and vision for modern luxury fashion.';
+$pageTitle       = 'About Urban Outfit Collection — Our Story, Craft & Vision';
+$pageDescription = 'Learn about Urban Outfit Collection — a homegrown Indian fashion brand crafting premium streetwear, ethnic fusion kurtas & resort co-ords. Made with love in India.';
+$pageKeywords    = 'about urban outfit, indian fashion brand, made in india clothing, streetwear brand india, ethnic fusion brand';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/about.php';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

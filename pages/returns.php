@@ -1,8 +1,10 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
 
-$pageTitle = 'Returns & Refunds — ATELIER';
-$pageDescription = 'Learn about our return, exchange, and refund policies.';
+$pageTitle       = 'Returns & Exchange Policy — Urban Outfit Collection';
+$pageDescription = '7-day easy exchange on all orders. Hassle-free returns, fast refunds. Read our complete returns & exchange policy at Urban Outfit Collection.';
+$pageKeywords    = 'urban outfit returns policy, exchange clothing india, refund policy fashion, easy returns online shopping india';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/returns.php';
 include dirname(__DIR__) . '/includes/header.php';
 
 $returnDays = (int)getSetting('return_days', 30);

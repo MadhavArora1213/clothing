@@ -1,6 +1,10 @@
 <?php
-$pageTitle = 'Terms & Conditions — ATELIER';
-$pageDescription = 'Read our terms and conditions for using our website and services.';
+require_once dirname(__DIR__) . '/config/database.php';
+$pageTitle       = 'Terms & Conditions — Urban Outfit Collection';
+$pageDescription = 'Read the terms and conditions for shopping at Urban Outfit Collection. Understand your rights, our policies and how we operate.';
+$pageKeywords    = 'urban outfit terms and conditions, shopping terms india, clothing brand terms';
+$pageCanonical   = 'https://urbanoutfitshop.com/pages/terms.php';
+$pageRobots      = 'noindex, follow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

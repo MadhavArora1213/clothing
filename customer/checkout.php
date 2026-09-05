@@ -178,7 +178,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 }
 
 // ─── HTML PAGE ───
-$pageTitle = 'Checkout — urban outfit';
+$pageTitle    = 'Checkout — Urban Outfit Collection';
+$pageRobots   = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 

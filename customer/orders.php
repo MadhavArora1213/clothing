@@ -66,7 +66,8 @@ if ($orderResult) {
   }
 }
 
-$pageTitle = 'My Orders — urban outfit';
+$pageTitle  = 'My Orders — Urban Outfit Collection';
+$pageRobots = 'noindex, nofollow';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 
