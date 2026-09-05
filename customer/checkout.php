@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   if (isset($result['cf_order_id'])) {
     $upd = $mysqli->prepare('UPDATE orders SET payment_session_id = ? WHERE id = ?');
-    if ($upd) { $upd->bind_param('si', $result['cf_order_id'], $orderId); $upd->execute(); }
+    if ($upd) { $upd->bind_param('si', $cfOrderId, $orderId); $upd->execute(); }
 
     echo json_encode(['success' => true, 'payment_session_id' => $result['payment_session_id'] ?? '', 'order_id' => $orderId]);
   } else {

@@ -38,8 +38,8 @@ if ($orderId) {
       // CF order ID was set as: $orderNumber . '_' . time() in checkout.php
       // We stored cf_order_id in payment_session_id column
       $storedCfId = $order['payment_session_id'] ?? '';
-
-      if ($storedCfId) {
+      // Only query if it looks like our order ID (ORD-... format), not CF internal ID
+      if ($storedCfId && preg_match('/^ORD-/i', $storedCfId)) {
         $ch = curl_init('https://api.cashfree.com/pg/orders/' . urlencode($storedCfId));
         curl_setopt_array($ch, [
           CURLOPT_RETURNTRANSFER => true,

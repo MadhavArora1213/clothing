@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
-date_default_timezone_set('Asia/Kolkata');
 
 if (!isset($_SESSION['customer_id'])) {
   redirect('/customer/login.php');
@@ -29,7 +28,12 @@ if ($pendingOrders && $pendingOrders->num_rows > 0) {
   if ($cfAppId && $cfSecret) {
     while ($po = $pendingOrders->fetch_assoc()) {
       $cfId = $po['payment_session_id'] ?? '';
-      if (!$cfId) continue;
+      // If stored ID looks like CF internal numeric ID (not our order ID), try order_number pattern
+      if (empty($cfId) || !preg_match('/^ORD-/i', $cfId)) {
+        // Build our cf_order_id pattern: we sent ORD-XXXXXXXX_timestamp to Cashfree
+        // Try fetching using order_number directly won't work — skip if no valid cfId
+        if (empty($cfId)) continue;
+      }
       $ch = curl_init('https://api.cashfree.com/pg/orders/' . urlencode($cfId));
       curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8,
@@ -52,7 +56,7 @@ if ($pendingOrders && $pendingOrders->num_rows > 0) {
   }
 }
 
-$orderResult = $mysqli->query("SELECT * FROM orders WHERE customer_id = $customerId ORDER BY created_at DESC");
+$orderResult = $mysqli->query("SELECT *, CONVERT_TZ(created_at, @@session.time_zone, '+05:30') as created_ist FROM orders WHERE customer_id = $customerId ORDER BY created_at DESC");
 if ($orderResult) {
   while ($row = $orderResult->fetch_assoc()) {
     // Fetch items for each order
@@ -446,7 +450,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <div class="ord-num"><?= sanitize($order['order_number']) ?></div>
               <div class="ord-date">
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <?= date('d M Y, g:i A', strtotime($order['created_at'])) ?>
+                <?= date('d M Y, g:i A', strtotime($order['created_ist'] ?: $order['created_at'])) ?>
               </div>
             </div>
             <div class="ord-card-head-right">

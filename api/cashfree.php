@@ -151,7 +151,7 @@ if ($action === 'create_order') {
   if (isset($result['cf_order_id'])) {
     $upd = $mysqli->prepare('UPDATE orders SET payment_session_id = ? WHERE id = ?');
     if ($upd) {
-      $upd->bind_param('si', $result['cf_order_id'], $orderId);
+      $upd->bind_param('si', $cfOrderId, $orderId);
       $upd->execute();
     }
     $mysqli->close();
