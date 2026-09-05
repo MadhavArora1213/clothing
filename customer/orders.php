@@ -6,221 +6,516 @@ if (!isset($_SESSION['customer_id'])) {
 }
 
 $customerId = $_SESSION['customer_id'];
+$orders = [];
 $orderResult = $mysqli->query("SELECT * FROM orders WHERE customer_id = $customerId ORDER BY created_at DESC");
-$orders = $orderResult ? $orderResult->fetch_all(MYSQLI_ASSOC) : [];
+if ($orderResult) {
+  while ($row = $orderResult->fetch_assoc()) {
+    // Fetch items for each order
+    $itemsResult = $mysqli->query("SELECT oi.product_name, oi.size, oi.quantity, oi.unit_price, oi.total_price, p.image FROM order_items oi LEFT JOIN products p ON oi.product_id = p.id WHERE oi.order_id = {$row['id']}");
+    $row['items'] = $itemsResult ? $itemsResult->fetch_all(MYSQLI_ASSOC) : [];
+    $orders[] = $row;
+  }
+}
 
-$pageTitle = 'My Orders — ATELIER';
+$pageTitle = 'My Orders — urban outfit';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <style>
-  body { background: #F5F0E8; }
-  .orders-wrap {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: var(--space-8) var(--space-4) var(--space-16);
-  }
-  .orders-breadcrumb {
-    font-size: 13px;
-    color: #8B7355;
-    margin-bottom: var(--space-5);
-  }
-  .orders-breadcrumb a { color: #8B7355; text-decoration: none; }
-  .orders-breadcrumb a:hover { color: #D4AF37; }
-  .orders-breadcrumb .sep { margin: 0 8px; opacity: 0.5; }
-  .orders-breadcrumb .current { color: #D4AF37; font-weight: 600; }
-  .orders-title {
-    font-family: var(--font-display);
-    font-size: clamp(28px, 3vw, 36px);
-    font-weight: 400;
-    font-style: italic;
-    color: #1a1a1a;
-    margin-bottom: var(--space-8);
-  }
-  .order-card {
-    background: var(--color-surface);
-    border: 1px solid #E8E2D8;
-    border-radius: 14px;
-    margin-bottom: var(--space-4);
-    overflow: hidden;
-    transition: var(--transition);
-  }
-  .order-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
-  .order-card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-5) var(--space-6);
-    border-bottom: 1px solid #E8E2D8;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-  .order-num {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-  .order-date {
-    font-size: 13px;
-    color: #8B7355;
-  }
-  .order-card-body {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-5) var(--space-6);
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-  .order-status-badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 5px 14px;
-    border-radius: 999px;
-  }
-  .status-pending { background: #FEF3C7; color: #92400E; }
-  .status-confirmed { background: #DBEAFE; color: #1E40AF; }
-  .status-processing { background: #E0E7FF; color: #3730A3; }
-  .status-shipped { background: #D1FAE5; color: #065F46; }
-  .status-delivered { background: #DCFCE7; color: #166534; }
-  .status-cancelled { background: #FEE2E2; color: #991B1B; }
-  .order-amount {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 700;
-    color: #1a1a1a;
-  }
-  .order-items-preview {
-    display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-  }
-  .order-item-thumb {
-    width: 56px;
-    height: 70px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #EDE8E0;
-  }
-  .order-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+/* ── Page base ── */
+.ord-page {
+  min-height: calc(100vh - var(--header-height, 80px));
+  background: var(--color-bg);
+  padding-bottom: 80px;
+}
 
-  /* Empty */
-  .orders-empty {
-    text-align: center;
-    padding: 80px 0;
-  }
-  .orders-empty-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(212,175,55,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--space-5);
-  }
-  .orders-empty-icon svg { width: 36px; height: 36px; stroke: #D4AF37; }
-  .orders-empty h3 {
-    font-family: var(--font-display);
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: var(--space-2);
-    color: #1a1a1a;
-  }
-  .orders-empty p { color: #8B7355; margin-bottom: var(--space-6); font-size: 14px; }
-  .orders-empty .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 32px;
-    background: #1a1a1a;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: var(--transition);
-    font-family: var(--font-body);
-  }
-  .orders-empty .btn:hover { background: #333; }
+/* ── Hero banner ── */
+.ord-hero {
+  position: relative;
+  height: 220px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.ord-hero-bg {
+  position: absolute; inset: 0;
+  background: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&h=300&fit=crop&crop=center') center/cover no-repeat;
+}
+.ord-hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, rgba(10,10,10,0.78) 0%, rgba(10,10,10,0.3) 60%, transparent 100%);
+}
+.ord-hero-content {
+  position: relative; z-index: 2;
+  padding: 32px 60px;
+  width: 100%;
+}
+.ord-hero-eyebrow {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--color-accent);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.ord-hero-eyebrow::before {
+  content: ''; width: 24px; height: 2px; background: var(--color-accent);
+}
+.ord-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700; color: #fff; line-height: 1.15;
+  margin: 0;
+}
+.ord-hero h1 em { font-style: italic; color: var(--color-accent); }
 
-  @media (max-width: 600px) {
-    .order-card-head { flex-direction: column; align-items: flex-start; }
-    .order-card-body { flex-direction: column; align-items: flex-start; }
-  }
+/* ── Container ── */
+.ord-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Breadcrumb ── */
+.ord-breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--color-text-muted);
+  margin-bottom: 28px;
+}
+.ord-breadcrumb a { color: var(--color-text-muted); text-decoration: none; transition: color 0.2s; }
+.ord-breadcrumb a:hover { color: var(--color-accent); }
+.ord-breadcrumb .sep { opacity: 0.4; }
+.ord-breadcrumb .cur { color: var(--color-text-main); }
+
+/* ── Stats strip ── */
+.ord-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.ord-stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.25s;
+  position: relative; overflow: hidden;
+}
+.ord-stat::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--color-accent); transform: scaleX(0); transition: transform 0.25s;
+}
+.ord-stat:hover::before { transform: scaleX(1); }
+.ord-stat:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); transform: translateY(-2px); }
+.ord-stat-num {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 700; color: var(--color-text-main);
+}
+.ord-stat-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--color-text-muted); margin-top: 4px;
+}
+
+/* ── Section heading ── */
+.ord-section-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.ord-section-head h2 {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700; color: var(--color-text-main);
+}
+.ord-count-badge {
+  font-size: 12px; font-weight: 700; padding: 4px 12px;
+  background: var(--color-accent-light); color: var(--color-accent);
+  border-radius: 999px;
+}
+
+/* ── Order card ── */
+.ord-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.ord-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.08); transform: translateY(-2px); }
+
+/* Card header */
+.ord-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap; gap: 12px;
+  background: linear-gradient(to right, rgba(var(--color-accent-rgb, 212,175,55), 0.03), transparent);
+}
+.ord-card-head-left { display: flex; flex-direction: column; gap: 3px; }
+.ord-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 14px; font-weight: 700; color: var(--color-text-main);
+  letter-spacing: 0.03em;
+}
+.ord-date { font-size: 12px; color: var(--color-text-muted); }
+.ord-card-head-right { display: flex; align-items: center; gap: 10px; }
+
+/* Status badges */
+.s-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 5px 14px; border-radius: 999px;
+}
+.s-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+/* Order status */
+.s-pending    { background: #FEF3C7; color: #92400E; }  .s-pending::before    { background: #F59E0B; }
+.s-confirmed  { background: #DBEAFE; color: #1E40AF; }  .s-confirmed::before  { background: #3B82F6; }
+.s-processing { background: #EDE9FE; color: #5B21B6; }  .s-processing::before { background: #7C3AED; }
+.s-shipped    { background: #D1FAE5; color: #065F46; }  .s-shipped::before    { background: #10B981; }
+.s-delivered  { background: #DCFCE7; color: #166534; }  .s-delivered::before  { background: #16A34A; }
+.s-cancelled  { background: #FEE2E2; color: #991B1B; }  .s-cancelled::before  { background: #EF4444; }
+.s-returned   { background: #FEF3C7; color: #92400E; }  .s-returned::before   { background: #F59E0B; }
+/* Payment status */
+.p-pending    { background: #FEF9C3; color: #854D0E; }  .p-pending::before    { background: #EAB308; }
+.p-paid       { background: #DCFCE7; color: #166534; }  .p-paid::before       { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+.p-completed  { background: #DCFCE7; color: #166534; }  .p-completed::before  { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+.p-failed     { background: #FEE2E2; color: #991B1B; }  .p-failed::before     { background: #EF4444; }
+.p-refunded   { background: #E0E7FF; color: #3730A3; }  .p-refunded::before   { background: #6366F1; }
+
+/* Payment done highlight */
+.payment-done-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 14px; border-radius: 999px;
+  background: linear-gradient(135deg, #16A34A, #15803D);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22,163,74,0.35);
+}
+.payment-done-tag svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 2.5; }
+
+/* Card body */
+.ord-card-body { padding: 20px 24px; }
+
+/* Product thumbnails */
+.ord-thumbs { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ord-thumb {
+  width: 58px; height: 72px;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: #F4F0EC; flex-shrink: 0;
+  position: relative;
+}
+.ord-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ord-thumb-more {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--color-text-muted);
+  background: var(--color-bg); border: 1px dashed var(--color-border);
+  width: 58px; height: 72px; border-radius: 10px; flex-shrink: 0;
+}
+
+/* Card footer */
+.ord-card-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+  flex-wrap: wrap; gap: 10px;
+}
+.ord-total-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: 2px; }
+.ord-total-amount {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700; color: var(--color-text-main);
+}
+.ord-items-count {
+  font-size: 12px; color: var(--color-text-muted); margin-top: 2px;
+}
+.ord-actions { display: flex; gap: 10px; align-items: center; }
+.ord-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 20px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; text-decoration: none; transition: all 0.2s;
+  font-family: var(--font-body); cursor: pointer; border: none;
+}
+.ord-btn-primary {
+  background: var(--color-text-main); color: #fff;
+}
+.ord-btn-primary:hover { background: var(--color-accent); transform: translateY(-1px); }
+.ord-btn-ghost {
+  background: transparent; color: var(--color-text-main);
+  border: 1.5px solid var(--color-border);
+}
+.ord-btn-ghost:hover { border-color: var(--color-text-main); background: var(--color-surface); }
+
+/* Item details inside card */
+.ord-items-detail {
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+.ord-item-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; gap: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 13px;
+}
+.ord-item-row:last-child { border-bottom: none; }
+.ord-item-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.ord-item-img { width: 44px; height: 54px; border-radius: 7px; overflow: hidden; flex-shrink: 0; background: #F4F0EC; }
+.ord-item-img img { width: 100%; height: 100%; object-fit: cover; }
+.ord-item-name {
+  font-weight: 600; color: var(--color-text-main);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ord-item-meta { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+.ord-item-price { font-weight: 700; color: var(--color-text-main); flex-shrink: 0; }
+
+/* Expand toggle */
+.ord-expand-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 600; color: var(--color-accent);
+  display: flex; align-items: center; gap: 5px;
+  padding: 0; font-family: var(--font-body);
+  transition: opacity 0.2s;
+}
+.ord-expand-btn:hover { opacity: 0.7; }
+.ord-expand-btn svg { transition: transform 0.25s; }
+.ord-expand-btn.expanded svg { transform: rotate(180deg); }
+
+/* ── Empty state ── */
+.ord-empty {
+  text-align: center;
+  padding: 80px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+}
+.ord-empty-icon {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: rgba(212,175,55,0.1);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.ord-empty-icon svg { width: 40px; height: 40px; stroke: var(--color-accent); }
+.ord-empty h3 {
+  font-family: var(--font-display); font-size: 28px; font-weight: 700;
+  color: var(--color-text-main); margin-bottom: 10px;
+}
+.ord-empty p { color: var(--color-text-muted); font-size: 15px; margin-bottom: 28px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .ord-hero-content { padding: 24px; }
+  .ord-stats { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .ord-card-head, .ord-card-foot { flex-direction: column; align-items: flex-start; }
+  .ord-actions { width: 100%; justify-content: flex-end; }
+}
+@media (max-width: 480px) {
+  .ord-stats { grid-template-columns: 1fr 1fr; }
+  .ord-container { padding: 0 16px; }
+}
 </style>
 
-<main style="padding-top: calc(var(--header-height) + var(--space-4));">
-  <div class="orders-wrap">
+<div class="ord-page">
+  <!-- Hero -->
+  <div class="ord-hero">
+    <div class="ord-hero-bg"></div>
+    <div class="ord-hero-content">
+      <div class="ord-hero-eyebrow">Account</div>
+      <h1>My <em>Orders</em></h1>
+    </div>
+  </div>
 
-    <div class="orders-breadcrumb">
+  <div class="ord-container">
+
+    <!-- Breadcrumb -->
+    <div class="ord-breadcrumb">
       <a href="<?= BASE_URL ?>/">Home</a>
       <span class="sep">/</span>
       <a href="<?= BASE_URL ?>/customer/account.php">Account</a>
       <span class="sep">/</span>
-      <span class="current">My Orders</span>
+      <span class="cur">Orders</span>
     </div>
 
-    <h1 class="orders-title">My Orders</h1>
+    <?php
+    $totalSpent = 0;
+    $paidCount = 0;
+    foreach ($orders as $o) {
+      if (!in_array($o['order_status'], ['cancelled'])) $totalSpent += $o['grand_total'];
+      if (in_array($o['payment_status'], ['paid', 'completed'])) $paidCount++;
+    }
+    ?>
 
+    <!-- Stats -->
+    <div class="ord-stats">
+      <div class="ord-stat">
+        <div class="ord-stat-num"><?= count($orders) ?></div>
+        <div class="ord-stat-label">Total Orders</div>
+      </div>
+      <div class="ord-stat">
+        <div class="ord-stat-num"><?= formatPrice($totalSpent) ?></div>
+        <div class="ord-stat-label">Amount Spent</div>
+      </div>
+      <div class="ord-stat">
+        <div class="ord-stat-num"><?= $paidCount ?></div>
+        <div class="ord-stat-label">Paid Orders</div>
+      </div>
+    </div>
+
+    <!-- Orders list -->
     <?php if (empty($orders)): ?>
-      <div class="orders-empty">
-        <div class="orders-empty-icon">
+      <div class="ord-empty">
+        <div class="ord-empty-icon">
           <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
         </div>
         <h3>No orders yet</h3>
-        <p>You haven't placed any orders. Start shopping to see your orders here.</p>
-        <a href="<?= BASE_URL ?>/shop.php" class="btn">
+        <p>You haven't placed any orders. Explore our collection and find something you love.</p>
+        <a href="<?= BASE_URL ?>/shop.php" class="ord-btn ord-btn-primary" style="display:inline-flex;margin:0 auto;">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Browse Collection
         </a>
       </div>
 
     <?php else: ?>
-      <?php foreach ($orders as $order): ?>
-        <div class="order-card">
-          <div class="order-card-head">
-            <div>
-              <div class="order-num"><?= sanitize($order['order_number']) ?></div>
-              <div class="order-date"><?= date('M d, Y \a\t g:i A', strtotime($order['created_at'])) ?></div>
+
+      <div class="ord-section-head">
+        <h2>Order History</h2>
+        <span class="ord-count-badge"><?= count($orders) ?> order<?= count($orders) !== 1 ? 's' : '' ?></span>
+      </div>
+
+      <?php foreach ($orders as $i => $order):
+        $isPaid = in_array($order['payment_status'], ['paid', 'completed']);
+        $items = $order['items'];
+        $previewItems = array_slice($items, 0, 4);
+        $extraCount = count($items) - 4;
+        $cardId = 'order-detail-' . $order['id'];
+      ?>
+        <div class="ord-card">
+
+          <!-- Head -->
+          <div class="ord-card-head">
+            <div class="ord-card-head-left">
+              <div class="ord-num"><?= sanitize($order['order_number']) ?></div>
+              <div class="ord-date">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <?= date('d M Y, g:i A', strtotime($order['created_at'])) ?>
+              </div>
             </div>
-            <span class="order-status-badge status-<?= $order['order_status'] ?>">
-              <?= ucfirst(str_replace('_', ' ', $order['order_status'])) ?>
-            </span>
-          </div>
-          <div class="order-card-body">
-            <div class="order-items-preview">
-              <?php
-                $orderItems = $mysqli->query("SELECT oi.*, p.image FROM order_items oi LEFT JOIN products p ON oi.product_id = p.id WHERE oi.order_id = {$order['id']} LIMIT 4");
-                if ($orderItems):
-                  while ($oi = $orderItems->fetch_assoc()):
-                    $img = $oi['image'] ?: 'https://via.placeholder.com/112x140?text=No+Image';
-              ?>
-                <div class="order-item-thumb">
-                  <img src="<?= htmlspecialchars($img) ?>" alt="<?= sanitize($oi['product_name']) ?>" loading="lazy">
-                </div>
-              <?php
-                  endwhile;
-                endif;
-              ?>
-            </div>
-            <div style="display: flex; align-items: center; gap: var(--space-4);">
-              <div class="order-amount"><?= formatPrice($order['grand_total']) ?></div>
-              <span class="order-status-badge status-<?= $order['payment_status'] ?>" style="font-size: 10px;">
-                <?= ucfirst($order['payment_status']) ?>
+            <div class="ord-card-head-right">
+              <!-- Order status -->
+              <span class="s-badge s-<?= $order['order_status'] ?>">
+                <?= ucfirst(str_replace('_', ' ', $order['order_status'])) ?>
               </span>
+              <!-- Payment status - highlight if paid -->
+              <?php if ($isPaid): ?>
+                <span class="payment-done-tag">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+                  Payment Done
+                </span>
+              <?php else: ?>
+                <span class="s-badge p-<?= $order['payment_status'] ?>">
+                  <?= ucfirst($order['payment_status']) ?>
+                </span>
+              <?php endif; ?>
             </div>
           </div>
+
+          <!-- Body — thumbnails + expand -->
+          <div class="ord-card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div class="ord-thumbs">
+                <?php foreach ($previewItems as $item):
+                  $img = !empty($item['image']) ? $item['image'] : 'https://via.placeholder.com/116x144?text=No+Image';
+                ?>
+                  <div class="ord-thumb">
+                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= sanitize($item['product_name']) ?>" loading="lazy">
+                  </div>
+                <?php endforeach; ?>
+                <?php if ($extraCount > 0): ?>
+                  <div class="ord-thumb-more">+<?= $extraCount ?></div>
+                <?php endif; ?>
+              </div>
+              <?php if (!empty($items)): ?>
+                <button class="ord-expand-btn" onclick="toggleOrderDetail('<?= $cardId ?>', this)" aria-label="Toggle order items">
+                  View items
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              <?php endif; ?>
+            </div>
+
+            <!-- Collapsible item rows -->
+            <div id="<?= $cardId ?>" class="ord-items-detail" style="display:none;">
+              <?php foreach ($items as $item):
+                $img = !empty($item['image']) ? $item['image'] : 'https://via.placeholder.com/88x108?text=No+Image';
+              ?>
+                <div class="ord-item-row">
+                  <div class="ord-item-info">
+                    <div class="ord-item-img">
+                      <img src="<?= htmlspecialchars($img) ?>" alt="<?= sanitize($item['product_name']) ?>" loading="lazy">
+                    </div>
+                    <div style="min-width:0;">
+                      <div class="ord-item-name"><?= sanitize($item['product_name']) ?></div>
+                      <div class="ord-item-meta">
+                        <?php if ($item['size']): ?>Size: <?= sanitize($item['size']) ?> · <?php endif; ?>
+                        Qty: <?= (int)$item['quantity'] ?>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ord-item-price"><?= formatPrice($item['total_price']) ?></div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="ord-card-foot">
+            <div>
+              <div class="ord-total-label">Order Total</div>
+              <div class="ord-total-amount"><?= formatPrice($order['grand_total']) ?></div>
+              <div class="ord-items-count"><?= count($items) ?> item<?= count($items) !== 1 ? 's' : '' ?></div>
+            </div>
+            <div class="ord-actions">
+              <?php if (in_array($order['order_status'], ['shipped', 'processing', 'confirmed'])): ?>
+                <a href="<?= BASE_URL ?>/customer/order-tracking.php?order_id=<?= $order['id'] ?>" class="ord-btn ord-btn-ghost">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+                  Track
+                </a>
+              <?php endif; ?>
+              <a href="<?= BASE_URL ?>/shop.php" class="ord-btn ord-btn-primary">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+                Shop Again
+              </a>
+            </div>
+          </div>
+
         </div>
       <?php endforeach; ?>
+
+      <!-- Back to account -->
+      <div style="text-align:center;margin-top:32px;">
+        <a href="<?= BASE_URL ?>/customer/account.php" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--color-text-muted);text-decoration:none;padding:10px 24px;border:1px solid var(--color-border);border-radius:999px;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--color-text-main)';this.style.color='var(--color-text-main)';" onmouseout="this.style.borderColor='var(--color-border)';this.style.color='var(--color-text-muted)';">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Account
+        </a>
+      </div>
+
     <?php endif; ?>
 
-  </div>
-</main>
+  </div><!-- /container -->
+</div><!-- /page -->
+
+<script>
+function toggleOrderDetail(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('expanded', !isOpen);
+  btn.childNodes[0].textContent = isOpen ? 'View items' : 'Hide items';
+}
+</script>
 
 <?php include dirname(__DIR__) . '/includes/footer.php'; ?>
