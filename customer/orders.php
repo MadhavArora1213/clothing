@@ -166,25 +166,25 @@ include dirname(__DIR__) . '/includes/header.php';
 .s-badge {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; padding: 5px 14px; border-radius: 999px;
+  letter-spacing: 0.07em; padding: 5px 14px; border-radius: 8px;
 }
 .s-badge::before {
   content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
 }
-/* Order status */
-.s-pending    { background: #FEF3C7; color: #92400E; }  .s-pending::before    { background: #F59E0B; }
-.s-confirmed  { background: #DBEAFE; color: #1E40AF; }  .s-confirmed::before  { background: #3B82F6; }
-.s-processing { background: #EDE9FE; color: #5B21B6; }  .s-processing::before { background: #7C3AED; }
-.s-shipped    { background: #D1FAE5; color: #065F46; }  .s-shipped::before    { background: #10B981; }
-.s-delivered  { background: #DCFCE7; color: #166534; }  .s-delivered::before  { background: #16A34A; }
-.s-cancelled  { background: #FEE2E2; color: #991B1B; }  .s-cancelled::before  { background: #EF4444; }
-.s-returned   { background: #FEF3C7; color: #92400E; }  .s-returned::before   { background: #F59E0B; }
-/* Payment status */
-.p-pending    { background: #FEF9C3; color: #854D0E; }  .p-pending::before    { background: #EAB308; }
-.p-paid       { background: #DCFCE7; color: #166534; }  .p-paid::before       { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
-.p-completed  { background: #DCFCE7; color: #166534; }  .p-completed::before  { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
-.p-failed     { background: #FEE2E2; color: #991B1B; }  .p-failed::before     { background: #EF4444; }
-.p-refunded   { background: #E0E7FF; color: #3730A3; }  .p-refunded::before   { background: #6366F1; }
+/* Order status — square-ish pill */
+.s-pending    { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }  .s-pending::before    { background: #F59E0B; }
+.s-confirmed  { background: #DBEAFE; color: #1E40AF; border: 1px solid #93C5FD; }  .s-confirmed::before  { background: #3B82F6; }
+.s-processing { background: #EDE9FE; color: #5B21B6; border: 1px solid #C4B5FD; }  .s-processing::before { background: #7C3AED; }
+.s-shipped    { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }  .s-shipped::before    { background: #10B981; }
+.s-delivered  { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; }  .s-delivered::before  { background: #16A34A; }
+.s-cancelled  { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }  .s-cancelled::before  { background: #EF4444; }
+.s-returned   { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }  .s-returned::before   { background: #F59E0B; }
+/* Payment status — rounded pill, distinct shape */
+.p-pending    { background: #fff7e6; color: #b45309; border: 1.5px dashed #F59E0B; border-radius: 999px; }  .p-pending::before    { background: #EAB308; }
+.p-paid       { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC;   border-radius: 999px; }  .p-paid::before       { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+.p-completed  { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC;   border-radius: 999px; }  .p-completed::before  { background: #22C55E; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+.p-failed     { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;   border-radius: 999px; }  .p-failed::before     { background: #EF4444; }
+.p-refunded   { background: #E0E7FF; color: #3730A3; border: 1px solid #A5B4FC;   border-radius: 999px; }  .p-refunded::before   { background: #6366F1; }
 
 /* Payment done highlight */
 .payment-done-tag {
@@ -406,20 +406,38 @@ include dirname(__DIR__) . '/includes/header.php';
             </div>
             <div class="ord-card-head-right">
               <!-- Order status -->
-              <span class="s-badge s-<?= $order['order_status'] ?>">
-                <?= ucfirst(str_replace('_', ' ', $order['order_status'])) ?>
-              </span>
-              <!-- Payment status - highlight if paid -->
-              <?php if ($isPaid): ?>
-                <span class="payment-done-tag">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
-                  Payment Done
-                </span>
-              <?php else: ?>
-                <span class="s-badge p-<?= $order['payment_status'] ?>">
-                  <?= ucfirst($order['payment_status']) ?>
-                </span>
-              <?php endif; ?>
+              <?php
+                $orderStatusLabels = [
+                  'pending'    => 'Order Placed',
+                  'confirmed'  => 'Confirmed',
+                  'processing' => 'Processing',
+                  'shipped'    => 'Shipped',
+                  'delivered'  => 'Delivered',
+                  'cancelled'  => 'Cancelled',
+                  'returned'   => 'Returned',
+                ];
+                $orderLabel = $orderStatusLabels[$order['order_status']] ?? ucfirst($order['order_status']);
+              ?>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);">Order</span>
+                <span class="s-badge s-<?= $order['order_status'] ?>"><?= $orderLabel ?></span>
+              </div>
+              <!-- Payment status -->
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);">Payment</span>
+                <?php if ($isPaid): ?>
+                  <span class="payment-done-tag">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+                    Done
+                  </span>
+                <?php elseif ($order['payment_status'] === 'failed'): ?>
+                  <span class="s-badge p-failed">Failed</span>
+                <?php elseif ($order['payment_status'] === 'refunded'): ?>
+                  <span class="s-badge p-refunded">Refunded</span>
+                <?php else: ?>
+                  <span class="s-badge p-pending">Pending</span>
+                <?php endif; ?>
+              </div>
             </div>
           </div>
 
@@ -478,12 +496,6 @@ include dirname(__DIR__) . '/includes/header.php';
               <div class="ord-items-count"><?= count($items) ?> item<?= count($items) !== 1 ? 's' : '' ?></div>
             </div>
             <div class="ord-actions">
-              <?php if (in_array($order['order_status'], ['shipped', 'processing', 'confirmed'])): ?>
-                <a href="<?= BASE_URL ?>/customer/order-tracking.php?order_id=<?= $order['id'] ?>" class="ord-btn ord-btn-ghost">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
-                  Track
-                </a>
-              <?php endif; ?>
               <a href="<?= BASE_URL ?>/shop.php" class="ord-btn ord-btn-primary">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
                 Shop Again
