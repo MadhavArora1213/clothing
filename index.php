@@ -702,24 +702,6 @@ include __DIR__ . '/includes/header.php';
     </div>
   </section>
 
-  <!-- ===== NEWSLETTER / CTA SECTION ===== -->
-  <section class="lux-section lux-newsletter">
-    <div class="aura-container">
-      <div class="lux-nl-inner reveal-scale">
-        <span class="lux-eyebrow" style="justify-content:center; color: #D4AF37;">Stay in the Loop</span>
-        <h2 class="lux-nl-title">Get First Access to<br>Exclusive Drops</h2>
-        <p class="lux-nl-sub">Early access to new collections, exclusive subscriber-only discounts, and style guides from our team.</p>
-        <div class="lux-nl-form">
-          <input type="email" placeholder="Enter your email address..." class="lux-nl-input" id="nlEmail">
-          <button class="lux-nl-btn" onclick="subscribeNewsletter()">
-            <span>Subscribe</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
-        </div>
-        <p class="lux-nl-note">No spam, ever. Unsubscribe anytime.</p>
-      </div>
-    </div>
-  </section>
 
 </main>
 

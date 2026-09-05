@@ -60,14 +60,6 @@
         </div>
 
         <div class="footer-col">
-          <h4>VIP Club</h4>
-          <p style="font-size: 12px; color: #94A3B8; margin-bottom: 14px;">
-            Subscribe to receive private drops, early access to sales, and 10% OFF your first order.
-          </p>
-          <form onsubmit="event.preventDefault(); alert('🎉 Welcome to the AURA VIP Club! Your 10% coupon code is WELCOME10');" style="display: flex; gap: 6px;">
-            <input type="email" placeholder="Enter your email" required style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); padding: 10px 14px; border-radius: 9999px; color: #FFFFFF; font-size: 12px; flex: 1; outline: none;">
-            <button type="submit" class="btn btn-primary" style="padding: 10px 18px; font-size: 12px;">Join</button>
-          </form>
         </div>
       </div>
 

@@ -861,17 +861,7 @@ if ($subcategory && $mysqli) {
     </div>
   </section>
 
-  <!-- Newsletter -->
-  <section class="shop-newsletter">
-    <div class="aura-container">
-      <h2 class="shop-nl-title">Stay in the Loop</h2>
-      <p class="shop-nl-desc">Get early access to new drops, exclusive sales, and 10% OFF your first order.</p>
-      <form class="shop-nl-form" onsubmit="subscribeNewsletter(event)">
-        <input type="email" class="shop-nl-input" placeholder="Enter your email address..." required>
-        <button type="submit" class="shop-nl-btn">Subscribe →</button>
-      </form>
-    </div>
-  </section>
+
 </div>
 
 <script>
