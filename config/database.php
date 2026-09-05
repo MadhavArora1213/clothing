@@ -427,7 +427,6 @@ function handleImageUpload($fileArray, $subfolder = 'products') {
 
     return $uploadedUrl;
   }
-  }
 
   return null;
 }
