@@ -38,12 +38,29 @@
         <div class="footer-col">
           <h4>Collections</h4>
           <ul class="footer-links">
-            <li><a href="<?= BASE_URL ?>/shop.php?category=oversized">Oversized Drop Tees</a></li>
-            <li><a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion">Arya Ethnic Fusion</a></li>
-            <li><a href="<?= BASE_URL ?>/shop.php?category=co-ords">Resort Co-Ords</a></li>
-            <li><a href="<?= BASE_URL ?>/shop.php?category=men">Men's Streetwear</a></li>
-            <li><a href="<?= BASE_URL ?>/shop.php?category=women">Women's Edit</a></li>
-            <li><a href="<?= BASE_URL ?>/shop.php?sale=1">50% OFF Flash Sale</a></li>
+            <?php
+            // Pull active categories from DB
+            $footerCats = [];
+            if (!empty($mysqli)) {
+              $fcResult = $mysqli->query("SELECT name, slug, department FROM categories WHERE is_active = 1 AND parent_id = 0 ORDER BY sort_order ASC LIMIT 8");
+              if ($fcResult) $footerCats = $fcResult->fetch_all(MYSQLI_ASSOC);
+            }
+            if (!empty($footerCats)):
+              foreach ($footerCats as $fc):
+            ?>
+              <li><a href="<?= BASE_URL ?>/shop.php?category=<?= urlencode($fc['department']) ?>&subcategory=<?= urlencode($fc['slug']) ?>"><?= htmlspecialchars($fc['name']) ?></a></li>
+            <?php
+              endforeach;
+            else:
+              // Fallback static links if DB empty
+            ?>
+              <li><a href="<?= BASE_URL ?>/shop.php?category=men">Men</a></li>
+              <li><a href="<?= BASE_URL ?>/shop.php?category=women">Women</a></li>
+              <li><a href="<?= BASE_URL ?>/shop.php?category=kids">Kids</a></li>
+              <li><a href="<?= BASE_URL ?>/shop.php?sale=1">Sale</a></li>
+            <?php endif; ?>
+            <li><a href="<?= BASE_URL ?>/shop.php?sale=1" style="color: #EF4444; font-weight: 700;">🔥 Sale</a></li>
+            <li><a href="<?= BASE_URL ?>/shop.php?category=new-arrivals">New Arrivals</a></li>
           </ul>
         </div>
 
