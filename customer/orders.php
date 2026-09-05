@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
+date_default_timezone_set('Asia/Kolkata');
 
 if (!isset($_SESSION['customer_id'])) {
   redirect('/customer/login.php');
@@ -7,6 +8,50 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customerId = $_SESSION['customer_id'];
 $orders = [];
+
+// ── Auto-verify pending payments via Cashfree ──
+$pendingOrders = $mysqli->query("SELECT id, order_number, payment_session_id FROM orders WHERE customer_id = $customerId AND payment_method = 'online' AND payment_status = 'pending'");
+if ($pendingOrders && $pendingOrders->num_rows > 0) {
+  // Load env for CF keys
+  $envFile = dirname(__DIR__) . '/.env';
+  $cfAppId = ''; $cfSecret = '';
+  if (file_exists($envFile)) {
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+      if (strpos(trim($line), '#') === 0 || strpos($line, '=') === false) continue;
+      list($k, $v) = explode('=', $line, 2);
+      $v = trim($v);
+      if (($v[0] ?? '') === '"' && substr($v, -1) === '"') $v = substr($v, 1, -1);
+      $_ENV[trim($k)] = $v;
+    }
+    $cfAppId  = $_ENV['CF_APP_ID']     ?? '';
+    $cfSecret = $_ENV['CF_SECRET_KEY'] ?? '';
+  }
+  if ($cfAppId && $cfSecret) {
+    while ($po = $pendingOrders->fetch_assoc()) {
+      $cfId = $po['payment_session_id'] ?? '';
+      if (!$cfId) continue;
+      $ch = curl_init('https://api.cashfree.com/pg/orders/' . urlencode($cfId));
+      curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8,
+        CURLOPT_HTTPHEADER => [
+          'x-client-id: ' . $cfAppId,
+          'x-client-secret: ' . $cfSecret,
+          'x-api-version: 2023-08-01',
+        ],
+      ]);
+      $cfResp = curl_exec($ch);
+      curl_close($ch);
+      if ($cfResp) {
+        $cfData = json_decode($cfResp, true);
+        if (($cfData['order_status'] ?? '') === 'PAID') {
+          $oid = (int)$po['id'];
+          $mysqli->query("UPDATE orders SET payment_status='paid', order_status='confirmed' WHERE id=$oid");
+        }
+      }
+    }
+  }
+}
+
 $orderResult = $mysqli->query("SELECT * FROM orders WHERE customer_id = $customerId ORDER BY created_at DESC");
 if ($orderResult) {
   while ($row = $orderResult->fetch_assoc()) {
