@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $validToken = false;
-if (!empty($resetToken) && empty($error)) {
+if (!empty($resetToken)) {
   if (!$mysqli) {
     $error = 'Database connection failed.';
   } else {
