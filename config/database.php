@@ -68,11 +68,20 @@ if (!is_dir(UPLOADS_PATH . '/categories')) {
   @mkdir(UPLOADS_PATH . '/categories', 0755, true);
 }
 
-// Database Credentials (supports .env for hosted)
-$dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
-$dbName = $_ENV['DB_NAME'] ?? 'cloths';
-$dbUser = $_ENV['DB_USER'] ?? 'root';
-$dbPass = $_ENV['DB_PASS'] ?? '';
+// Database Credentials — detect localhost vs production
+$isLocal = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '::1']);
+
+if ($isLocal) {
+  $dbHost = '127.0.0.1';
+  $dbName = 'cloths';
+  $dbUser = 'root';
+  $dbPass = '';
+} else {
+  $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
+  $dbName = $_ENV['DB_NAME'] ?? 'cloths';
+  $dbUser = $_ENV['DB_USER'] ?? 'root';
+  $dbPass = $_ENV['DB_PASS'] ?? '';
+}
 
 // Connect to MySQL server
 $conn = @new mysqli($dbHost, $dbUser, $dbPass);

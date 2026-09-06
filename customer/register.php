@@ -309,7 +309,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="reg-left">
     <div class="reg-left-bg"></div>
     <div class="reg-left-content">
-      <div class="reg-left-brand">ATELIER</div>
+      <div class="reg-left-brand">UOC</div>
       <div class="reg-left-tagline">Join the Movement</div>
       <p class="reg-left-desc">
         Create your account and unlock access to exclusive collections, personalized recommendations, and member-only offers.
@@ -320,7 +320,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="reg-right">
     <div class="reg-form-wrap">
       <div class="reg-form-header">
-        <div class="brand">ATELIER</div>
+        <div class="brand">UOC</div>
         <h1>Create Account</h1>
         <p>Join us for a premium shopping experience</p>
       </div>

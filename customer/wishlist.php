@@ -423,7 +423,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
             <!-- Body -->
             <div class="wish-card-body">
-              <div class="wish-card-cat"><?= htmlspecialchars($item['category_name'] ?? 'ATELIER') ?></div>
+              <div class="wish-card-cat"><?= htmlspecialchars($item['category_name'] ?? 'UOC') ?></div>
               <div class="wish-card-name">
                 <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
               </div>
@@ -469,8 +469,8 @@ function quickAdd(productId, size, name, price, image, slug) {
 function shareWishlist() {
   if (navigator.share) {
     navigator.share({
-      title: 'My ATELIER Wishlist',
-      text: 'Check out my favorite pieces from ATELIER!',
+      title: 'My UOC Wishlist',
+      text: 'Check out my favorite pieces from UOC!',
       url: window.location.href
     });
   } else {

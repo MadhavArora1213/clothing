@@ -350,7 +350,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="login-left">
     <div class="login-left-bg"></div>
     <div class="login-left-content">
-      <div class="login-left-brand">ATELIER</div>
+      <div class="login-left-brand">UOC</div>
       <div class="login-left-tagline">Fashion E-Commerce</div>
       <p class="login-left-desc">
         Discover curated collections that blend timeless elegance with contemporary design. Your style journey begins here.
@@ -382,7 +382,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="login-right">
     <div class="login-form-wrap">
       <div class="login-form-header">
-        <div class="brand">ATELIER</div>
+        <div class="brand">UOC</div>
         <h1>Welcome Back</h1>
         <p>Sign in to your account to continue</p>
       </div>

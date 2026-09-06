@@ -285,7 +285,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="verify-left">
     <div class="verify-left-bg"></div>
     <div class="verify-left-content">
-      <div class="verify-left-brand">ATELIER</div>
+      <div class="verify-left-brand">UOC</div>
       <div class="verify-left-tagline">Almost There</div>
       <p class="verify-left-desc">
         We've sent a verification code to your email. Enter it below to complete your registration.
@@ -296,7 +296,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="verify-right">
     <div class="verify-form-wrap">
       <div class="verify-form-header">
-        <div class="brand">ATELIER</div>
+        <div class="brand">UOC</div>
         <h1>Verify Email</h1>
         <p>Enter the 6-digit OTP sent to <strong><?= sanitize($email) ?></strong></p>
       </div>
