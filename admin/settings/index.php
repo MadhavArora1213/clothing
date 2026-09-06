@@ -22,20 +22,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Handle Admin Password Change
   if (!empty($_POST['new_password'])) {
-    $currentPass = $_POST['current_password'] ?? '';
-    $newPass = $_POST['new_password'];
-    $confirmPass = $_POST['confirm_password'] ?? '';
-
-    if ($newPass !== $confirmPass) {
-      $error = 'New passwords do not match.';
-    } elseif (strlen($newPass) < 6) {
-      $error = 'New password must be at least 6 characters.';
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+      $error = 'Invalid request. Please try again.';
     } else {
-      $hash = password_hash($newPass, PASSWORD_DEFAULT);
-      $pStmt = $mysqli->prepare('UPDATE admins SET password = ? WHERE id = ?');
-      $pStmt->bind_param('si', $hash, $_SESSION['admin_id']);
-      $pStmt->execute();
-      $success = 'Password changed and store settings updated successfully.';
+      $currentPass = $_POST['current_password'] ?? '';
+      $newPass = $_POST['new_password'];
+      $confirmPass = $_POST['confirm_password'] ?? '';
+
+      if (empty($currentPass)) {
+        $error = 'Current password is required to change password.';
+      } elseif ($newPass !== $confirmPass) {
+        $error = 'New passwords do not match.';
+      } elseif (strlen($newPass) < 6) {
+        $error = 'New password must be at least 6 characters.';
+      } else {
+        // Verify current password
+        $checkStmt = $mysqli->prepare('SELECT password FROM admins WHERE id = ?');
+        $checkStmt->bind_param('i', $_SESSION['admin_id']);
+        $checkStmt->execute();
+        $admin = $checkStmt->get_result()->fetch_assoc();
+
+        if (!$admin || !password_verify($currentPass, $admin['password'])) {
+          $error = 'Current password is incorrect.';
+        } else {
+          $hash = password_hash($newPass, PASSWORD_DEFAULT);
+          $pStmt = $mysqli->prepare('UPDATE admins SET password = ? WHERE id = ?');
+          $pStmt->bind_param('si', $hash, $_SESSION['admin_id']);
+          $pStmt->execute();
+          $success = 'Password changed and store settings updated successfully.';
+        }
+      }
     }
   } else {
     $success = 'Store configuration settings updated successfully.';
@@ -88,6 +104,7 @@ $groupDescriptions = [
   <?php endif; ?>
 
   <form method="POST" action="">
+    <?= getCSRFInput() ?>
     <?php foreach ($settingsByGroup as $groupName => $groupSettings): ?>
       <div class="admin-card" style="margin-bottom: var(--space-6); padding: var(--space-6);">
         <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 4px; border-bottom: 1px solid var(--color-bg-elevated); padding-bottom: 8px;">
@@ -122,9 +139,15 @@ $groupDescriptions = [
       </h2>
       <div class="form-grid">
         <div class="form-group">
+          <label>Current Password (required to change)</label>
+          <input type="password" name="current_password" placeholder="Enter current password">
+        </div>
+        <div class="form-group">
           <label>New Password (Optional)</label>
           <input type="password" name="new_password" placeholder="Leave blank to keep unchanged">
         </div>
+      </div>
+      <div class="form-grid">
         <div class="form-group">
           <label>Confirm New Password</label>
           <input type="password" name="confirm_password" placeholder="Repeat new password">

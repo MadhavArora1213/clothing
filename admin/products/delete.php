@@ -16,22 +16,32 @@ if (!$product) {
   redirect(adminUrl('products/'));
 }
 
-// Function to delete product and associated records
 function deleteProductCompletely($mysqli, $productId) {
-  // Delete related records
-  $mysqli->query("DELETE FROM product_images WHERE product_id = $productId");
-  $mysqli->query("DELETE FROM product_colors WHERE product_id = $productId");
-  $mysqli->query("DELETE FROM product_sizes WHERE product_id = $productId");
-  $mysqli->query("DELETE FROM reviews WHERE product_id = $productId");
-  
-  // Delete main product
-  $stmt = $mysqli->prepare("DELETE FROM products WHERE id = ?");
+  $stmt1 = $mysqli->prepare('DELETE FROM product_images WHERE product_id = ?');
+  $stmt1->bind_param('i', $productId);
+  $stmt1->execute();
+
+  $stmt2 = $mysqli->prepare('DELETE FROM product_colors WHERE product_id = ?');
+  $stmt2->bind_param('i', $productId);
+  $stmt2->execute();
+
+  $stmt3 = $mysqli->prepare('DELETE FROM product_sizes WHERE product_id = ?');
+  $stmt3->bind_param('i', $productId);
+  $stmt3->execute();
+
+  $stmt4 = $mysqli->prepare('DELETE FROM reviews WHERE product_id = ?');
+  $stmt4->bind_param('i', $productId);
+  $stmt4->execute();
+
+  $stmt = $mysqli->prepare('DELETE FROM products WHERE id = ?');
   $stmt->bind_param('i', $productId);
   return $stmt->execute();
 }
 
-// Support instant confirmation via URL or Form POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['confirm'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    redirect(adminUrl('products/?msg=Invalid+request'));
+  }
   deleteProductCompletely($mysqli, $id);
   redirect(adminUrl('products/?msg=Product+deleted+successfully'));
 }
@@ -56,6 +66,7 @@ include dirname(__DIR__) . '/includes/header.php';
     </div>
 
     <form method="POST" style="display: flex; gap: 12px; justify-content: center;">
+      <?= getCSRFInput() ?>
       <a href="<?= adminUrl('products/') ?>" class="btn btn-secondary">No, Cancel</a>
       <button type="submit" class="btn btn-danger" style="background: #DC2626; color: white;">Yes, Delete Product</button>
     </form>

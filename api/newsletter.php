@@ -9,6 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
+if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+  http_response_code(403);
+  echo json_encode(['error' => 'Invalid request']);
+  exit;
+}
+
+if (rateLimit('newsletter', 5, 300)) {
+  http_response_code(429);
+  echo json_encode(['error' => 'Too many attempts. Please wait.']);
+  exit;
+}
+
 $email = strtolower(trim($_POST['email'] ?? ''));
 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
   http_response_code(400);
@@ -16,7 +28,6 @@ if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
   exit;
 }
 
-// Create table if not exists
 if ($mysqli) {
   $mysqli->query("CREATE TABLE IF NOT EXISTS newsletter_subscribers (
     id INT AUTO_INCREMENT PRIMARY KEY,

@@ -6,7 +6,10 @@ if (!isset($_SESSION['customer_id'])) {
 }
 
 $customerId = $_SESSION['customer_id'];
-$customer = $mysqli->query("SELECT * FROM customers WHERE id = $customerId")->fetch_assoc();
+$stmt = $mysqli->prepare('SELECT * FROM customers WHERE id = ?');
+$stmt->bind_param('i', $customerId);
+$stmt->execute();
+$customer = $stmt->get_result()->fetch_assoc();
 
 if (!$customer) {
   session_destroy();
@@ -17,35 +20,55 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $firstName = sanitize($_POST['first_name'] ?? '');
-  $lastName = sanitize($_POST['last_name'] ?? '');
-  $phone = sanitize($_POST['phone'] ?? '');
-
-  if (empty($firstName) || empty($lastName)) {
-    $error = 'First and last name are required.';
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    $error = 'Invalid request. Please try again.';
   } else {
-    $stmt = $mysqli->prepare('UPDATE customers SET first_name = ?, last_name = ?, phone = ? WHERE id = ?');
-    $stmt->bind_param('sssi', $firstName, $lastName, $phone, $customerId);
-    $stmt->execute();
-    $_SESSION['customer_name'] = $firstName . ' ' . $lastName;
-    $success = 'Profile updated successfully.';
-    $customer['first_name'] = $firstName;
-    $customer['last_name'] = $lastName;
-    $customer['phone'] = $phone;
+    $firstName = sanitize($_POST['first_name'] ?? '');
+    $lastName = sanitize($_POST['last_name'] ?? '');
+    $phone = sanitize($_POST['phone'] ?? '');
+
+    if (empty($firstName) || empty($lastName)) {
+      $error = 'First and last name are required.';
+    } else {
+      $stmt = $mysqli->prepare('UPDATE customers SET first_name = ?, last_name = ?, phone = ? WHERE id = ?');
+      $stmt->bind_param('sssi', $firstName, $lastName, $phone, $customerId);
+      $stmt->execute();
+      $_SESSION['customer_name'] = $firstName . ' ' . $lastName;
+      $success = 'Profile updated successfully.';
+      $customer['first_name'] = $firstName;
+      $customer['last_name'] = $lastName;
+      $customer['phone'] = $phone;
+    }
   }
 }
 
-$addrResult = $mysqli->query("SELECT * FROM addresses WHERE customer_id = $customerId ORDER BY is_default DESC, created_at DESC");
-$addresses = $addrResult ? $addrResult->fetch_all(MYSQLI_ASSOC) : [];
-$ordResult = $mysqli->query("SELECT * FROM orders WHERE customer_id = $customerId ORDER BY created_at DESC LIMIT 5");
-$orders = $ordResult ? $ordResult->fetch_all(MYSQLI_ASSOC) : [];
-$ordCountResult = $mysqli->query("SELECT COUNT(*) as cnt FROM orders WHERE customer_id = $customerId");
-$orderCount = $ordCountResult ? ($ordCountResult->fetch_assoc()['cnt'] ?? 0) : 0;
-$spentResult = $mysqli->query("SELECT COALESCE(SUM(grand_total),0) as total FROM orders WHERE customer_id = $customerId AND order_status != 'cancelled'");
-$totalSpent = $spentResult ? ($spentResult->fetch_assoc()['total'] ?? 0) : 0;
+$addrResult = $mysqli->prepare('SELECT * FROM addresses WHERE customer_id = ? ORDER BY is_default DESC, created_at DESC');
+$addrResult->bind_param('i', $customerId);
+$addrResult->execute();
+$addresses = $addrResult->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$ordResult = $mysqli->prepare('SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC LIMIT 5');
+$ordResult->bind_param('i', $customerId);
+$ordResult->execute();
+$orders = $ordResult->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$ordCountResult = $mysqli->prepare('SELECT COUNT(*) as cnt FROM orders WHERE customer_id = ?');
+$ordCountResult->bind_param('i', $customerId);
+$ordCountResult->execute();
+$orderCount = $ordCountResult->get_result()->fetch_assoc()['cnt'] ?? 0;
+
+$spentResult = $mysqli->prepare('SELECT COALESCE(SUM(grand_total),0) as total FROM orders WHERE customer_id = ? AND order_status != ?');
+$spentResult->bind_param('is', $customerId, $cancelled);
+$cancelled = 'cancelled';
+$spentResult->execute();
+$totalSpent = $spentResult->get_result()->fetch_assoc()['total'] ?? 0;
+
 $addressCount = count($addresses);
-$wishlistResult = @$mysqli->query("SELECT COUNT(*) as cnt FROM wishlists WHERE customer_id = $customerId");
-$wishlistCount = $wishlistResult ? ($wishlistResult->fetch_assoc()['cnt'] ?? 0) : 0;
+
+$wishlistResult = $mysqli->prepare('SELECT COUNT(*) as cnt FROM wishlists WHERE customer_id = ?');
+$wishlistResult->bind_param('i', $customerId);
+$wishlistResult->execute();
+$wishlistCount = $wishlistResult->get_result()->fetch_assoc()['cnt'] ?? 0;
 
 $pageTitle    = 'My Account — Urban Outfit Collection';
 $pageRobots   = 'noindex, nofollow';
@@ -616,6 +639,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <div class="alert alert-success" style="margin-bottom: var(--space-4);"><?= sanitize($success) ?></div>
           <?php endif; ?>
           <form method="POST">
+            <?= getCSRFInput() ?>
             <div class="profile-row">
               <div class="profile-field">
                 <label>First Name</label>

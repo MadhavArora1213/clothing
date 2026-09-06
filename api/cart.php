@@ -24,28 +24,19 @@ if ($productId <= 0) {
 }
 
 $product = null;
-$stmt = $mysqli->prepare('SELECT id, price FROM products WHERE id = ?');
+$stmt = $mysqli->prepare('SELECT id, name, slug, price, image FROM products WHERE id = ? AND is_active = 1');
 if ($stmt) {
   $stmt->bind_param('i', $productId);
   $stmt->execute();
   $product = $stmt->get_result()->fetch_assoc();
 }
 
-if (!$product && $productName && $productPrice > 0) {
-  $slug = $productSlug ?: preg_replace('/[^a-z0-9]+/', '-', strtolower($productName));
-  $ins = $mysqli->prepare('INSERT INTO products (id, name, slug, price, image, is_active, category_id) VALUES (?, ?, ?, ?, ?, 1, 1) ON DUPLICATE KEY UPDATE id=id');
-  if ($ins) {
-    $ins->bind_param('issds', $productId, $productName, $slug, $productPrice, $productImage);
-    $ins->execute();
-  }
-  $product = ['id' => $productId, 'price' => $productPrice];
-}
-
 if (!$product) {
-  echo json_encode(['success' => false, 'message' => 'Product not found. Please provide product details.']);
+  echo json_encode(['success' => false, 'message' => 'Product not found or unavailable.']);
   exit;
 }
 
+// Always use DB price, never client-supplied
 $unitPrice = $product['price'];
 
 if ($customerId) {

@@ -3,9 +3,14 @@ require_once dirname(__DIR__, 2) . '/config/database.php';
 requireAdminAuth();
 
 // Handle status toggle
-if (isset($_GET['toggle_status_id'])) {
-  $toggleId = (int)$_GET['toggle_status_id'];
-  $mysqli->query("UPDATE customers SET is_active = IF(is_active = 1, 0, 1) WHERE id = $toggleId");
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_status_id'])) {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    redirect(adminUrl('customers/?msg=Invalid+request'));
+  }
+  $toggleId = (int)$_POST['toggle_status_id'];
+  $stmt = $mysqli->prepare('UPDATE customers SET is_active = IF(is_active = 1, 0, 1) WHERE id = ?');
+  $stmt->bind_param('i', $toggleId);
+  $stmt->execute();
   redirect(adminUrl('customers/?msg=Customer+status+updated'));
 }
 
@@ -115,9 +120,13 @@ include dirname(__DIR__) . '/includes/header.php';
                 </td>
                 <td style="font-size: 12px; color: #64748b;"><?= date('M d, Y', strtotime($cust['created_at'])) ?></td>
                 <td style="text-align: right;">
-                  <a href="<?= adminUrl('customers/?toggle_status_id=' . $cust['id']) ?>" class="btn btn-secondary btn-sm" onclick="return confirm('Change account status for this customer?')">
-                    <?= $cust['is_active'] ? 'Disable' : 'Enable' ?>
-                  </a>
+                  <form method="POST" style="display: inline;" onsubmit="return confirm('Change account status for this customer?')">
+                    <?= getCSRFInput() ?>
+                    <input type="hidden" name="toggle_status_id" value="<?= $cust['id'] ?>">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                      <?= $cust['is_active'] ? 'Disable' : 'Enable' ?>
+                    </button>
+                  </form>
                 </td>
               </tr>
             <?php endforeach; ?>

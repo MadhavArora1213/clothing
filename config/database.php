@@ -54,10 +54,10 @@ define('CF_API_URL', 'https://api.cashfree.com/pg');
 
 // Ensure uploads directory exists
 if (!is_dir(UPLOADS_PATH . '/products')) {
-  @mkdir(UPLOADS_PATH . '/products', 0777, true);
+  @mkdir(UPLOADS_PATH . '/products', 0755, true);
 }
 if (!is_dir(UPLOADS_PATH . '/categories')) {
-  @mkdir(UPLOADS_PATH . '/categories', 0777, true);
+  @mkdir(UPLOADS_PATH . '/categories', 0755, true);
 }
 
 // Database Credentials (supports .env for hosted)
@@ -202,6 +202,31 @@ if ($conn && !$conn->connect_error) {
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
+    // Check if password_reset_tokens table exists
+    $checkPrt = $mysqli->query("SHOW TABLES LIKE 'password_reset_tokens'");
+    if ($checkPrt && $checkPrt->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT UNSIGNED NOT NULL,
+        token VARCHAR(64) NOT NULL UNIQUE,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_token (token),
+        INDEX idx_customer (customer_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+    // Check if rate_limits table exists
+    $checkRl = $mysqli->query("SHOW TABLES LIKE 'rate_limits'");
+    if ($checkRl && $checkRl->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS rate_limits (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        rate_key VARCHAR(255) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        attempts INT UNSIGNED DEFAULT 1,
+        first_attempt_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_rate (rate_key, ip_address)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    }
   }
 } else {
   $mysqli = null;
@@ -273,42 +298,72 @@ function rateLimit($key, $maxAttempts = 5, $windowSeconds = 300) {
   if (!$mysqli) return false;
 
   $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-  $rateKey = $key . ':' . $ip;
 
-  if (!isset($_SESSION['rate_limit'])) {
-    $_SESSION['rate_limit'] = [];
-  }
+  // Ensure rate_limits table exists
+  $mysqli->query("CREATE TABLE IF NOT EXISTS rate_limits (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    rate_key VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    attempts INT UNSIGNED DEFAULT 1,
+    first_attempt_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_rate (rate_key, ip_address)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
   $now = time();
+  $windowStart = date('Y-m-d H:i:s', $now - $windowSeconds);
 
-  if (!isset($_SESSION['rate_limit'][$rateKey])) {
-    $_SESSION['rate_limit'][$rateKey] = ['count' => 0, 'first' => $now];
+  // Clean old entries
+  $mysqli->query("DELETE FROM rate_limits WHERE first_attempt_at < '$windowStart'");
+
+  // Check current attempts
+  $stmt = $mysqli->prepare('SELECT id, attempts, first_attempt_at FROM rate_limits WHERE rate_key = ? AND ip_address = ?');
+  $stmt->bind_param('ss', $key, $ip);
+  $stmt->execute();
+  $result = $stmt->get_result()->fetch_assoc();
+
+  if ($result) {
+    $firstAttempt = strtotime($result['first_attempt_at']);
+    if (($now - $firstAttempt) > $windowSeconds) {
+      // Window expired, reset
+      $upd = $mysqli->prepare('UPDATE rate_limits SET attempts = 1, first_attempt_at = NOW() WHERE id = ?');
+      $upd->bind_param('i', $result['id']);
+      $upd->execute();
+      return false;
+    }
+    if ($result['attempts'] >= $maxAttempts) {
+      return true; // rate limited
+    }
+    // Increment
+    $upd = $mysqli->prepare('UPDATE rate_limits SET attempts = attempts + 1 WHERE id = ?');
+    $upd->bind_param('i', $result['id']);
+    $upd->execute();
+    return false;
+  } else {
+    // First attempt
+    $ins = $mysqli->prepare('INSERT INTO rate_limits (rate_key, ip_address, attempts, first_attempt_at) VALUES (?, ?, 1, NOW())');
+    $ins->bind_param('ss', $key, $ip);
+    $ins->execute();
+    return false;
   }
-
-  $rl = &$_SESSION['rate_limit'][$rateKey];
-
-  if (($now - $rl['first']) > $windowSeconds) {
-    $rl = ['count' => 0, 'first' => $now];
-  }
-
-  $rl['count']++;
-
-  if ($rl['count'] > $maxAttempts) {
-    return true; // rate limited
-  }
-
-  return false;
 }
 
 function getRemainingAttempts($key, $maxAttempts = 5, $windowSeconds = 300) {
-  if (!isset($_SESSION['rate_limit'])) return $maxAttempts;
+  global $mysqli;
+  if (!$mysqli) return $maxAttempts;
+
   $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-  $rateKey = $key . ':' . $ip;
-  $rl = $_SESSION['rate_limit'][$rateKey] ?? null;
-  if (!$rl) return $maxAttempts;
-  $elapsed = time() - $rl['first'];
-  if ($elapsed > $windowSeconds) return $maxAttempts;
-  return max(0, $maxAttempts - $rl['count']);
+  $now = time();
+  $windowStart = date('Y-m-d H:i:s', $now - $windowSeconds);
+
+  $stmt = $mysqli->prepare('SELECT attempts, first_attempt_at FROM rate_limits WHERE rate_key = ? AND ip_address = ?');
+  $stmt->bind_param('ss', $key, $ip);
+  $stmt->execute();
+  $result = $stmt->get_result()->fetch_assoc();
+
+  if (!$result) return $maxAttempts;
+  $firstAttempt = strtotime($result['first_attempt_at']);
+  if (($now - $firstAttempt) > $windowSeconds) return $maxAttempts;
+  return max(0, $maxAttempts - $result['attempts']);
 }
 
 function validateEmail($email) {
@@ -415,7 +470,7 @@ function handleImageUpload($fileArray, $subfolder = 'products') {
   $targetDir = UPLOADS_PATH . '/' . trim($subfolder, '/');
   
   if (!is_dir($targetDir)) {
-    @mkdir($targetDir, 0777, true);
+    @mkdir($targetDir, 0755, true);
   }
 
   $targetPath = $targetDir . '/' . $filename;

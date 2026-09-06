@@ -20,21 +20,27 @@ if (!$order) {
 }
 
 // Fetch Items with product images
-$items = $mysqli->query("
+$stmt = $mysqli->prepare('
   SELECT oi.*, p.image as fallback_img, p.slug as prod_slug 
   FROM order_items oi 
   LEFT JOIN products p ON oi.product_id = p.id 
-  WHERE oi.order_id = $id
-")->fetch_all(MYSQLI_ASSOC);
+  WHERE oi.order_id = ?
+');
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Fetch Status History
-$history = $mysqli->query("
+$histStmt = $mysqli->prepare('
   SELECT h.*, a.name as admin_name 
   FROM order_status_history h 
   LEFT JOIN admins a ON h.created_by = a.id 
-  WHERE h.order_id = $id 
+  WHERE h.order_id = ? 
   ORDER BY h.created_at DESC
-")->fetch_all(MYSQLI_ASSOC);
+');
+$histStmt->bind_param('i', $id);
+$histStmt->execute();
+$history = $histStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $error = '';
 $success = '';
@@ -65,13 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $order = $stmt->get_result()->fetch_assoc();
 
-    $history = $mysqli->query("
-      SELECT h.*, a.name as admin_name 
-      FROM order_status_history h 
-      LEFT JOIN admins a ON h.created_by = a.id 
-      WHERE h.order_id = $id 
-      ORDER BY h.created_at DESC
-    ")->fetch_all(MYSQLI_ASSOC);
+    $histStmt->execute();
+    $history = $histStmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
 }
 
@@ -235,6 +236,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <div class="admin-card" style="padding: var(--space-6); margin-bottom: var(--space-6);">
         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Update Order Status</h3>
         <form method="POST" action="">
+          <?= getCSRFInput() ?>
           <div class="form-group" style="margin-bottom: 14px;">
             <label>Order Pipeline Status</label>
             <select name="order_status" style="font-weight: 600;">

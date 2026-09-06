@@ -7,15 +7,19 @@ if ($id <= 0 || !$mysqli) {
   redirect(adminUrl('reviews/?msg=Invalid+review+ID'));
 }
 
-$stmt = $mysqli->prepare('DELETE FROM reviews WHERE id = ?');
-if (!$stmt) {
-  redirect(adminUrl('reviews/?msg=Database+error+occurred'));
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    redirect(adminUrl('reviews/?msg=Invalid+request'));
+  }
+  $stmt = $mysqli->prepare('DELETE FROM reviews WHERE id = ?');
+  if ($stmt) {
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    if ($stmt->affected_rows > 0) {
+      redirect(adminUrl('reviews/?msg=Review+deleted+successfully'));
+    } else {
+      redirect(adminUrl('reviews/?msg=Review+not+found'));
+    }
+  }
 }
-$stmt->bind_param('i', $id);
-$stmt->execute();
-
-if ($stmt->affected_rows > 0) {
-  redirect(adminUrl('reviews/?msg=Review+deleted+successfully'));
-} else {
-  redirect(adminUrl('reviews/?msg=Review+not+found'));
-}
+redirect(adminUrl('reviews/?msg=Invalid+request'));

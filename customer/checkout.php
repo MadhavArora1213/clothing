@@ -15,16 +15,25 @@ if (!isset($_SESSION['customer_id'])) {
 }
 
 $customerId = $_SESSION['customer_id'];
-$customer = $mysqli->query("SELECT * FROM customers WHERE id = $customerId")->fetch_assoc();
+$stmt = $mysqli->prepare('SELECT * FROM customers WHERE id = ?');
+$stmt->bind_param('i', $customerId);
+$stmt->execute();
+$customer = $stmt->get_result()->fetch_assoc();
 
-$cart = $mysqli->query("SELECT * FROM carts WHERE customer_id = $customerId")->fetch_assoc();
+$stmt = $mysqli->prepare('SELECT * FROM carts WHERE customer_id = ?');
+$stmt->bind_param('i', $customerId);
+$stmt->execute();
+$cart = $stmt->get_result()->fetch_assoc();
 if (!$cart) redirect('/customer/cart.php');
 
 $items = [];
 $subtotal = 0;
 $shippingAmount = 0;
 if ($cart) {
-  $items = $mysqli->query("SELECT ci.*, p.name, p.sku, p.price, p.image, p.shipping_charge, p.free_shipping, p.shipping_days FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = {$cart['id']}")->fetch_all(MYSQLI_ASSOC);
+  $stmt = $mysqli->prepare('SELECT ci.*, p.name, p.sku, p.price, p.image, p.shipping_charge, p.free_shipping, p.shipping_days FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = ?');
+  $stmt->bind_param('i', $cart['id']);
+  $stmt->execute();
+  $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   foreach ($items as $item) {
     $subtotal += $item['unit_price'] * $item['quantity'];
     if (!$item['free_shipping']) {
@@ -41,7 +50,13 @@ $couponCode = '';
 $grandTotal = $subtotal - $discountAmount + $shippingAmount;
 
 // ─── AJAX: Create Order + Cashfree ───
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Invalid request. Please refresh and try again.']);
+    exit;
+  }
   while (ob_get_level()) ob_end_clean();
   header('Content-Type: application/json');
 
@@ -63,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
   if (!$stmt) {
-    echo json_encode(['success' => false, 'message' => 'DB error: ' . $mysqli->error]);
+    echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
     exit;
   }
   $paymentStatus = 'pending';
@@ -71,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
   $paymentMethod = 'online';
   $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customer['email'], $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   if (!$stmt->execute()) {
-    echo json_encode(['success' => false, 'message' => 'Order creation failed: ' . $stmt->error]);
+    echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
     exit;
   }
   $orderId = $mysqli->insert_id;
@@ -86,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
     }
   }
 
-  $mysqli->query("DELETE FROM cart_items WHERE cart_id = {$cart['id']}");
+  $mysqli->query("DELETE FROM cart_items WHERE cart_id = " . (int)$cart['id']);
 
   // 2. Load .env
   $envFile = dirname(__DIR__) . '/.env';
@@ -253,6 +268,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <div class="ck-right">
     <form method="POST" id="checkoutForm" onsubmit="return handleCheckout(event)" style="display: flex; flex-direction: column; flex: 1;">
+      <?= getCSRFInput() ?>
       <div class="ck-section">
         <div class="ck-section-header"><h3><span class="ck-section-num">1</span> Customer</h3></div>
         <div class="ck-customer-card">
@@ -308,6 +324,7 @@ async function handleCheckout(e) {
   const form = document.getElementById('checkoutForm');
   const formData = new FormData(form);
   formData.append('ajax', '1');
+  // CSRF token is already in the form via getCSRFInput()
 
   try {
     const res = await fetch('<?= BASE_URL ?>/customer/checkout.php', {

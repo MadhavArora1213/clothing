@@ -21,6 +21,10 @@ $rating = (int)($_POST['rating'] ?? 0);
 $title = trim($_POST['title'] ?? '');
 $comment = trim($_POST['comment'] ?? '');
 
+// Validate input lengths
+if (strlen($title) > 200) $title = substr($title, 0, 200);
+if (strlen($comment) > 2000) $comment = substr($comment, 0, 2000);
+
 if ($productId <= 0 || $rating < 1 || $rating > 5) {
   http_response_code(400);
   echo json_encode(['error' => 'Invalid product or rating']);

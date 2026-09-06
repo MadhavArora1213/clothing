@@ -13,30 +13,33 @@ $parentCategories = array_filter($allCategories, fn($c) => $c['parent_id'] == 0)
 $subCategories = array_filter($allCategories, fn($c) => $c['parent_id'] > 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $name = sanitize($_POST['name'] ?? '');
-  $slug = sanitize($_POST['slug'] ?? '');
-  $sku = sanitize($_POST['sku'] ?? '');
-  $brand = sanitize($_POST['brand'] ?? 'urban outfit');
-  $gender = sanitize($_POST['gender'] ?? 'women');
-  $category_id = (int)($_POST['category_id'] ?? 0);
-  $subcategory_id = !empty($_POST['subcategory_id']) ? (int)$_POST['subcategory_id'] : null;
-  $description = $_POST['description'] ?? '';
-  $material = sanitize($_POST['material'] ?? '');
-  $care_instructions = sanitize($_POST['care_instructions'] ?? '');
-  $price = (float)($_POST['price'] ?? 0);
-  $original_price = !empty($_POST['original_price']) ? (float)$_POST['original_price'] : null;
-  $discount_percent = (int)($_POST['discount_percent'] ?? 0);
-  $shipping_charge = (float)($_POST['shipping_charge'] ?? 0);
-  $free_shipping = isset($_POST['free_shipping']) ? 1 : 0;
-  $shipping_days = sanitize($_POST['shipping_days'] ?? '3-5');
-  $is_featured = isset($_POST['is_featured']) ? 1 : 0;
-  $is_active = isset($_POST['is_active']) ? 1 : 0;
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    $error = 'Invalid request. Please try again.';
+  } else {
+    $name = sanitize($_POST['name'] ?? '');
+    $slug = sanitize($_POST['slug'] ?? '');
+    $sku = sanitize($_POST['sku'] ?? '');
+    $brand = sanitize($_POST['brand'] ?? 'urban outfit');
+    $gender = sanitize($_POST['gender'] ?? 'women');
+    $category_id = (int)($_POST['category_id'] ?? 0);
+    $subcategory_id = !empty($_POST['subcategory_id']) ? (int)$_POST['subcategory_id'] : null;
+    $description = $_POST['description'] ?? '';
+    $material = sanitize($_POST['material'] ?? '');
+    $care_instructions = sanitize($_POST['care_instructions'] ?? '');
+    $price = (float)($_POST['price'] ?? 0);
+    $original_price = !empty($_POST['original_price']) ? (float)$_POST['original_price'] : null;
+    $discount_percent = (int)($_POST['discount_percent'] ?? 0);
+    $shipping_charge = (float)($_POST['shipping_charge'] ?? 0);
+    $free_shipping = isset($_POST['free_shipping']) ? 1 : 0;
+    $shipping_days = sanitize($_POST['shipping_days'] ?? '3-5');
+    $is_featured = isset($_POST['is_featured']) ? 1 : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
 
-  $features = array_filter(array_map('trim', $_POST['features'] ?? []));
-  $colors = $_POST['colors'] ?? [];
-  $sizes = $_POST['sizes'] ?? [];
-  $subimage_urls = $_POST['subimage_urls'] ?? [];
-  $subimage_labels = $_POST['subimage_labels'] ?? [];
+    $features = array_filter(array_map('trim', $_POST['features'] ?? []));
+    $colors = $_POST['colors'] ?? [];
+    $sizes = $_POST['sizes'] ?? [];
+    $subimage_urls = $_POST['subimage_urls'] ?? [];
+    $subimage_labels = $_POST['subimage_labels'] ?? [];
 
   if (empty($name)) {
     $error = 'Product Name is required.';
@@ -150,7 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: ' . adminUrl('products/?success=Product+added+successfully'));
       exit;
     } else {
-      $error = 'Failed to create product: ' . $mysqli->error;
+      $error = 'Failed to create product. Please try again.';
+      error_log('Product creation failed: ' . $mysqli->error);
+    }
     }
   }
 }
@@ -180,6 +185,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <?php endif; ?>
 
   <form method="POST" action="" enctype="multipart/form-data" id="productForm">
+    <?= getCSRFInput() ?>
     <div class="admin-form-two-col">
       
       <!-- ================= LEFT SIDE ================= -->

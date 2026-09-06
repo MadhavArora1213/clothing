@@ -149,7 +149,10 @@ include dirname(__DIR__) . '/includes/header.php';
                 <td style="text-align: right;">
                   <div style="display: flex; gap: 8px; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="editCoupon(<?= htmlspecialchars(json_encode($coupon)) ?>)">Edit</button>
-                    <a href="<?= adminUrl('coupons/delete.php?id=' . $coupon['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this coupon?')">Delete</a>
+                    <form method="POST" action="<?= adminUrl('coupons/delete.php?id=' . $coupon['id']) ?>" style="display: inline;" onsubmit="return confirm('Delete this coupon?')">
+                      <?= getCSRFInput() ?>
+                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
                   </div>
                 </td>
               </tr>

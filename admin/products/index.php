@@ -276,10 +276,13 @@ include dirname(__DIR__) . '/includes/header.php';
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                       Edit
                     </a>
-                    <a href="<?= adminUrl('products/delete.php?id=' . $prod['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete \'<?= addslashes(sanitize($prod['name'])) ?>\'?')" title="Delete Product">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                      Delete
-                    </a>
+                    <form method="POST" action="<?= adminUrl('products/delete.php?id=' . $prod['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete \'<?= addslashes(sanitize($prod['name'])) ?>\'?')">
+                      <?= getCSRFInput() ?>
+                      <button type="submit" class="btn btn-danger btn-sm" title="Delete Product">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Delete
+                      </button>
+                    </form>
                   </div>
                 </td>
               </tr>

@@ -15,24 +15,32 @@ if (!$payload) {
   exit;
 }
 
+// ── Verify Webhook Signature ──
+$webhookSignature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '';
+if (empty($webhookSignature)) {
+  error_log("Cashfree Webhook: Missing x-webhook-signature header");
+  http_response_code(401);
+  echo json_encode(['error' => 'Missing signature']);
+  exit;
+}
+
+// Verify signature using HMAC SHA256
+$expectedSignature = hash_hmac('sha256', $rawBody, CF_SECRET_KEY);
+if (!hash_equals($expectedSignature, $webhookSignature)) {
+  error_log("Cashfree Webhook: Invalid signature. Expected: " . substr($expectedSignature, 0, 16) . "...");
+  http_response_code(401);
+  echo json_encode(['error' => 'Invalid signature']);
+  exit;
+}
+
 error_log("Cashfree Webhook RAW: " . $rawBody);
 
 // ── Cashfree 2023-08-01 payload structure ──
-// {
-//   "data": {
-//     "order": { "order_id": "ORD-XXX_timestamp", "order_status": "PAID", ... },
-//     "payment": { "payment_status": "SUCCESS", ... }
-//   },
-//   "event_time": "...",
-//   "type": "PAYMENT_SUCCESS_WEBHOOK"
-// }
-
 $eventType = $payload['type'] ?? '';
 $data      = $payload['data'] ?? [];
 $orderData = $data['order']   ?? [];
 $cfOrderId = $orderData['order_id'] ?? '';
 
-// Fallback: some older versions use payload.order path
 if (empty($cfOrderId)) {
   $cfOrderId = $payload['payload']['order']['order']['order_id']
             ?? $payload['payload']['order']['order_id']
@@ -43,14 +51,12 @@ if (empty($cfOrderId)) {
 if (empty($cfOrderId)) {
   error_log("Cashfree Webhook: no order_id found in payload: " . $rawBody);
   http_response_code(400);
-  echo json_encode(['error' => 'Missing order_id', 'keys' => array_keys($payload)]);
+  echo json_encode(['error' => 'Missing order_id']);
   exit;
 }
 
-// Our cf_order_id format: ORD-XXXXXXXX_timestamp → extract order_number = ORD-XXXXXXXX
 $orderNumber = explode('_', $cfOrderId)[0];
 
-// Find the order in DB
 $stmt = $mysqli->prepare('SELECT id, payment_status FROM orders WHERE order_number = ?');
 if (!$stmt) {
   http_response_code(500);
@@ -62,7 +68,6 @@ $stmt->execute();
 $order = $stmt->get_result()->fetch_assoc();
 
 if (!$order) {
-  // Try exact match too (in case order_number === cfOrderId)
   $stmt2 = $mysqli->prepare('SELECT id, payment_status FROM orders WHERE order_number = ?');
   $stmt2->bind_param('s', $cfOrderId);
   $stmt2->execute();
@@ -72,17 +77,15 @@ if (!$order) {
 if (!$order) {
   error_log("Cashfree Webhook: order not found for cf_order_id=$cfOrderId, order_number=$orderNumber");
   http_response_code(404);
-  echo json_encode(['error' => 'Order not found', 'cf_order_id' => $cfOrderId, 'order_number' => $orderNumber]);
+  echo json_encode(['error' => 'Order not found']);
   exit;
 }
 
-// Already processed
 if (in_array($order['payment_status'], ['paid', 'completed', 'refunded'])) {
   echo json_encode(['status' => 'already_processed']);
   exit;
 }
 
-// Determine new status from event type + payment status field
 $cfOrderStatus   = $orderData['order_status'] ?? '';
 $cfPaymentStatus = $data['payment']['payment_status'] ?? '';
 

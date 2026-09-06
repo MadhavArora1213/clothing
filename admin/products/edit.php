@@ -44,34 +44,49 @@ $subCategories = array_filter($allCategories, fn($c) => $c['parent_id'] > 0);
 $error = '';
 $success = '';
 
-// Handle Delete Single Image Action via GET
-if (isset($_GET['delete_image_id'])) {
-  $delImgId = (int)$_GET['delete_image_id'];
+// Handle Delete Single Image Action via POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image_id'])) {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Invalid+request'));
+  }
+  $delImgId = (int)$_POST['delete_image_id'];
   $delStmt = $mysqli->prepare("DELETE FROM product_images WHERE id = ? AND product_id = ?");
   $delStmt->bind_param('ii', $delImgId, $id);
   $delStmt->execute();
   redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Image+deleted'));
 }
 
-// Handle Set Primary Image via GET
-if (isset($_GET['set_primary_image_id'])) {
-  $primaryImgId = (int)$_GET['set_primary_image_id'];
+// Handle Set Primary Image via POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_primary_image_id'])) {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Invalid+request'));
+  }
+  $primaryImgId = (int)$_POST['set_primary_image_id'];
   $pStmt = $mysqli->prepare("SELECT image_url FROM product_images WHERE id = ? AND product_id = ?");
   $pStmt->bind_param('ii', $primaryImgId, $id);
   $pStmt->execute();
   $pImg = $pStmt->get_result()->fetch_assoc();
   if ($pImg) {
-    $mysqli->query("UPDATE product_images SET is_primary = 0 WHERE product_id = $id");
-    $mysqli->query("UPDATE product_images SET is_primary = 1 WHERE id = $primaryImgId");
-    $upProd = $mysqli->prepare("UPDATE products SET image = ? WHERE id = ?");
+    $updP1 = $mysqli->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
+    $updP1->bind_param('i', $id);
+    $updP1->execute();
+
+    $updP2 = $mysqli->prepare('UPDATE product_images SET is_primary = 1 WHERE id = ?');
+    $updP2->bind_param('i', $primaryImgId);
+    $updP2->execute();
+
+    $upProd = $mysqli->prepare('UPDATE products SET image = ? WHERE id = ?');
     $upProd->bind_param('si', $pImg['image_url'], $id);
     $upProd->execute();
   }
   redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Primary+image+updated'));
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $name = sanitize($_POST['name'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id']) && !isset($_POST['set_primary_image_id'])) {
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    $error = 'Invalid request. Please try again.';
+  } else {
+    $name = sanitize($_POST['name'] ?? '');
   $slug = sanitize($_POST['slug'] ?? '');
   $sku = sanitize($_POST['sku'] ?? '');
   $brand = sanitize($_POST['brand'] ?? 'urban outfit');
@@ -119,14 +134,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $uploaded = handleImageUpload($_FILES['main_image_file'], 'products');
       if ($uploaded) {
         $mainImageUrl = $uploaded;
-        $mysqli->query("UPDATE product_images SET is_primary = 0 WHERE product_id = $id");
+        $updImg1 = $mysqli->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
+        $updImg1->bind_param('i', $id);
+        $updImg1->execute();
         $insP = $mysqli->prepare("INSERT INTO product_images (product_id, image_url, image_label, sort_order, is_primary) VALUES (?, ?, 'Main Front', 0, 1)");
         $insP->bind_param('is', $id, $mainImageUrl);
         $insP->execute();
       }
     } elseif (!empty($_POST['main_image_url']) && $_POST['main_image_url'] !== $product['image']) {
       $mainImageUrl = trim($_POST['main_image_url']);
-      $mysqli->query("UPDATE product_images SET is_primary = 0 WHERE product_id = $id");
+      $updImg2 = $mysqli->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
+      $updImg2->bind_param('i', $id);
+      $updImg2->execute();
       $insP = $mysqli->prepare("INSERT INTO product_images (product_id, image_url, image_label, sort_order, is_primary) VALUES (?, ?, 'Main Front', 0, 1)");
       $insP->bind_param('is', $id, $mainImageUrl);
       $insP->execute();
@@ -179,7 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
       }
 
-      $mysqli->query("DELETE FROM product_colors WHERE product_id = $id");
+      $delClr = $mysqli->prepare('DELETE FROM product_colors WHERE product_id = ?');
+      $delClr->bind_param('i', $id);
+      $delClr->execute();
       if (!empty($colors)) {
         $clrStmt = $mysqli->prepare("INSERT INTO product_colors (product_id, color_code, color_name, sort_order) VALUES (?, ?, ?, ?)");
         foreach ($colors as $idx => $clr) {
@@ -192,7 +213,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
       }
 
-      $mysqli->query("DELETE FROM product_sizes WHERE product_id = $id");
+      $delSz = $mysqli->prepare('DELETE FROM product_sizes WHERE product_id = ?');
+      $delSz->bind_param('i', $id);
+      $delSz->execute();
       if (!empty($sizes)) {
         $szStmt = $mysqli->prepare("INSERT INTO product_sizes (product_id, size, stock, sku) VALUES (?, ?, ?, ?)");
         foreach ($sizes as $sz) {
@@ -217,7 +240,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $sizesStmt->execute();
       $existingSizes = $sizesStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     } else {
-      $error = 'Failed to update product: ' . $mysqli->error;
+      $error = 'Failed to update product. Please try again.';
+      error_log('Product update failed: ' . $mysqli->error);
+    }
     }
   }
 }
@@ -254,6 +279,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <?php endif; ?>
 
   <form method="POST" action="" enctype="multipart/form-data" id="editProductForm">
+    <?= getCSRFInput() ?>
     <div class="admin-form-two-col">
       
       <!-- ================= LEFT SIDE ================= -->
@@ -415,11 +441,19 @@ include dirname(__DIR__) . '/includes/header.php';
                     <span class="gallery-label-badge" style="font-size: 10px; padding: 2px 4px;"><?= sanitize($img['image_label'] ?? 'View') ?></span>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
                       <?php if (!$img['is_primary']): ?>
-                        <a href="<?= adminUrl('products/edit.php?id=' . $id . '&set_primary_image_id=' . $img['id']) ?>" style="font-size: 10px; color: #0284c7; text-decoration: underline;">Set Main</a>
+                        <form method="POST" style="display: inline;">
+                          <?= getCSRFInput() ?>
+                          <input type="hidden" name="set_primary_image_id" value="<?= $img['id'] ?>">
+                          <button type="submit" style="font-size: 10px; color: #0284c7; text-decoration: underline; background: none; border: none; cursor: pointer;">Set Main</button>
+                        </form>
                       <?php else: ?>
-                        <span style="font-size: 10px; color: #0284c7; font-weight: 700;">★ Main</span>
+                        <span style="font-size: 10px; color: #0284c7; font-weight: 700;">&#9733; Main</span>
                       <?php endif; ?>
-                      <a href="<?= adminUrl('products/edit.php?id=' . $id . '&delete_image_id=' . $img['id']) ?>" style="font-size: 10px; color: #dc2626;" onclick="return confirm('Delete image?')">Delete</a>
+                      <form method="POST" style="display: inline;" onsubmit="return confirm('Delete image?')">
+                        <?= getCSRFInput() ?>
+                        <input type="hidden" name="delete_image_id" value="<?= $img['id'] ?>">
+                        <button type="submit" style="font-size: 10px; color: #dc2626; background: none; border: none; cursor: pointer;">Delete</button>
+                      </form>
                     </div>
                   </div>
                 </div>

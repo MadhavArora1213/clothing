@@ -7,46 +7,52 @@ $success = '';
 
 // Handle Add / Edit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $name = sanitize($_POST['name'] ?? '');
-  $slug = sanitize($_POST['slug'] ?? '');
-  $department = sanitize($_POST['department'] ?? 'all');
-  $description = sanitize($_POST['description'] ?? '');
-  $parent_id = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : 0;
-  $sort_order = (int)($_POST['sort_order'] ?? 0);
-  $is_active = isset($_POST['is_active']) ? 1 : 0;
-  $edit_id = !empty($_POST['edit_id']) ? (int)$_POST['edit_id'] : 0;
-
-  // Handle Image Upload or URL
-  $image = sanitize($_POST['image'] ?? '');
-  if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-    $uploaded = handleImageUpload($_FILES['image_file'], 'categories');
-    if ($uploaded) {
-      $image = $uploaded;
-    }
-  }
-
-  if (empty($name)) {
-    $error = 'Category name is required.';
+  if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+    $error = 'Invalid request. Please try again.';
   } else {
-    if (empty($slug)) {
-      $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+    $name = sanitize($_POST['name'] ?? '');
+    $slug = sanitize($_POST['slug'] ?? '');
+    $department = sanitize($_POST['department'] ?? 'all');
+    $description = sanitize($_POST['description'] ?? '');
+    $parent_id = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : 0;
+    $sort_order = (int)($_POST['sort_order'] ?? 0);
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    $edit_id = !empty($_POST['edit_id']) ? (int)$_POST['edit_id'] : 0;
+
+    // Handle Image Upload or URL
+    $image = sanitize($_POST['image'] ?? '');
+    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+      $uploaded = handleImageUpload($_FILES['image_file'], 'categories');
+      if ($uploaded) {
+        $image = $uploaded;
+      }
     }
 
-    if ($edit_id > 0) {
-      $stmt = $mysqli->prepare('UPDATE categories SET name=?, slug=?, department=?, description=?, image=?, parent_id=?, sort_order=?, is_active=? WHERE id=?');
-      $stmt->bind_param('sssssiiii', $name, $slug, $department, $description, $image, $parent_id, $sort_order, $is_active, $edit_id);
-      if ($stmt->execute()) {
-        redirect(adminUrl('categories/?msg=Category+updated+successfully'));
-      } else {
-        $error = 'Update failed: ' . $mysqli->error;
-      }
+    if (empty($name)) {
+      $error = 'Category name is required.';
     } else {
-      $stmt = $mysqli->prepare('INSERT INTO categories (name, slug, department, description, image, parent_id, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-      $stmt->bind_param('sssssiii', $name, $slug, $department, $description, $image, $parent_id, $sort_order, $is_active);
-      if ($stmt->execute()) {
-        redirect(adminUrl('categories/?msg=Category+created+successfully'));
+      if (empty($slug)) {
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+      }
+
+      if ($edit_id > 0) {
+        $stmt = $mysqli->prepare('UPDATE categories SET name=?, slug=?, department=?, description=?, image=?, parent_id=?, sort_order=?, is_active=? WHERE id=?');
+        $stmt->bind_param('sssssiiii', $name, $slug, $department, $description, $image, $parent_id, $sort_order, $is_active, $edit_id);
+        if ($stmt->execute()) {
+          redirect(adminUrl('categories/?msg=Category+updated+successfully'));
+        } else {
+          $error = 'Update failed. Please try again.';
+          error_log('Category update failed: ' . $mysqli->error);
+        }
       } else {
-        $error = 'Creation failed: ' . $mysqli->error;
+        $stmt = $mysqli->prepare('INSERT INTO categories (name, slug, department, description, image, parent_id, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->bind_param('sssssiii', $name, $slug, $department, $description, $image, $parent_id, $sort_order, $is_active);
+        if ($stmt->execute()) {
+          redirect(adminUrl('categories/?msg=Category+created+successfully'));
+        } else {
+          $error = 'Creation failed. Please try again.';
+          error_log('Category creation failed: ' . $mysqli->error);
+        }
       }
     }
   }
@@ -97,6 +103,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <button type="button" class="btn btn-secondary btn-sm" onclick="closeForm()">✕ Close</button>
     </div>
     <form method="POST" action="" enctype="multipart/form-data" style="padding: var(--space-6);">
+      <?= getCSRFInput() ?>
       <input type="hidden" name="edit_id" id="editId" value="">
       <div class="form-grid">
         <div class="form-group">
@@ -244,9 +251,10 @@ include dirname(__DIR__) . '/includes/header.php';
                     <button type="button" class="btn btn-secondary btn-sm" onclick="editCategory(<?= htmlspecialchars(json_encode($cat)) ?>)">
                       Edit
                     </button>
-                    <a href="<?= adminUrl('categories/delete.php?id=' . $cat['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete category \'<?= addslashes(sanitize($cat['name'])) ?>\'?')">
-                      Delete
-                    </a>
+                    <form method="POST" action="<?= adminUrl('categories/delete.php?id=' . $cat['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete category \'<?= addslashes(sanitize($cat['name'])) ?>\'?')">
+                      <?= getCSRFInput() ?>
+                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
                   </div>
                 </td>
               </tr>

@@ -257,11 +257,20 @@ include dirname(__DIR__) . '/includes/header.php';
                 <td style="text-align: right;">
                   <div style="display: flex; gap: 6px; justify-content: flex-end;">
                     <?php if (!$review['is_approved']): ?>
-                      <a href="<?= adminUrl('reviews/approve.php?id=' . $review['id']) ?>" class="btn btn-secondary btn-sm" style="color: #166534; border-color: #BBF7D0;">Approve</a>
+                      <form method="POST" action="<?= adminUrl('reviews/approve.php?id=' . $review['id']) ?>" style="display: inline;">
+                        <?= getCSRFInput() ?>
+                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #166534; border-color: #BBF7D0;">Approve</button>
+                      </form>
                     <?php else: ?>
-                      <a href="<?= adminUrl('reviews/reject.php?id=' . $review['id']) ?>" class="btn btn-secondary btn-sm" style="color: #EA580C; border-color: #FED7AA;">Reject</a>
+                      <form method="POST" action="<?= adminUrl('reviews/reject.php?id=' . $review['id']) ?>" style="display: inline;">
+                        <?= getCSRFInput() ?>
+                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #EA580C; border-color: #FED7AA;">Reject</button>
+                      </form>
                     <?php endif; ?>
-                    <a href="<?= adminUrl('reviews/delete.php?id=' . $review['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this review permanently?')">Delete</a>
+                    <form method="POST" action="<?= adminUrl('reviews/delete.php?id=' . $review['id']) ?>" style="display: inline;" onsubmit="return confirm('Delete this review permanently?')">
+                      <?= getCSRFInput() ?>
+                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
                   </div>
                 </td>
               </tr>

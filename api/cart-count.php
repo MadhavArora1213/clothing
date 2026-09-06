@@ -19,8 +19,10 @@ if ($customerId) {
 
 $count = 0;
 if ($cart) {
-  $result = $mysqli->query("SELECT SUM(quantity) as total FROM cart_items WHERE cart_id = {$cart['id']}");
-  $count = $result->fetch_assoc()['total'] ?? 0;
+  $stmt = $mysqli->prepare('SELECT COALESCE(SUM(quantity), 0) as total FROM cart_items WHERE cart_id = ?');
+  $stmt->bind_param('i', $cart['id']);
+  $stmt->execute();
+  $count = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
 }
 
 echo json_encode(['count' => (int)$count]);
