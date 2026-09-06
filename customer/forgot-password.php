@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log('forgot-password: INSERT prepare failed: ' . $mysqli->error);
             $error = 'A system error occurred. Please try again.';
           } else {
-            $ins->bind_param('isi', $customer['id'], $token, $expiry);
+            $ins->bind_param('iss', $customer['id'], $token, $expiry);
             if (!$ins->execute()) {
               error_log('forgot-password: INSERT execute failed: ' . $ins->error);
               $error = 'A system error occurred. Please try again.';

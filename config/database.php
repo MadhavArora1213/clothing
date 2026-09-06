@@ -223,6 +223,8 @@ if ($conn && !$conn->connect_error) {
         INDEX idx_customer (customer_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
+    // Cleanup corrupt tokens (zero expiry)
+    $mysqli->query("DELETE FROM password_reset_tokens WHERE expires_at = '0000-00-00 00:00:00'");
     // Check if rate_limits table exists
     $checkRl = $mysqli->query("SHOW TABLES LIKE 'rate_limits'");
     if ($checkRl && $checkRl->num_rows === 0) {
