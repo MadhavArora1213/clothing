@@ -42,15 +42,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'An account with this email already exists.';
       } else {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $mysqli->prepare('INSERT INTO customers (first_name, last_name, email, phone, password) VALUES (?, ?, ?, ?, ?)');
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otpExpiry = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+
+        $stmt = $mysqli->prepare('INSERT INTO customers (first_name, last_name, email, phone, password, otp, otp_expiry, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, 0)');
         if ($stmt) {
-          $stmt->bind_param('sssss', $firstName, $lastName, $email, $phone, $hashedPassword);
+          $stmt->bind_param('sssssss', $firstName, $lastName, $email, $phone, $hashedPassword, $otp, $otpExpiry);
           $stmt->execute();
 
-          session_regenerate_id(true);
-          $_SESSION['customer_id'] = $mysqli->insert_id;
-          $_SESSION['customer_name'] = $firstName . ' ' . $lastName;
-          redirect('/customer/account.php');
+          $_SESSION['pending_verify_email'] = $email;
+
+          // Send OTP email
+          $otpHtml = '
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="UTF-8"></head>
+          <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+            <div style="max-width:500px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+              <div style="background:#0f172a;padding:30px;text-align:center;">
+                <h1 style="color:#D4AF37;font-size:24px;margin:0;">Urban Outfit Collection</h1>
+              </div>
+              <div style="padding:30px;text-align:center;">
+                <h2 style="color:#0f172a;font-size:20px;margin:0 0 16px;">Verify Your Email</h2>
+                <p style="color:#555;font-size:14px;line-height:1.6;">Use the following OTP to verify your account. This code expires in 10 minutes.</p>
+                <div style="margin:30px 0;">
+                  <span style="display:inline-block;font-size:36px;font-weight:700;letter-spacing:12px;color:#0f172a;background:#f8f8f8;padding:16px 28px;border-radius:8px;border:2px dashed #D4AF37;">' . $otp . '</span>
+                </div>
+                <p style="color:#999;font-size:12px;line-height:1.5;">If you did not create an account, please ignore this email.</p>
+                <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+                <p style="color:#aaa;font-size:11px;text-align:center;">Urban Outfit Collection — Fashion E-Commerce</p>
+              </div>
+            </div>
+          </body>
+          </html>';
+
+          $otpText = "Your OTP for Urban Outfit Collection: {$otp}\nThis code expires in 10 minutes.";
+          sendEmail($email, 'Verify Your Email — Urban Outfit Collection', $otpHtml, $otpText);
+
+          redirect('/customer/verify-otp.php');
         } else {
           $error = 'A system error occurred. Please try again.';
         }

@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $error = 'Please enter a valid email address.';
   } else {
-    $stmt = $mysqli->prepare('SELECT id, first_name, last_name, email, password, is_active FROM customers WHERE email = ?');
+    $stmt = $mysqli->prepare('SELECT id, first_name, last_name, email, password, is_active, is_verified FROM customers WHERE email = ?');
     if (!$stmt) {
       $error = 'A system error occurred. Please try again.';
     } else {
@@ -31,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if ($customer && password_verify($password, $customer['password'])) {
         if (!$customer['is_active']) {
           $error = 'Your account has been deactivated.';
+        } elseif (!$customer['is_verified']) {
+          $_SESSION['pending_verify_email'] = $customer['email'];
+          redirect('/customer/verify-otp.php');
         } else {
           session_regenerate_id(true);
           $_SESSION['customer_id'] = $customer['id'];

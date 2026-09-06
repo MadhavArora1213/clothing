@@ -52,6 +52,14 @@ define('CF_SECRET_KEY', $_ENV['CF_SECRET_KEY'] ?? '');
 define('CF_ENV', 'production');
 define('CF_API_URL', 'https://api.cashfree.com/pg');
 
+// SMTP Email Configuration
+define('SMTP_HOST', $_ENV['SMTP_HOST'] ?? 'smtp.gmail.com');
+define('SMTP_PORT', (int)($_ENV['SMTP_PORT'] ?? 587));
+define('SMTP_USER', $_ENV['SMTP_USER'] ?? '');
+define('SMTP_PASS', $_ENV['SMTP_PASS'] ?? '');
+define('SMTP_FROM', $_ENV['SMTP_FROM'] ?? '');
+define('SMTP_FROM_NAME', $_ENV['SMTP_FROM_NAME'] ?? 'Urban Outfit Collection');
+
 // Ensure uploads directory exists
 if (!is_dir(UPLOADS_PATH . '/products')) {
   @mkdir(UPLOADS_PATH . '/products', 0755, true);
@@ -226,6 +234,13 @@ if ($conn && !$conn->connect_error) {
         first_attempt_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         UNIQUE KEY unique_rate (rate_key, ip_address)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    }
+    // Add OTP columns to customers table if missing
+    $colCheck = $mysqli->query("SHOW COLUMNS FROM customers LIKE 'otp'");
+    if ($colCheck && $colCheck->num_rows === 0) {
+      $mysqli->query("ALTER TABLE customers ADD COLUMN otp VARCHAR(6) NULL AFTER password");
+      $mysqli->query("ALTER TABLE customers ADD COLUMN otp_expiry DATETIME NULL AFTER otp");
+      $mysqli->query("ALTER TABLE customers ADD COLUMN is_verified TINYINT(1) DEFAULT 0 AFTER otp_expiry");
     }
   }
 } else {
@@ -588,5 +603,59 @@ function gitPushUpload($filePath) {
     $result = json_decode($response, true);
     $msg    = $result['message'] ?? $response;
     error_log("gitPushUpload: FAILED {$filename} — HTTP {$httpCode}: {$msg}");
+  }
+}
+
+/**
+ * Send Email using Resend API (REST)
+ */
+function sendEmail($to, $subject, $htmlBody, $textBody = '') {
+  $apiKey = SMTP_PASS;
+  $from   = SMTP_FROM;
+  $fromName = SMTP_FROM_NAME;
+
+  if (empty($apiKey) || $apiKey === 're_xxxxxxxxxxxxxxxx') {
+    error_log('sendEmail: Resend API key not configured in .env');
+    return false;
+  }
+
+  $payload = json_encode([
+    'from'    => "{$fromName} <{$from}>",
+    'to'      => [$to],
+    'subject' => $subject,
+    'html'    => $htmlBody,
+    'text'    => $textBody ?: strip_tags($htmlBody),
+  ]);
+
+  $ch = curl_init('https://api.resend.com/emails');
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT        => 30,
+    CURLOPT_CUSTOMREQUEST  => 'POST',
+    CURLOPT_POSTFIELDS     => $payload,
+    CURLOPT_HTTPHEADER     => [
+      'Authorization: Bearer ' . $apiKey,
+      'Content-Type: application/json',
+    ],
+  ]);
+
+  $response = curl_exec($ch);
+  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $curlErr  = curl_error($ch);
+  curl_close($ch);
+
+  if ($curlErr) {
+    error_log("sendEmail: cURL error: {$curlErr}");
+    return false;
+  }
+
+  if ($httpCode === 200) {
+    error_log("sendEmail: Email sent to {$to} successfully");
+    return true;
+  } else {
+    $result = json_decode($response, true);
+    $msg = $result['message'] ?? $response;
+    error_log("sendEmail: Failed (HTTP {$httpCode}): {$msg}");
+    return false;
   }
 }
