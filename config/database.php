@@ -235,12 +235,10 @@ if ($conn && !$conn->connect_error) {
         UNIQUE KEY unique_rate (rate_key, ip_address)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     }
-    // Add OTP columns to customers table if missing
-    $colCheck = $mysqli->query("SHOW COLUMNS FROM customers LIKE 'otp'");
+    // Add is_verified column to customers table if missing
+    $colCheck = $mysqli->query("SHOW COLUMNS FROM customers LIKE 'is_verified'");
     if ($colCheck && $colCheck->num_rows === 0) {
-      $mysqli->query("ALTER TABLE customers ADD COLUMN otp VARCHAR(6) NULL AFTER password");
-      $mysqli->query("ALTER TABLE customers ADD COLUMN otp_expiry DATETIME NULL AFTER otp");
-      $mysqli->query("ALTER TABLE customers ADD COLUMN is_verified TINYINT(1) DEFAULT 0 AFTER otp_expiry");
+      $mysqli->query("ALTER TABLE customers ADD COLUMN is_verified TINYINT(1) DEFAULT 0 AFTER is_active");
     }
   }
 } else {

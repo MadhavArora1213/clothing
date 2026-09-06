@@ -123,8 +123,6 @@ CREATE TABLE IF NOT EXISTS customers (
   email VARCHAR(255) UNIQUE NOT NULL,
   phone VARCHAR(20) NULL,
   password VARCHAR(255) NOT NULL,
-  otp VARCHAR(6) NULL,
-  otp_expiry DATETIME NULL,
   is_verified TINYINT(1) DEFAULT 0,
   avatar VARCHAR(500) NULL,
   gender ENUM('male', 'female', 'other') NULL,
