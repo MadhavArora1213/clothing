@@ -4,6 +4,12 @@ require_once dirname(__DIR__) . '/config/database.php';
 $error = '';
 $success = '';
 
+// Flash message from password reset
+if (!empty($_SESSION['flash_success'])) {
+  $success = $_SESSION['flash_success'];
+  unset($_SESSION['flash_success']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
     $error = 'Invalid request. Please try again.';
@@ -385,6 +391,13 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="login-error">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
           <?= sanitize($error) ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($success): ?>
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;margin-bottom:var(--space-4);display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          <?= sanitize($success) ?>
         </div>
       <?php endif; ?>
 

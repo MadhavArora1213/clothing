@@ -134,7 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $del->bind_param('s', $token);
           $del->execute();
 
-          $success = 'Password reset successfully! You can now login with your new password.';
+          $_SESSION['flash_success'] = 'Password reset successfully! You can now login with your new password.';
+          redirect('/customer/login.php');
         }
       }
     }
