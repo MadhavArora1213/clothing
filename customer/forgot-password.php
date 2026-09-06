@@ -25,6 +25,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $customer = $stmt->get_result()->fetch_assoc();
 
         if ($customer) {
+          // Ensure password_reset_tokens table exists
+          $checkTable = $mysqli->query("SHOW TABLES LIKE 'password_reset_tokens'");
+          if ($checkTable && $checkTable->num_rows === 0) {
+            $mysqli->query("CREATE TABLE IF NOT EXISTS password_reset_tokens (
+              id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              customer_id INT UNSIGNED NOT NULL,
+              token VARCHAR(64) NOT NULL UNIQUE,
+              expires_at DATETIME NOT NULL,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              INDEX idx_token (token),
+              INDEX idx_customer (customer_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+          }
+
           $token = bin2hex(random_bytes(32));
           $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
@@ -33,10 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $del->execute();
 
           $ins = $mysqli->prepare('INSERT INTO password_reset_tokens (customer_id, token, expires_at) VALUES (?, ?, ?)');
-          $ins->bind_param('isi', $customer['id'], $token, $expiry);
-          $ins->execute();
-
-          $resetUrl = BASE_URL . '/customer/forgot-password.php?token=' . $token;
+          if (!$ins) {
+            error_log('forgot-password: INSERT prepare failed: ' . $mysqli->error);
+            $error = 'A system error occurred. Please try again.';
+          } else {
+            $ins->bind_param('isi', $customer['id'], $token, $expiry);
+            if (!$ins->execute()) {
+              error_log('forgot-password: INSERT execute failed: ' . $ins->error);
+              $error = 'A system error occurred. Please try again.';
+            } else {
+              $resetUrl = BASE_URL . '/customer/forgot-password.php?token=' . $token;
 
           // Send email
           $emailSubject = 'Reset Your Password — Urban Outfit Collection';
@@ -67,13 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           $emailSent = sendEmail($email, $emailSubject, $emailHtml, $emailText);
 
-          if ($emailSent) {
-            $success = 'A password reset link has been sent to your email address. Please check your inbox.';
-          } else {
-            // Fallback: show link on page if email fails
-            $success = 'Email could not be sent. Use this link to reset: <a href="' . $resetUrl . '" style="color:#D4AF37;font-weight:600;text-decoration:underline;">Click here to reset password</a>';
+              if ($emailSent) {
+                $success = 'A password reset link has been sent to your email address. Please check your inbox.';
+              } else {
+                $success = 'Email could not be sent. Use this link to reset: <a href="' . $resetUrl . '" style="color:#D4AF37;font-weight:600;text-decoration:underline;">Click here to reset password</a>';
+              }
+              $emailSent = true;
+            }
           }
-          $emailSent = true;
         } else {
           $success = 'If an account with that email exists, a password reset link has been sent.';
           $emailSent = true;
@@ -122,14 +143,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $validToken = false;
 if (!empty($resetToken) && empty($error)) {
-  $stmt = $mysqli->prepare('SELECT customer_id, expires_at FROM password_reset_tokens WHERE token = ?');
-  $stmt->bind_param('s', $resetToken);
-  $stmt->execute();
-  $tokenData = $stmt->get_result()->fetch_assoc();
-  if ($tokenData && strtotime($tokenData['expires_at']) >= time()) {
-    $validToken = true;
+  if (!$mysqli) {
+    $error = 'Database connection failed.';
   } else {
-    $error = 'Invalid or expired reset token.';
+    // Ensure table exists
+    $checkTable = $mysqli->query("SHOW TABLES LIKE 'password_reset_tokens'");
+    if ($checkTable && $checkTable->num_rows === 0) {
+      $mysqli->query("CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT UNSIGNED NOT NULL,
+        token VARCHAR(64) NOT NULL UNIQUE,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_token (token),
+        INDEX idx_customer (customer_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
+    $stmt = $mysqli->prepare('SELECT customer_id, expires_at FROM password_reset_tokens WHERE token = ?');
+    if (!$stmt) {
+      error_log('forgot-password: token query prepare failed: ' . $mysqli->error);
+      $error = 'A system error occurred.';
+    } else {
+      $stmt->bind_param('s', $resetToken);
+      $stmt->execute();
+      $tokenData = $stmt->get_result()->fetch_assoc();
+      if ($tokenData && strtotime($tokenData['expires_at']) >= time()) {
+        $validToken = true;
+      } else {
+        error_log('forgot-password: token not found or expired. Token length=' . strlen($resetToken));
+        $error = 'Invalid or expired reset token.';
+      }
+    }
   }
 }
 
