@@ -407,6 +407,10 @@ include dirname(__DIR__) . '/includes/header.php';
         <button type="submit" class="login-submit">Sign In</button>
       </form>
 
+      <div style="text-align: center; margin-top: var(--space-4);">
+        <a href="<?= BASE_URL ?>/customer/forgot-password.php" style="font-size: 13px; color: var(--color-accent); font-weight: 600; text-decoration: none;">Forgot Password?</a>
+      </div>
+
       <div class="login-footer">
         Don't have an account? <a href="<?= BASE_URL ?>/customer/register.php">Create Account</a>
       </div>
