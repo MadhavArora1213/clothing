@@ -127,15 +127,6 @@ if (!defined('BASE_URL')) {
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
-  <div class="uoc-announcement">
-    <div class="uoc-announcement-inner">
-      <span>Free shipping on orders above ₹999</span>
-      <span class="uoc-announcement-sep">|</span>
-      <span>7-day easy exchange</span>
-    </div>
-  </div>
-
   <!-- Main Header -->
   <header class="uoc-header" id="siteHeader">
     <div class="uoc-header-inner">
