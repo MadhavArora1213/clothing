@@ -16,59 +16,42 @@ if (!$product) {
   redirect(adminUrl('products/'));
 }
 
-function deleteProductCompletely($mysqli, $productId) {
-  $stmt1 = $mysqli->prepare('DELETE FROM product_images WHERE product_id = ?');
-  $stmt1->bind_param('i', $productId);
-  $stmt1->execute();
-
-  $stmt2 = $mysqli->prepare('DELETE FROM product_colors WHERE product_id = ?');
-  $stmt2->bind_param('i', $productId);
-  $stmt2->execute();
-
-  $stmt3 = $mysqli->prepare('DELETE FROM product_sizes WHERE product_id = ?');
-  $stmt3->bind_param('i', $productId);
-  $stmt3->execute();
-
-  $stmt4 = $mysqli->prepare('DELETE FROM reviews WHERE product_id = ?');
-  $stmt4->bind_param('i', $productId);
-  $stmt4->execute();
-
-  $stmt = $mysqli->prepare('DELETE FROM products WHERE id = ?');
-  $stmt->bind_param('i', $productId);
-  return $stmt->execute();
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
     redirect(adminUrl('products/?msg=Invalid+request'));
   }
-  deleteProductCompletely($mysqli, $id);
+
+  // Soft delete — set is_active = 0 so order history is preserved
+  $stmt = $mysqli->prepare('UPDATE products SET is_active = 0 WHERE id = ?');
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+
   redirect(adminUrl('products/?msg=Product+deleted+successfully'));
 }
 
-$pageTitle = 'Delete Product — urban outfit Admin';
+$pageTitle = 'Delete Product — Urban Outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <div class="admin-content">
   <div class="page-header">
-    <h1>Delete Product Confirmation</h1>
+    <h1>Delete Product</h1>
   </div>
-  <div class="admin-card" style="max-width: 600px; margin: 0 auto; padding: var(--space-8);">
-    <div style="text-align: center; margin-bottom: var(--space-6);">
+  <div class="admin-card" style="max-width: 600px; margin: 0 auto; padding: 40px;">
+    <div style="text-align: center; margin-bottom: 24px;">
       <div style="width: 64px; height: 64px; border-radius: 50%; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
       </div>
       <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Delete "<?= sanitize($product['name']) ?>"?</h2>
-      <p style="color: var(--color-text-secondary); font-size: 14px;">
-        Are you sure you want to permanently delete this product along with its images, color options, and size inventory? This action cannot be undone.
+      <p style="color: #666; font-size: 14px;">
+        This product will be hidden from the store. Existing orders will not be affected.
       </p>
     </div>
 
     <form method="POST" style="display: flex; gap: 12px; justify-content: center;">
       <?= getCSRFInput() ?>
-      <a href="<?= adminUrl('products/') ?>" class="btn btn-secondary">No, Cancel</a>
-      <button type="submit" class="btn btn-danger" style="background: #DC2626; color: white;">Yes, Delete Product</button>
+      <a href="<?= adminUrl('products/') ?>" style="padding: 10px 24px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; color: #333;">No, Cancel</a>
+      <button type="submit" style="padding: 10px 24px; background: #DC2626; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">Yes, Delete</button>
     </form>
   </div>
 </div>

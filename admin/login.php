@@ -90,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
-                  radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.04) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(255,255,255,0.02) 0%, transparent 50%);
       pointer-events: none;
     }
 
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .login-brand-name span {
-      color: #000;
+      color: #888;
     }
 
     .login-brand-sub {
@@ -179,8 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .field-input:focus {
-      border-color: #000;
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+      border-color: #555;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
     }
 
     .error-msg {
@@ -204,8 +204,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .btn-submit {
       width: 100%;
       padding: 14px;
-      background: #000;
-      color: #0A0A0A;
+      background: #fff;
+      color: #000;
       border: none;
       border-radius: 12px;
       font-size: 14px;
@@ -217,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .btn-submit:hover {
-      background: #E5C04A;
+      background: #e5e5e5;
     }
 
     .btn-submit:active {
@@ -232,13 +232,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .login-footer a {
       font-size: 13px;
       font-weight: 600;
-      color: #000;
+      color: #666;
       text-decoration: none;
       transition: color 0.2s;
     }
 
     .login-footer a:hover {
-      color: #E5C04A;
+      color: #fff;
     }
 
     @media (max-width: 480px) {
