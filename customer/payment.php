@@ -94,7 +94,7 @@ include dirname(__DIR__) . '/includes/header.php';
   #cf-pay-btn {
     width: 100%;
     padding: 16px;
-    background: var(--color-accent, #D4AF37);
+    background: var(--color-accent, #000);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -142,7 +142,7 @@ include dirname(__DIR__) . '/includes/header.php';
     text-decoration: none;
     transition: color 0.2s;
   }
-  .pay-cancel:hover { color: var(--color-accent, #D4AF37); }
+  .pay-cancel:hover { color: var(--color-accent, #000); }
 </style>
 
 <section class="pay-page">

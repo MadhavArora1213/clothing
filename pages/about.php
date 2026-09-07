@@ -1,8 +1,8 @@
 <?php
 require_once dirname(__DIR__) . '/config/database.php';
-$pageTitle       = 'About Urban Outfit Collection — Our Story, Craft & Vision';
-$pageDescription = 'Learn about Urban Outfit Collection — a homegrown Indian fashion brand crafting premium streetwear, ethnic fusion kurtas & resort co-ords. Made with love in India.';
-$pageKeywords    = 'about urban outfit, indian fashion brand, made in india clothing, streetwear brand india, ethnic fusion brand';
+$pageTitle       = 'About Urban Outfit Collection — Men\'s, Women\'s & Kids\' Fashion Store in Mukerian, Punjab';
+$pageDescription = 'Urban Outfit Collection is a premium fashion store based in Mukerian, Punjab. We offer trendy men\'s, women\'s, and kids\' clothing with worldwide shipping. Shop streetwear, ethnic wear, and accessories.';
+$pageKeywords    = 'urban outfit collection, mukerian clothing store, punjab fashion, mens wear mukerian, kids wear, womens fashion india, streetwear india';
 $pageCanonical   = 'https://urbanoutfitshop.com/pages/about.php';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
@@ -15,7 +15,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
 /* ── CSS VARIABLES ── */
 :root {
-  --ab-accent: #c9a84c;
+  --ab-accent: #000;
   --ab-accent-rgb: 201,168,76;
   --ab-dark: #0a0a0a;
   --ab-light: #f5f2eb;
@@ -1071,85 +1071,63 @@ footer.aura-footer .btn-primary:hover {
 
 <div class="ab-page">
 
-  <!-- FLOATING PARTICLES -->
-  <div class="ab-particles">
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-    <div class="ab-particle"></div>
-  </div>
-
   <!-- CUSTOM CURSOR -->
   <div class="ab-cursor"></div>
   <div class="ab-cursor-dot"></div>
 
-  <!-- ═══ HERO — ORGANIC SPLIT ═══ -->
+  <!-- ═══ HERO ═══ -->
   <section class="ab-hero-split">
     <div class="ab-hero-left">
-      <div class="ab-hero-label ab-reveal">Est. Mumbai, India</div>
       <h1 class="ab-hero-title-mega">
-        <span class="ab-reveal ab-reveal-delay-1">About</span>
-        <span class="line-accent ab-reveal ab-reveal-delay-2">Urban</span>
-        <span class="line-outline ab-reveal ab-reveal-delay-3">Outfit</span>
+        <span class="ab-reveal">About</span>
+        <span class="line-accent ab-reveal ab-reveal-delay-1">Urban</span>
+        <span class="line-outline ab-reveal ab-reveal-delay-2">Outfit</span>
       </h1>
-      <p class="ab-hero-tagline ab-reveal ab-reveal-delay-4">Where centuries-old Indian textile heritage dissolves into the pulse of contemporary streetwear. Every thread, a dialogue between past and future.</p>
+      <p class="ab-hero-tagline ab-reveal ab-reveal-delay-3">Urban Outfit Collection is a fashion and clothing store based in Mukerian, Punjab, offering clothing and accessories for men, women and kids.</p>
     </div>
     <div class="ab-hero-right">
       <div class="ab-hero-morph">
-        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=800&fit=crop" alt="Urban Outfit Craft">
+        <img src="../images/menhero1.png" alt="Urban Outfit Collection">
       </div>
-    </div>
-    <div class="ab-hero-scroll-indicator">
-      <span>Scroll</span>
-      <div class="ab-hero-scroll-line"></div>
     </div>
   </section>
 
   <!-- ═══ MARQUEE STRIP ═══ -->
   <div class="ab-marquee-strip">
     <div class="ab-marquee-track">
-      <span class="ab-marquee-item">Handcrafted</span>
-      <span class="ab-marquee-item">Heritage</span>
-      <span class="ab-marquee-item">Sustainable</span>
-      <span class="ab-marquee-item">Made in India</span>
-      <span class="ab-marquee-item">Premium Fabrics</span>
-      <span class="ab-marquee-item">Artisanal</span>
-      <span class="ab-marquee-item">Handcrafted</span>
-      <span class="ab-marquee-item">Heritage</span>
-      <span class="ab-marquee-item">Sustainable</span>
-      <span class="ab-marquee-item">Made in India</span>
-      <span class="ab-marquee-item">Premium Fabrics</span>
-      <span class="ab-marquee-item">Artisanal</span>
+      <span class="ab-marquee-item">Men's Clothing</span>
+      <span class="ab-marquee-item">Women's Wear</span>
+      <span class="ab-marquee-item">Kids Collection</span>
+      <span class="ab-marquee-item">Accessories</span>
+      <span class="ab-marquee-item">Mukerian, Punjab</span>
+      <span class="ab-marquee-item">Men's Clothing</span>
+      <span class="ab-marquee-item">Women's Wear</span>
+      <span class="ab-marquee-item">Kids Collection</span>
+      <span class="ab-marquee-item">Accessories</span>
+      <span class="ab-marquee-item">Mukerian, Punjab</span>
     </div>
   </div>
 
-  <!-- ═══ NARRATIVE SECTION ═══ -->
+  <!-- ═══ ABOUT SECTION ═══ -->
   <section class="ab-narrative">
     <div class="ab-narrative-inner">
-      <blockquote class="ab-narrative-quote ab-reveal">
-        We don't design clothes. We engineer <em>conversations</em> between centuries-old craft and the rhythm of now.
-      </blockquote>
       <div class="ab-narrative-columns">
         <div class="ab-narrative-col ab-reveal">
-          <div class="ab-narrative-col-num">01 — ORIGIN</div>
-          <h3>Rooted in Tradition</h3>
-          <p>Born in Mumbai, we work directly with artisan communities across 12 Indian states. Each piece carries the DNA of centuries-old textile mastery — block printing, hand embroidery, natural dyeing — reimagined for the modern wardrobe.</p>
+          <div class="ab-narrative-col-num">01 — ABOUT US</div>
+          <h3>Urban Outfit Collection</h3>
+          <p>Urban Outfit Collection is a fashion and clothing store based in Mukerian, Punjab, offering clothing and accessories for men, women and kids. Located opposite Sri Guru Nanak Girls Senior Secondary School, Mukerian, the store brings together everyday fashion and contemporary clothing choices for the whole family.</p>
         </div>
         <div class="ab-narrative-divider"></div>
         <div class="ab-narrative-col ab-reveal ab-reveal-delay-1">
-          <div class="ab-narrative-col-num">02 — PROCESS</div>
-          <h3>Crafted, Not Manufactured</h3>
-          <p>No assembly lines. No shortcuts. Every garment passes through the hands of 14 skilled artisans before reaching you. From fabric selection to final stitch — quality is never compromised, never rushed.</p>
+          <div class="ab-narrative-col-num">02 — WHAT WE OFFER</div>
+          <h3>Something for Everyone</h3>
+          <p>From casual everyday looks to outfits for different occasions, Urban Outfit Collection focuses on giving customers a convenient local destination for discovering clothing and accessories in one place. We stock men's, kids, women's and accessories.</p>
         </div>
         <div class="ab-narrative-divider"></div>
         <div class="ab-narrative-col ab-reveal ab-reveal-delay-2">
-          <div class="ab-narrative-col-num">03 — VISION</div>
-          <h3>Fashion Forward</h3>
-          <p>We see clothing as wearable art. Each collection is a curated story — blending Indian textile heritage with global street culture, creating pieces that transcend trends and speak to identity.</p>
+          <div class="ab-narrative-col-num">03 — VISIT US</div>
+          <h3>Find Us in Mukerian</h3>
+          <p>Visit us in Mukerian or connect with us on Instagram and Facebook to see our latest collections, new arrivals and updates. Open daily from 9:00 AM to 9:00 PM.</p>
         </div>
       </div>
     </div>
@@ -1157,191 +1135,92 @@ footer.aura-footer .btn-primary:hover {
 
   <hr class="ab-hr-accent">
 
-  <!-- ═══ BENTO GRID ═══ -->
+  <!-- ═══ CATEGORIES ═══ -->
   <section class="ab-bento">
     <div class="ab-bento-inner">
       <div class="ab-bento-header ab-reveal">
-        <div class="ab-eyebrow-alt">What We Stand For</div>
-        <h2>Beyond <em>Fabric</em></h2>
+        <div class="ab-eyebrow-alt">What We Offer</div>
+        <h2>Our <em>Categories</em></h2>
       </div>
       <div class="ab-bento-grid">
         <div class="ab-bento-card ab-bento-card-1 ab-reveal">
           <div class="ab-bento-card-bg">
-            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&h=600&fit=crop" alt="Artisan Craft">
+            <img src="../images/menhero1.png" alt="Men's Wear">
           </div>
           <div class="ab-bento-card-inner">
-            <div class="ab-bento-card-tag">Our Craft</div>
-            <h3>500+ Artisan Families</h3>
-            <p>Direct partnerships with master craftspeople across India. Fair wages, safe conditions, and preservation of dying art forms.</p>
+            <div class="ab-bento-card-tag">Men's Wear</div>
+            <h3>Men's Clothing</h3>
+            <p>Casual and contemporary clothing for men — from everyday basics to statement pieces.</p>
           </div>
         </div>
         <div class="ab-bento-card ab-bento-card-2 ab-reveal ab-reveal-delay-1">
           <div class="ab-bento-card-bg">
-            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=800&h=600&fit=crop" alt="Sustainable Fashion">
+            <img src="../images/womenhero1.png" alt="Women's Wear">
           </div>
           <div class="ab-bento-card-inner">
-            <div class="ab-bento-card-tag">Sustainability</div>
-            <h3>Zero Waste Promise</h3>
-            <p>Low-water dyeing, zero-waste pattern cutting, and biodegradable packaging. Fashion that respects the earth.</p>
+            <div class="ab-bento-card-tag">Women's Wear</div>
+            <h3>Women's Clothing</h3>
+            <p>Trendy and stylish options for women — fashion that fits every occasion.</p>
           </div>
         </div>
         <div class="ab-bento-card ab-bento-card-3 ab-reveal ab-reveal-delay-2">
           <div class="ab-bento-card-bg">
-            <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=800&h=600&fit=crop" alt="Premium Fabrics">
+            <img src="../images/kidshero1.png" alt="Kids Wear">
           </div>
           <div class="ab-bento-card-inner">
-            <div class="ab-bento-card-tag">Materials</div>
-            <h3>Premium Fabrics</h3>
-            <p>Organic linen, 260+ GSM French Terry, hand-loomed Chikankari — only the finest.</p>
+            <div class="ab-bento-card-tag">Kids Wear</div>
+            <h3>Kids' Clothing</h3>
+            <p>Comfortable and fun clothing for kids — because young ones deserve great style too.</p>
           </div>
         </div>
-        <div class="ab-bento-card ab-bento-card-4 ab-reveal ab-reveal-delay-3">
-          <div class="ab-bento-card-bg">
-            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=600&fit=crop" alt="Heritage Design">
-          </div>
-          <div class="ab-bento-card-inner">
-            <div class="ab-bento-card-tag">Heritage</div>
-            <h3>12 States, One Vision</h3>
-            <p>From Rajasthan's block prints to Kerala's handlooms — every region contributes its unique craft to our collections.</p>
-          </div>
-        </div>
+
       </div>
     </div>
   </section>
 
   <hr class="ab-hr-accent">
 
-  <!-- ═══ TIMELINE ═══ -->
-  <section class="ab-timeline">
-    <div class="ab-timeline-inner">
-      <div class="ab-timeline-header ab-reveal">
-        <h2>Our <em>Journey</em></h2>
-        <span class="ab-timeline-year">2019 — Present</span>
-      </div>
-      <div class="ab-timeline-track">
-        <div class="ab-timeline-item ab-reveal">
-          <div class="ab-timeline-item-num">2019</div>
-          <h3>The Spark</h3>
-          <p>Founded in a small Mumbai studio with a vision to bridge heritage craft and modern streetwear.</p>
-        </div>
-        <div class="ab-timeline-item ab-reveal ab-reveal-delay-1">
-          <div class="ab-timeline-item-num">2020</div>
-          <h3>First Collection</h3>
-          <p>Launched our debut "Roots & Routes" collection. 200 pieces, sold out in 72 hours.</p>
-        </div>
-        <div class="ab-timeline-item ab-reveal ab-reveal-delay-2">
-          <div class="ab-timeline-item-num">2022</div>
-          <h3>Artisan Network</h3>
-          <p>Expanded partnerships to 500+ artisan families across 12 Indian states.</p>
-        </div>
-        <div class="ab-timeline-item ab-reveal ab-reveal-delay-3">
-          <div class="ab-timeline-item-num">2024</div>
-          <h3>Global Reach</h3>
-          <p>50,000+ pieces crafted. Now shipping to 30+ countries worldwide.</p>
-        </div>
-        <div class="ab-timeline-item ab-reveal ab-reveal-delay-4">
-          <div class="ab-timeline-item-num">2026</div>
-          <h3>The Future</h3>
-          <p>Pioneering AI-assisted design while keeping the human craft at the core.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <hr class="ab-hr-accent">
-
-  <!-- ═══ TEAM ═══ -->
+  <!-- ═══ CONTACT / VISIT US ═══ -->
   <section class="ab-team">
     <div class="ab-team-inner">
       <div class="ab-team-header ab-reveal">
-        <div class="ab-eyebrow-alt">The People</div>
-        <h2>Behind the <em>Label</em></h2>
+        <div class="ab-eyebrow-alt">Get in Touch</div>
+        <h2>Visit <em>Us</em></h2>
       </div>
-      <div class="ab-team-grid">
-        <div class="ab-team-card ab-reveal">
-          <div class="ab-team-card-avatar">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face" alt="Founder">
+      <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+        <div class="ab-reveal" style="margin-bottom: 40px;">
+          <h3 style="font-family: var(--font-display); font-size: 24px; color: rgba(255,255,255,0.9); margin-bottom: 16px;">Urban Outfit Collection</h3>
+          <p style="color: rgba(255,255,255,0.6); line-height: 1.8; font-size: 15px;">
+            Opp. Sri Guru Nanak Girls Senior Secondary School,<br>
+            Mukerian, Punjab 144211
+          </p>
+        </div>
+        <div class="ab-reveal ab-reveal-delay-1" style="display: flex; justify-content: center; gap: 40px; margin-bottom: 40px; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ab-accent); margin-bottom: 8px;">Phone</div>
+            <a href="tel:+919780704131" style="color: rgba(255,255,255,0.8); text-decoration: none; font-size: 18px; font-family: var(--font-display);">+91 97807 04131</a>
           </div>
-          <div class="ab-team-card-role">Founder & Creative Director</div>
-          <h3>Arjun Mehta</h3>
-          <p>Former fashion editor turned craftsman. Driven by the belief that heritage is the new luxury.</p>
-          <div class="ab-team-card-socials">
-            <a href="#" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
-            </a>
-            <a href="#" aria-label="Twitter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-            </a>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ab-accent); margin-bottom: 8px;">Rating</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 18px; font-family: var(--font-display);">4.8 / 5 <span style="font-size: 13px; color: rgba(255,255,255,0.4);">(44 reviews)</span></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ab-accent); margin-bottom: 8px;">Hours</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 18px; font-family: var(--font-display);">9 AM – 9 PM</div>
+            <div style="color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 4px;">Mon – Sun</div>
           </div>
         </div>
-        <div class="ab-team-card ab-reveal ab-reveal-delay-1">
-          <div class="ab-team-card-avatar">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face" alt="Head of Design">
-          </div>
-          <div class="ab-team-card-role">Head of Design</div>
-          <h3>Priya Sharma</h3>
-          <p>NID graduate with 12 years in luxury textiles. She bridges the gap between runway and street.</p>
-          <div class="ab-team-card-socials">
-            <a href="#" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
-            </a>
-            <a href="#" aria-label="Twitter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div class="ab-team-card ab-reveal ab-reveal-delay-2">
-          <div class="ab-team-card-avatar">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" alt="Sustainability Lead">
-          </div>
-          <div class="ab-team-card-role">Sustainability Lead</div>
-          <h3>Dev Kapoor</h3>
-          <p>Environmental engineer turned fashion innovator. Architect of our zero-waste supply chain.</p>
-          <div class="ab-team-card-socials">
-            <a href="#" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
-            </a>
-            <a href="#" aria-label="Twitter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div class="ab-team-card ab-reveal ab-reveal-delay-3">
-          <div class="ab-team-card-avatar">
-            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face" alt="Brand Director">
-          </div>
-          <div class="ab-team-card-role">Brand Director</div>
-          <h3>Maya Iyer</h3>
-          <p>Storyteller at heart. Shapes how the world sees urban outfit through strategy and soul.</p>
-          <div class="ab-team-card-socials">
-            <a href="#" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
-            </a>
-            <a href="#" aria-label="Twitter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-            </a>
-          </div>
+        <div class="ab-reveal ab-reveal-delay-2" style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+          <a href="https://www.instagram.com/urban_0utfit_mukerian/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;transition:all 0.3s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.8)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+            @urban_0utfit_mukerian
+          </a>
+          <a href="https://www.facebook.com/urban.outfit.2025" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.8);text-decoration:none;font-size:14px;transition:all 0.3s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.8)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            Urban Outfit
+          </a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <hr class="ab-hr-accent">
-
-  <!-- ═══ CTA SPLIT ═══ -->
-  <section class="ab-cta-split">
-    <div class="ab-cta-split-left">
-      <div class="ab-eyebrow-alt">Join the Movement</div>
-      <h2>Ready to Wear <em>Heritage</em>?</h2>
-      <p>Explore our collections and discover pieces that carry centuries of craft into your everyday wardrobe. Each purchase supports 500+ artisan families across India.</p>
-      <a href="<?= BASE_URL ?>/shop.php" class="ab-cta-split-btn">
-        <span>Explore Collections</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
-    </div>
-    <div class="ab-cta-split-right">
-      <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=800&fit=crop" alt="Shop Urban Outfit">
-      <div class="ab-cta-split-overlay"></div>
     </div>
   </section>
 

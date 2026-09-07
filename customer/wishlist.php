@@ -108,7 +108,7 @@ include dirname(__DIR__) . '/includes/header.php';
     font-family: var(--font-body, 'Plus Jakarta Sans');
     text-decoration: none;
   }
-  .wish-share-btn:hover { border-color: var(--color-accent, #D4AF37); color: var(--color-accent, #D4AF37); }
+  .wish-share-btn:hover { border-color: var(--color-accent, #000); color: var(--color-accent, #000); }
   .wish-share-btn svg { width: 15px; height: 15px; }
 
   /* ── Product Grid ── */
@@ -214,7 +214,7 @@ include dirname(__DIR__) . '/includes/header.php';
     transition: all 0.15s;
     font-family: var(--font-body, 'Plus Jakarta Sans');
   }
-  .wish-size-btn:hover { background: var(--color-accent, #D4AF37); color: #fff; }
+  .wish-size-btn:hover { background: var(--color-accent, #000); color: #fff; }
 
   /* Card Body */
   .wish-card-body { padding: 16px; }
@@ -234,7 +234,7 @@ include dirname(__DIR__) . '/includes/header.php';
     text-decoration: none;
     transition: color 0.2s;
   }
-  .wish-card-name a:hover { color: var(--color-accent, #D4AF37); }
+  .wish-card-name a:hover { color: var(--color-accent, #000); }
 
   .wish-card-cat {
     font-size: 11px;
@@ -288,7 +288,7 @@ include dirname(__DIR__) . '/includes/header.php';
     justify-content: center;
     gap: 6px;
   }
-  .wish-add-btn:hover { background: var(--color-accent, #D4AF37); }
+  .wish-add-btn:hover { background: var(--color-accent, #000); }
   .wish-add-btn svg { width: 15px; height: 15px; }
 
   /* ── Empty State ── */
@@ -300,13 +300,13 @@ include dirname(__DIR__) . '/includes/header.php';
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.15));
+    background: linear-gradient(135deg, rgba(0,0,0,0.08), rgba(0,0,0,0.15));
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 24px;
   }
-  .wish-empty-icon svg { width: 40px; height: 40px; stroke: var(--color-accent, #D4AF37); }
+  .wish-empty-icon svg { width: 40px; height: 40px; stroke: var(--color-accent, #000); }
   .wish-empty h3 {
     font-family: var(--font-display, 'Playfair Display');
     font-size: 28px;
@@ -339,7 +339,7 @@ include dirname(__DIR__) . '/includes/header.php';
     transition: all 0.25s ease;
     font-family: var(--font-body, 'Plus Jakarta Sans');
   }
-  .wish-empty .btn-shop:hover { background: var(--color-accent, #D4AF37); transform: translateY(-1px); }
+  .wish-empty .btn-shop:hover { background: var(--color-accent, #000); transform: translateY(-1px); }
   .wish-empty .btn-shop svg { width: 16px; height: 16px; }
 
   /* ── Mobile ── */

@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .login-brand-name span {
-      color: #D4AF37;
+      color: #000;
     }
 
     .login-brand-sub {
@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .field-input:focus {
-      border-color: #D4AF37;
+      border-color: #000;
       box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
     }
 
@@ -204,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .btn-submit {
       width: 100%;
       padding: 14px;
-      background: #D4AF37;
+      background: #000;
       color: #0A0A0A;
       border: none;
       border-radius: 12px;
@@ -232,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .login-footer a {
       font-size: 13px;
       font-weight: 600;
-      color: #D4AF37;
+      color: #000;
       text-decoration: none;
       transition: color 0.2s;
     }

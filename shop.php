@@ -262,18 +262,18 @@ if ($subcategory && $mysqli) {
 ?>
 
 <style>
-/* ─── SHOP PAGE ─── */
+/* ─── SHOP HERO ─── */
 .shop-hero {
   position: relative;
-  background: #0A0A0A;
-  padding: 60px 0;
+  background: #000;
+  padding: 48px 0 40px;
   overflow: hidden;
 }
 .shop-hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(212,175,55,0.06) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.03) 0%, transparent 60%);
 }
 .shop-hero-inner {
   position: relative;
@@ -282,37 +282,30 @@ if ($subcategory && $mysqli) {
   justify-content: space-between;
   gap: 40px;
 }
-.shop-hero-left {}
 .shop-hero-eyebrow {
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  color: #D4AF37;
-  margin-bottom: 12px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 10px;
 }
 .shop-hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(40px, 5vw, 64px);
-  font-weight: 300;
-  font-style: italic;
+  font-family: 'Inter', var(--font-body);
+  font-size: clamp(36px, 4vw, 48px);
+  font-weight: 800;
   color: #fff;
   line-height: 1;
   letter-spacing: -0.03em;
 }
 .shop-hero-count {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
-  margin-top: 12px;
-}
-.shop-hero-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 10px;
 }
 .shop-hero-sort {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   padding: 10px 18px;
   border-radius: 40px;
   font-size: 12px;
@@ -324,110 +317,101 @@ if ($subcategory && $mysqli) {
 }
 .shop-hero-sort option { background: #1a1a1a; color: #fff; }
 
-/* ─── FILTER BAR ─── */
-.shop-filters {
-  padding: 20px 0;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 40px;
-}
-.shop-filter-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 22px;
-  border-radius: 60px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: all 0.3s ease;
-  border: 1px solid #e5e5e5;
-  color: #555;
-  background: #fff;
-}
-.shop-filter-pill:hover {
-  border-color: #D4AF37;
-  color: #D4AF37;
-}
-.shop-filter-pill.active {
-  background: #0F0F0F;
-  color: #fff;
-  border-color: #0F0F0F;
-}
-.shop-filter-pill.sale {
-  color: #dc2626;
-  border-color: #fecaca;
-}
-.shop-filter-pill.sale:hover,
-.shop-filter-pill.sale.active {
-  background: #dc2626;
-  color: #fff;
-  border-color: #dc2626;
-}
-.shop-filter-divider {
-  width: 1px;
-  height: 20px;
-  background: #ddd;
-  flex-shrink: 0;
+/* ─── SHOP LAYOUT: SIDEBAR + GRID ─── */
+.shop-layout {
+  display: flex;
+  gap: 32px;
+  padding: 32px 0 60px;
+  align-items: flex-start;
 }
 
-/* Filter Arrows */
-.shop-filters-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.shop-filters-inner {
-  flex: 1;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  scroll-behavior: smooth;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  padding: 4px 0;
-}
-.shop-filters-inner::-webkit-scrollbar { display: none; }
-.shop-filter-arrow {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid #ddd;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+/* ─── LEFT SIDEBAR ─── */
+.shop-sidebar {
+  width: 240px;
   flex-shrink: 0;
+  position: sticky;
+  top: 100px;
+}
+.sidebar-section {
+  margin-bottom: 28px;
+}
+.sidebar-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #000;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  text-decoration: none;
+  border-radius: 8px;
   transition: all 0.2s;
-  z-index: 2;
-  color: #333;
+  margin-bottom: 2px;
 }
-.shop-filter-arrow:hover {
-  background: #0F0F0F;
+.sidebar-link:hover {
+  background: #f5f5f5;
+  color: #000;
+}
+.sidebar-link.active {
+  background: #000;
   color: #fff;
-  border-color: #0F0F0F;
+  font-weight: 600;
 }
-.shop-filter-arrow-left { margin-right: 8px; }
-.shop-filter-arrow-right { margin-left: 8px; }
+.sidebar-link .count {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 500;
+}
+.sidebar-link.active .count {
+  color: rgba(255,255,255,0.6);
+}
+
+/* Sort dropdown in sidebar */
+.sidebar-sort {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  font-family: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* ─── RIGHT CONTENT ─── */
+.shop-content {
+  flex: 1;
+  min-width: 0;
+}
 
 /* ─── PRODUCT GRID ─── */
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 60px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 .shop-card {
   position: relative;
 }
 .shop-card-img {
   position: relative;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   aspect-ratio: 3/4;
   background: #f5f5f5;
@@ -453,11 +437,11 @@ if ($subcategory && $mysqli) {
 
 .shop-card-badges {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   z-index: 2;
 }
 .shop-badge-discount {
@@ -465,66 +449,21 @@ if ($subcategory && $mysqli) {
   color: #fff;
   font-size: 10px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 20px;
 }
 .shop-badge-bestseller {
-  background: #0F0F0F;
+  background: #000;
   color: #fff;
   font-size: 10px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 20px;
-}
-
-/* Quick Add Drawer */
-.shop-card-quick {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
-  padding: 12px;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
-  z-index: 3;
-  border-radius: 0 0 12px 12px;
-}
-.shop-card:hover .shop-card-quick { transform: translateY(0); }
-.shop-quick-label {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #999;
-  margin-bottom: 8px;
-  display: block;
-}
-.shop-quick-sizes {
-  display: flex;
-  gap: 6px;
-}
-.shop-quick-sizes button {
-  flex: 1;
-  padding: 8px 0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.shop-quick-sizes button:hover {
-  background: #0F0F0F;
-  color: #fff;
-  border-color: #0F0F0F;
 }
 
 /* Card Info */
 .shop-card-info {
-  padding: 14px 4px 0;
+  padding: 12px 2px 0;
 }
 .shop-card-cat {
   font-size: 10px;
@@ -532,30 +471,31 @@ if ($subcategory && $mysqli) {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #999;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .shop-card-name {
   font-size: 13px;
   font-weight: 600;
-  color: #0F0F0F;
+  color: #000;
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .shop-card-name a {
   text-decoration: none;
   color: inherit;
   transition: color 0.2s;
 }
-.shop-card-name a:hover { color: #D4AF37; }
+.shop-card-name a:hover { color: #555; }
 .shop-card-price {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 10px;
 }
 .shop-price-now {
   font-size: 14px;
   font-weight: 700;
-  color: #0F0F0F;
+  color: #000;
 }
 .shop-price-old {
   font-size: 12px;
@@ -568,155 +508,127 @@ if ($subcategory && $mysqli) {
   color: #16a34a;
 }
 
-/* Wishlist Heart Button */
-.shop-card-wishlist {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 3;
+/* Add to Bag Button */
+.shop-card-actions {
+  display: flex;
+  gap: 6px;
+}
+.shop-add-btn {
+  flex: 1;
+  padding: 9px 0;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.shop-add-btn:hover {
+  background: #333;
+}
+.shop-add-btn.adding {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.shop-wish-btn {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(8px);
-  border: none;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: #f5f5f5;
+  border: 1px solid #eee;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.2s;
 }
-.shop-card-wishlist:hover {
-  background: #fff;
-  transform: scale(1.1);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+.shop-wish-btn:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
 }
-.shop-card-wishlist svg {
-  width: 18px;
-  height: 18px;
+.shop-wish-btn svg {
+  width: 16px;
+  height: 16px;
   stroke: #999;
   fill: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
-.shop-card-wishlist:hover svg {
-  stroke: #dc2626;
-}
-.shop-card-wishlist.wishlisted {
-  background: #FEF2F2;
-}
-.shop-card-wishlist.wishlisted svg {
-  stroke: #dc2626;
-  fill: #dc2626;
-}
+.shop-wish-btn:hover svg { stroke: #dc2626; }
+.shop-wish-btn.wishlisted { background: #fef2f2; border-color: #fecaca; }
+.shop-wish-btn.wishlisted svg { stroke: #dc2626; fill: #dc2626; }
 
-/* shop-toast removed - using global uoc-toast */
-
-/* ─── BRAND STRIP ─── */
-.shop-brand-strip {
-  background: #FAF9F6;
-  padding: 60px 0;
-  margin: 20px 0 60px;
-}
-.shop-brand-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 32px;
-}
-.shop-brand-item {
+/* Empty state */
+.shop-empty {
+  grid-column: 1 / -1;
   text-align: center;
-  padding: 32px 16px;
+  padding: 80px 20px;
 }
-.shop-brand-icon {
-  font-size: 32px;
-  margin-bottom: 14px;
-}
-.shop-brand-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #0F0F0F;
-  margin-bottom: 6px;
-}
-.shop-brand-desc {
-  font-size: 12px;
-  color: #888;
-  line-height: 1.5;
-}
+.shop-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+.shop-empty h3 { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 8px; }
+.shop-empty p { font-size: 13px; color: #888; }
+.shop-empty a { display: inline-block; margin-top: 16px; padding: 10px 24px; background: #000; color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; }
+.shop-empty a:hover { background: #333; }
 
-/* ─── NEWSLETTER ─── */
-.shop-newsletter {
-  background: #0A0A0A;
-  padding: 80px 0;
-  text-align: center;
-}
-.shop-nl-title {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 4vw, 42px);
-  font-weight: 300;
-  font-style: italic;
-  color: #fff;
-  margin-bottom: 12px;
-}
-.shop-nl-desc {
-  font-size: 14px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 32px;
-}
-.shop-nl-form {
-  display: flex;
-  max-width: 480px;
-  margin: 0 auto;
-  border-radius: 60px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.shop-nl-input {
-  flex: 1;
-  padding: 16px 24px;
-  border: none;
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-}
-.shop-nl-input::placeholder { color: rgba(255,255,255,0.3); }
-.shop-nl-btn {
-  padding: 16px 32px;
-  background: #D4AF37;
-  color: #0A0A0A;
-  border: none;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
+/* ─── MOBILE FILTER TOGGLE ─── */
+.shop-mobile-filter-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.3s;
 }
-.shop-nl-btn:hover { background: #c9a84c; }
+.shop-mobile-filter-btn svg { width: 16px; height: 16px; }
+.shop-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+}
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1024px) {
-  .shop-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .shop-brand-grid { grid-template-columns: repeat(2, 1fr); }
+  .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 }
 @media (max-width: 768px) {
-  .shop-hero { padding: 40px 0; }
-  .shop-hero-inner { flex-direction: column; align-items: flex-start; }
-  .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-  .shop-brand-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
-  .shop-card-quick { transform: translateY(0); position: relative; background: #fff; border-radius: 0 0 12px 12px; }
+  .shop-hero { padding: 32px 0 24px; }
+  .shop-hero-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .shop-mobile-filter-btn { display: inline-flex; }
+  .shop-layout { flex-direction: column; gap: 0; padding: 16px 0 40px; }
+  .shop-sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    background: #fff;
+    z-index: 999;
+    padding: 24px 20px;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+  }
+  .shop-sidebar.open { left: 0; }
+  .shop-overlay.open { display: block; }
+  .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
 @media (max-width: 480px) {
   .shop-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .shop-card-name { font-size: 12px; }
   .shop-price-now { font-size: 13px; }
-  .shop-brand-grid { grid-template-columns: 1fr; }
-  .shop-nl-form { flex-direction: column; border-radius: 12px; }
-  .shop-nl-btn { padding: 14px; }
 }
 </style>
 
@@ -724,21 +636,26 @@ if ($subcategory && $mysqli) {
 <section class="shop-hero">
   <div class="aura-container">
     <div class="shop-hero-inner">
-      <div class="shop-hero-left">
+      <div>
         <div class="shop-hero-eyebrow">urban outfit</div>
         <h1 class="shop-hero-title"><?= $pageName ?></h1>
-        <p class="shop-hero-count"><?= count($products) ?> curated pieces &bull; 100% genuine fabrics</p>
+        <p class="shop-hero-count"><?= count($products) ?> products</p>
       </div>
-      <div class="shop-hero-right">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="shop-mobile-filter-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="16" y2="12"/><line x1="4" y1="18" x2="12" y2="18"/></svg>
+          Filters
+        </button>
         <form method="GET" action="">
           <?php if ($category): ?><input type="hidden" name="category" value="<?= htmlspecialchars($category) ?>"><?php endif; ?>
           <?php if ($subcategory): ?><input type="hidden" name="subcategory" value="<?= htmlspecialchars($subcategory) ?>"><?php endif; ?>
           <?php if ($sale): ?><input type="hidden" name="sale" value="1"><?php endif; ?>
           <?php if ($newArrivals): ?><input type="hidden" name="new" value="1"><?php endif; ?>
           <select name="sort" onchange="this.form.submit()" class="shop-hero-sort">
-            <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Newest First</option>
-            <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price: Low → High</option>
-            <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price: High → Low</option>
+            <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Newest</option>
+            <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price Low</option>
+            <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price High</option>
+            <option value="name" <?= $sort === 'name' ? 'selected' : '' ?>>A–Z</option>
           </select>
         </form>
       </div>
@@ -746,144 +663,133 @@ if ($subcategory && $mysqli) {
   </div>
 </section>
 
-<!-- Filters -->
+<!-- Mobile Overlay -->
+<div class="shop-overlay" id="shopOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Main Layout -->
 <div class="aura-container">
-  <div class="shop-filters">
-    <div class="shop-filters-wrap">
-      <button class="shop-filter-arrow shop-filter-arrow-left" id="filterLeft" onclick="scrollFilters(-1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="shop-filters-inner" id="filterScroll">
-      <a href="<?= BASE_URL ?>/shop.php" class="shop-filter-pill <?= empty($category) && !$sale && !$newArrivals && !$subcategory ? 'active' : '' ?>">All Drops</a>
-      <a href="<?= BASE_URL ?>/shop.php?new=1" class="shop-filter-pill <?= $newArrivals ? 'active' : '' ?>">New Arrivals</a>
+  <div class="shop-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="shop-sidebar" id="shopSidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Department</div>
+        <a href="<?= BASE_URL ?>/shop.php" class="sidebar-link <?= empty($category) && !$sale && !$newArrivals && !$subcategory ? 'active' : '' ?>">All Products</a>
+        <a href="<?= BASE_URL ?>/shop.php?new=1" class="sidebar-link <?= $newArrivals ? 'active' : '' ?>">New Arrivals</a>
+        <a href="<?= BASE_URL ?>/shop.php?sale=1" class="sidebar-link <?= $sale ? 'active' : '' ?>">Sale</a>
+      </div>
+
       <?php
-      $pillDepts = ['men' => 'Men', 'women' => 'Women', 'kids' => 'Kids'];
-      foreach ($pillDepts as $pSlug => $pLabel):
-        $pillSubs = [];
+      $sideDepts = ['men' => 'Men', 'women' => 'Women', 'kids' => 'Kids'];
+      foreach ($sideDepts as $sSlug => $sLabel):
+        $sideSubs = [];
         if ($mysqli) {
-          $pillStmt = $mysqli->prepare("SELECT name, slug FROM categories WHERE department = ? AND parent_id > 0 AND is_active = 1 ORDER BY sort_order ASC, name ASC");
-          if ($pillStmt) {
-            $pillStmt->bind_param('s', $pSlug);
-            $pillStmt->execute();
-            $pillSubs = $pillStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+          $sideStmt = $mysqli->prepare("SELECT name, slug FROM categories WHERE department = ? AND parent_id > 0 AND is_active = 1 ORDER BY sort_order ASC, name ASC");
+          if ($sideStmt) {
+            $sideStmt->bind_param('s', $sSlug);
+            $sideStmt->execute();
+            $sideSubs = $sideStmt->get_result()->fetch_all(MYSQLI_ASSOC);
           }
         }
       ?>
-      <span class="shop-filter-divider"></span>
-      <a href="<?= BASE_URL ?>/shop.php?category=<?= $pSlug ?>" class="shop-filter-pill <?= ($category === $pSlug && !$subcategory) ? 'active' : '' ?>"><?= $pLabel ?></a>
-      <?php foreach ($pillSubs as $ps): ?>
-      <a href="<?= BASE_URL ?>/shop.php?category=<?= $pSlug ?>&subcategory=<?= $ps['slug'] ?>" class="shop-filter-pill <?= ($category === $pSlug && $subcategory === $ps['slug']) ? 'active' : '' ?>"><?= htmlspecialchars($ps['name']) ?></a>
-      <?php endforeach; ?>
-      <?php endforeach; ?>
-      <span class="shop-filter-divider"></span>
-      <a href="<?= BASE_URL ?>/shop.php?category=accessories" class="shop-filter-pill <?= $category === 'accessories' ? 'active' : '' ?>">Accessories</a>
-      <a href="<?= BASE_URL ?>/shop.php?sale=1" class="shop-filter-pill sale <?= $sale ? 'active' : '' ?>">50% OFF Sale</a>
+      <div class="sidebar-section">
+        <div class="sidebar-title"><?= $sLabel ?></div>
+        <a href="<?= BASE_URL ?>/shop.php?category=<?= $sSlug ?>" class="sidebar-link <?= ($category === $sSlug && !$subcategory) ? 'active' : '' ?>">All <?= $sLabel ?></a>
+        <?php foreach ($sideSubs as $ss): ?>
+        <a href="<?= BASE_URL ?>/shop.php?category=<?= $sSlug ?>&subcategory=<?= $ss['slug'] ?>" class="sidebar-link <?= ($category === $sSlug && $subcategory === $ss['slug']) ? 'active' : '' ?>"><?= htmlspecialchars($ss['name']) ?></a>
+        <?php endforeach; ?>
       </div>
-      <button class="shop-filter-arrow shop-filter-arrow-right" id="filterRight" onclick="scrollFilters(1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  </div>
+      <?php endforeach; ?>
+    </aside>
 
-  <!-- Product Grid -->
-  <div class="shop-grid">
-    <?php foreach ($products as $item): ?>
-      <div class="shop-card">
-        <div class="shop-card-img">
-          <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>">
-            <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="main-img" loading="lazy">
-            <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="hover-img" loading="lazy">
-          </a>
-          <button class="shop-card-wishlist <?= in_array($item['id'], $wishlistedIds) ? 'wishlisted' : '' ?>" onclick="toggleWishlist(this, <?= $item['id'] ?>)" title="Add to Wishlist">
-            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-          </button>
-          <div class="shop-card-badges">
-            <?php if (!empty($item['discount_percent'])): ?>
-              <span class="shop-badge-discount"><?= $item['discount_percent'] ?>% OFF</span>
-            <?php endif; ?>
-            <?php if (!empty($item['is_bestseller'])): ?>
-              <span class="shop-badge-bestseller">Bestseller</span>
-            <?php endif; ?>
-          </div>
-          <div class="shop-card-quick">
-            <span class="shop-quick-label">Quick Add</span>
-            <div class="shop-quick-sizes">
-              <?php foreach (($item['sizes'] ?? []) as $sz): ?>
-              <button onclick="quickAddToCart(<?= $item['id'] ?>, '<?= htmlspecialchars($sz) ?>', '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>')"><?= htmlspecialchars($sz) ?></button>
-              <?php endforeach; ?>
+    <!-- RIGHT: PRODUCTS -->
+    <div class="shop-content">
+      <?php if (empty($products)): ?>
+      <div class="shop-grid">
+        <div class="shop-empty">
+          <div class="shop-empty-icon">:(</div>
+          <h3>No products found</h3>
+          <p>Try adjusting your filters or browse all products.</p>
+          <a href="<?= BASE_URL ?>/shop.php">View All Products</a>
+        </div>
+      </div>
+      <?php else: ?>
+      <div class="shop-grid">
+        <?php foreach ($products as $item): ?>
+          <?php $firstSize = !empty($item['sizes']) ? $item['sizes'][0] : ''; ?>
+          <div class="shop-card">
+            <div class="shop-card-img">
+              <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>">
+                <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="main-img" loading="lazy">
+                <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="hover-img" loading="lazy">
+              </a>
+              <div class="shop-card-badges">
+                <?php if (!empty($item['discount_percent'])): ?>
+                  <span class="shop-badge-discount"><?= $item['discount_percent'] ?>% OFF</span>
+                <?php endif; ?>
+                <?php if (!empty($item['is_bestseller'])): ?>
+                  <span class="shop-badge-bestseller">Bestseller</span>
+                <?php endif; ?>
+              </div>
+            </div>
+            <div class="shop-card-info">
+              <span class="shop-card-cat"><?= htmlspecialchars($item['category_name'] ?? '') ?></span>
+              <h4 class="shop-card-name">
+                <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
+              </h4>
+              <div class="shop-card-price">
+                <span class="shop-price-now">₹<?= number_format($item['price']) ?></span>
+                <?php if (!empty($item['original_price']) && $item['original_price'] > $item['price']): ?>
+                  <span class="shop-price-old">₹<?= number_format($item['original_price']) ?></span>
+                  <span class="shop-price-save">Save <?= $item['discount_percent'] ?>%</span>
+                <?php endif; ?>
+              </div>
+              <div class="shop-card-actions">
+                <button class="shop-add-btn" onclick="shopAddToCart(this, <?= $item['id'] ?>, '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>', '<?= $firstSize ?>')">Add to Bag</button>
+                <button class="shop-wish-btn <?= in_array($item['id'], $wishlistedIds) ? 'wishlisted' : '' ?>" onclick="toggleWishlist(this, <?= $item['id'] ?>)" title="Add to Wishlist">
+                  <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="shop-card-info">
-          <span class="shop-card-cat"><?= htmlspecialchars($item['category_name'] ?? 'Premium Essential') ?></span>
-          <h4 class="shop-card-name">
-            <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
-          </h4>
-          <div class="shop-card-price">
-            <span class="shop-price-now">₹<?= number_format($item['price']) ?></span>
-            <?php if (!empty($item['original_price']) && $item['original_price'] > $item['price']): ?>
-              <span class="shop-price-old">₹<?= number_format($item['original_price']) ?></span>
-              <span class="shop-price-save">Save <?= $item['discount_percent'] ?>%</span>
-            <?php endif; ?>
-          </div>
-        </div>
+        <?php endforeach; ?>
       </div>
-    <?php endforeach; ?>
-  </div>
-
-  <!-- Brand Strip -->
-  <section class="shop-brand-strip">
-    <div class="aura-container">
-      <div class="shop-brand-grid">
-        <div class="shop-brand-item">
-          <div class="shop-brand-icon">✈️</div>
-          <div class="shop-brand-title">Free Shipping</div>
-          <div class="shop-brand-desc">On prepaid &amp; COD orders above ₹999</div>
-        </div>
-        <div class="shop-brand-item">
-          <div class="shop-brand-icon">🔄</div>
-          <div class="shop-brand-title">7-Day Exchange</div>
-          <div class="shop-brand-desc">Hassle-free doorstep reverse pickup</div>
-        </div>
-        <div class="shop-brand-item">
-          <div class="shop-brand-icon">🛡️</div>
-          <div class="shop-brand-title">Genuine Fabrics</div>
-          <div class="shop-brand-desc">Pure organic linen &amp; combed cotton</div>
-        </div>
-        <div class="shop-brand-item">
-          <div class="shop-brand-icon">🧵</div>
-          <div class="shop-brand-title">Handcrafted</div>
-          <div class="shop-brand-desc">Made by 500+ Indian artisans</div>
-        </div>
-      </div>
+      <?php endif; ?>
     </div>
-  </section>
 
-
+  </div>
 </div>
 
 <script>
-function scrollFilters(dir) {
-  const el = document.getElementById('filterScroll');
-  el.scrollBy({ left: dir * 300, behavior: 'smooth' });
+function toggleSidebar() {
+  const sidebar = document.getElementById('shopSidebar');
+  const overlay = document.getElementById('shopOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+  document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
 
-function quickAddToCart(productId, size, name, price, image, slug) {
+function shopAddToCart(btn, productId, name, price, image, slug, size) {
+  btn.classList.add('adding');
+  btn.textContent = 'Adding...';
   fetch('<?= BASE_URL ?>/api/cart.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1&product_name=' + encodeURIComponent(name) + '&product_price=' + price + '&product_image=' + encodeURIComponent(image) + '&product_slug=' + encodeURIComponent(slug)
   }).then(r => r.json()).then(data => {
+    btn.classList.remove('adding');
+    btn.textContent = 'Add to Bag';
     if (data.success) {
-      const badges = document.querySelectorAll('.cart-count');
-      badges.forEach(b => b.textContent = data.cart_count || 1);
-      showToast(name + ' (Size ' + size + ') added to your bag!');
+      document.querySelectorAll('.cart-count').forEach(b => b.textContent = data.cart_count || 1);
+      showToast(name + ' added to your bag!');
     } else {
       showToast(data.message || 'Failed to add to cart', true);
     }
   }).catch(() => {
+    btn.classList.remove('adding');
+    btn.textContent = 'Add to Bag';
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';
   });
 }

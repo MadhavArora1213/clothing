@@ -59,18 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <head><meta charset="UTF-8"></head>
             <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
               <div style="max-width:500px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
-                <div style="background:#0f172a;padding:30px;text-align:center;">
-                  <h1 style="color:#D4AF37;font-size:24px;margin:0;">Urban Outfit Collection</h1>
+                <div style="background:#000;padding:30px;text-align:center;">
+                  <h1 style="color:#fff;font-size:24px;margin:0;">Urban Outfit Collection</h1>
                 </div>
                 <div style="padding:30px;text-align:center;">
-                  <h2 style="color:#0f172a;font-size:20px;margin:0 0 16px;">Verify Your Email</h2>
+                  <h2 style="color:#000;font-size:20px;margin:0 0 16px;">Verify Your Email</h2>
                   <p style="color:#555;font-size:14px;line-height:1.6;">Use the following OTP to verify your account. This code expires in 10 minutes.</p>
                   <div style="margin:30px 0;">
-                    <span style="display:inline-block;font-size:36px;font-weight:700;letter-spacing:12px;color:#0f172a;background:#f8f8f8;padding:16px 28px;border-radius:8px;border:2px dashed #D4AF37;">' . $otp . '</span>
+                    <span style="display:inline-block;font-size:36px;font-weight:700;letter-spacing:12px;color:#000;background:#f8f8f8;padding:16px 28px;border-radius:8px;border:2px dashed #000;">' . $otp . '</span>
                   </div>
                   <p style="color:#999;font-size:12px;line-height:1.5;">If you did not create an account, please ignore this email.</p>
                   <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
-                  <p style="color:#aaa;font-size:11px;text-align:center;">Urban Outfit Collection — Fashion E-Commerce</p>
+                  <p style="color:#aaa;font-size:11px;text-align:center;">Urban Outfit Collection — Mukerian, Punjab</p>
                 </div>
               </div>
             </body>
@@ -93,234 +93,292 @@ include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <style>
-  .reg-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: calc(100vh - var(--header-height));
-    margin-top: calc(-1 * var(--space-6));
-  }
+/* ====================== REGISTER PAGE ====================== */
+.reg-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - var(--header-height, 70px));
+}
 
-  .reg-left {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    min-height: 700px;
-  }
-  .reg-left-bg {
-    position: absolute;
-    inset: 0;
-    background: url('https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&h=1000&fit=crop&crop=top') center/cover no-repeat;
-  }
-  .reg-left-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(160deg, rgba(15,15,15,0.75) 0%, rgba(15,15,15,0.3) 50%, rgba(212,175,55,0.15) 100%);
-  }
-  .reg-left-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: var(--space-10);
-    max-width: 400px;
-  }
-  .reg-left-brand {
-    font-family: var(--font-display);
-    font-size: clamp(36px, 4vw, 52px);
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 0.04em;
-    margin-bottom: var(--space-3);
-  }
-  .reg-left-tagline {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--color-accent);
-    margin-bottom: var(--space-6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-  .reg-left-tagline::before,
-  .reg-left-tagline::after {
-    content: '';
-    width: 32px;
-    height: 1px;
-    background: var(--color-accent);
-  }
-  .reg-left-desc {
-    color: rgba(255,255,255,0.7);
-    font-size: 14px;
-    line-height: 1.7;
-  }
+/* Left Panel */
+.reg-left {
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.reg-left::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.reg-left-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 320px;
+}
+.reg-brand {
+  font-family: 'Inter', var(--font-body);
+  font-size: 48px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+.reg-tagline {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.reg-tagline::before,
+.reg-tagline::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+}
+.reg-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+.reg-features {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+.reg-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.reg-feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.reg-feature-icon svg { width: 18px; height: 18px; stroke: #fff; }
+.reg-feature span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
 
+/* Right Panel */
+.reg-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: #fff;
+  overflow-y: auto;
+}
+.reg-form-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+.reg-form-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.reg-form-header h1 {
+  font-family: 'Inter', var(--font-body);
+  font-size: 28px;
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+.reg-form-header p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Form */
+.reg-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.reg-form .form-row.full { grid-template-columns: 1fr; }
+.reg-form .field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.reg-form .field label .req { color: #DC2626; }
+.reg-form .field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #000;
+  background: #fafafa;
+  transition: all 0.2s;
+  font-family: 'Inter', var(--font-body);
+  box-sizing: border-box;
+}
+.reg-form .field input:focus {
+  outline: none;
+  border-color: #000;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+.reg-form .field input::placeholder { color: #bbb; }
+
+/* Password field */
+.password-field { position: relative; }
+.password-field input { padding-right: 44px !important; }
+.toggle-pass {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.toggle-pass:hover { color: #000; }
+
+/* Submit */
+.reg-submit {
+  width: 100%;
+  padding: 14px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', var(--font-body);
+  margin-top: 8px;
+}
+.reg-submit:hover {
+  background: #222;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Footer */
+.reg-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #999;
+}
+.reg-footer a {
+  color: #000;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.reg-footer a:hover { opacity: 0.6; }
+
+/* Error */
+.reg-error {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .reg-page { grid-template-columns: 1fr; }
+  .reg-left { display: none; }
   .reg-right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-10);
-    background: var(--color-bg);
-    overflow-y: auto;
+    min-height: calc(100vh - var(--header-height, 70px));
+    padding: 32px 24px;
   }
-  .reg-form-wrap {
-    width: 100%;
-    max-width: 420px;
-  }
-  .reg-form-header {
-    text-align: center;
-    margin-bottom: var(--space-6);
-  }
-  .reg-form-header .brand {
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--color-text-main);
-    margin-bottom: var(--space-2);
-  }
-  .reg-form-header h1 {
-    font-family: var(--font-display);
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--color-text-main);
-    margin-bottom: var(--space-2);
-  }
-  .reg-form-header p {
-    color: var(--color-text-muted);
-    font-size: 14px;
-  }
-
-  .reg-form .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
-  }
-  .reg-form .form-row.full { grid-template-columns: 1fr; }
-  .reg-form .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-main);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-  }
-  .reg-form .field label .req { color: #DC2626; }
-  .reg-form .field input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    color: var(--color-text-main);
-    background: var(--color-surface);
-    transition: var(--transition);
-    font-family: var(--font-body);
-    box-sizing: border-box;
-  }
-  .reg-form .field input:focus {
-    outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
-  }
-  .reg-form .field input::placeholder { color: var(--color-text-muted); }
-
-  .reg-submit {
-    width: 100%;
-    padding: 14px;
-    background: var(--color-text-main);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: var(--font-body);
-    margin-top: var(--space-2);
-  }
-  .reg-submit:hover { background: #333; transform: translateY(-1px); }
-
-  .password-field {
-    position: relative;
-  }
-  .password-field input {
-    padding-right: 44px !important;
-  }
-  .toggle-pass {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-  }
-  .toggle-pass:hover {
-    color: var(--color-text-main);
-  }
-
-  .reg-footer {
-    text-align: center;
-    margin-top: var(--space-6);
-    font-size: 13px;
-    color: var(--color-text-muted);
-  }
-  .reg-footer a {
-    color: var(--color-accent);
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .reg-footer a:hover { opacity: 0.7; }
-
-  .reg-error {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    color: #991B1B;
-    padding: 12px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: var(--space-4);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  @media (max-width: 900px) {
-    .reg-split { grid-template-columns: 1fr; }
-    .reg-left { display: none; }
-    .reg-right { min-height: calc(100vh - var(--header-height)); }
-  }
+}
+@media (max-width: 480px) {
+  .reg-right { padding: 24px 16px; }
+  .reg-form .form-row { grid-template-columns: 1fr; }
+}
 </style>
 
-<div class="reg-split">
+<div class="reg-page">
+  <!-- Left: Brand -->
   <div class="reg-left">
-    <div class="reg-left-bg"></div>
     <div class="reg-left-content">
-      <div class="reg-left-brand">UOC</div>
-      <div class="reg-left-tagline">Join the Movement</div>
-      <p class="reg-left-desc">
-        Create your account and unlock access to exclusive collections, personalized recommendations, and member-only offers.
+      <div class="reg-brand">UOC</div>
+      <div class="reg-tagline">Join the Movement</div>
+      <p class="reg-desc">
+        Create your account to unlock exclusive collections, personalized recommendations, and member-only offers.
       </p>
+      <div class="reg-features">
+        <div class="reg-feature">
+          <div class="reg-feature-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          </div>
+          <span>Premium Quality</span>
+        </div>
+        <div class="reg-feature">
+          <div class="reg-feature-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <span>Free Shipping</span>
+        </div>
+        <div class="reg-feature">
+          <div class="reg-feature-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg>
+          </div>
+          <span>Easy Returns</span>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Right: Form -->
   <div class="reg-right">
     <div class="reg-form-wrap">
       <div class="reg-form-header">
-        <div class="brand">UOC</div>
         <h1>Create Account</h1>
         <p>Join us for a premium shopping experience</p>
       </div>

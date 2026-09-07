@@ -1,20 +1,7 @@
 <?php
-require_once __DIR__ . '/config/database.php';
-
-$pageTitle       = 'UOC — Premium Streetwear & Ethnic Fusion Fashion India';
-$pageDescription = 'Shop premium oversized drop tees, Chikankari ethnic fusion kurtas, resort co-ords & streetwear. Handcrafted in India. Free shipping above ₹999.';
-$pageKeywords    = 'urban outfit collection, oversized tshirt india, ethnic fusion kurta, chikankari kurta online, resort co-ord set, streetwear india';
-$pageOgImage     = 'https://urbanoutfitshop.com/src/og-default.jpg';
-$pageCanonical   = 'https://urbanoutfitshop.com/';
-$pageSchema      = '{
-  "@type": "WebPage",
-  "@id": "https://urbanoutfitshop.com/#webpage",
-  "url": "https://urbanoutfitshop.com/",
-  "name": "UOC — Premium Streetwear & Ethnic Fusion Fashion India",
-  "isPartOf": { "@id": "https://urbanoutfitshop.com/#website" },
-  "about": { "@id": "https://urbanoutfitshop.com/#organization" }
-}';
-$currentPage = 'home';
+header('Location: men.php', true, 301);
+exit;
+?>
 
 // Fetch Featured products
 $featured = [];

@@ -345,7 +345,7 @@ include dirname(__DIR__) . '/includes/header.php';
 }
 .ord-empty-icon {
   width: 88px; height: 88px; border-radius: 50%;
-  background: rgba(212,175,55,0.1);
+  background: rgba(0,0,0,0.1);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 20px;
 }

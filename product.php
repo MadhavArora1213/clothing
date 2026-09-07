@@ -13,64 +13,10 @@ if ($mysqli && !empty($slug)) {
   }
 }
 
-// Fallback curated mock products if database is fresh
+// No fallback — only show real DB products
 if (!$product) {
-  $catalog = [
-    'vintage-nomad-acid-wash-tee' => [
-      'id' => 1,
-      'name' => 'Vintage Nomad Acid-Wash Oversized Drop Tee',
-      'brand' => 'AURA STREET',
-      'price' => 1299,
-      'original_price' => 2499,
-      'discount_percent' => 48,
-      'sku' => 'AUR-OVR-001',
-      'category_name' => 'Oversized Drops',
-      'description' => 'Engineered from heavyweight 260 GSM French Terry combed cotton with a bespoke mineral wash finish. Features a dropped shoulder boxy cut and reinforced ribbed collar.',
-      'material' => '100% Organic Combed Cotton (260 GSM)',
-      'care_instructions' => 'Machine wash cold inside out. Tumble dry low or line dry in shade. Do not iron on print.',
-      'images' => [
-        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1000&auto=format&fit=crop&q=85',
-        'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1000&auto=format&fit=crop&q=85',
-        'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1000&auto=format&fit=crop&q=85'
-      ]
-    ],
-    'artisanal-indigo-linen-kurta-set' => [
-      'id' => 2,
-      'name' => 'Artisanal Hand-Block Indigo Linen Kurta Set',
-      'brand' => 'ARYA CREATION',
-      'price' => 2899,
-      'original_price' => 4999,
-      'discount_percent' => 42,
-      'sku' => 'AUR-ETH-002',
-      'category_name' => 'Ethnic Fusion',
-      'description' => 'Pure handspun breathable linen kurta set with intricate Lucknowi tone-on-tone embroidery and mother-of-pearl buttons. Pairs with tapered linen trousers.',
-      'material' => '100% Pure French Flax Linen',
-      'care_instructions' => 'Dry clean recommended for first wash. Gentle cold wash thereafter.',
-      'images' => [
-        'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=1000&auto=format&fit=crop&q=85',
-        'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=1000&auto=format&fit=crop&q=85'
-      ]
-    ],
-    'sorrento-resort-linen-co-ord' => [
-      'id' => 3,
-      'name' => 'Sorrento Breathable Resort Linen Co-Ord',
-      'brand' => 'AURA RESORT',
-      'price' => 2499,
-      'original_price' => 4199,
-      'discount_percent' => 40,
-      'sku' => 'AUR-CRD-003',
-      'category_name' => 'Co-Ord Sets',
-      'description' => 'Relaxed camp-collar short sleeve shirt with matching drawstring pleated shorts in breezy textured linen-cotton blend.',
-      'material' => '65% Linen, 35% Cotton',
-      'care_instructions' => 'Machine wash gentle. Hang dry.',
-      'images' => [
-        'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1000&auto=format&fit=crop&q=85',
-        'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1000&auto=format&fit=crop&q=85'
-      ]
-    ]
-  ];
-
-  $product = $catalog[$slug] ?? $catalog['vintage-nomad-acid-wash-tee'];
+  header('Location: ' . BASE_URL . '/shop.php');
+  exit;
 }
 
 // Fetch images from product_images table for DB products
@@ -86,8 +32,7 @@ if (empty($imageUrls) && !empty($product['id']) && $mysqli) {
 }
 if (empty($imageUrls)) {
   $imageUrls = [
-    'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1000&auto=format&fit=crop&q=85',
-    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1000&auto=format&fit=crop&q=85'
+    'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1000&auto=format&fit=crop&q=85'
   ];
 }
 
@@ -466,10 +411,10 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         font-family: var(--font-display, 'Playfair Display');
         font-size: 52px;
         font-weight: 700;
-        color: #D4AF37;
+        color: #000;
         line-height: 1;
       }
-      .rev-summary-score .stars { color: #D4AF37; font-size: 18px; margin: 8px 0 4px; letter-spacing: 2px; }
+      .rev-summary-score .stars { color: #000; font-size: 18px; margin: 8px 0 4px; letter-spacing: 2px; }
       .rev-summary-score .count { font-size: 13px; color: #9A8E7E; }
 
       .rev-bars { flex: 1; }
@@ -490,7 +435,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       }
       .rev-bar-row .bar-fill {
         height: 100%;
-        background: #D4AF37;
+        background: #000;
         border-radius: 4px;
         transition: width 0.4s ease;
       }
@@ -518,7 +463,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #D4AF37, #B8960B);
+        background: linear-gradient(135deg, #000, #000);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -528,7 +473,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       }
       .rev-author-name { font-weight: 600; font-size: 14px; color: #1a1a1a; }
       .rev-author-date { font-size: 12px; color: #9A8E7E; }
-      .rev-stars { color: #D4AF37; font-size: 14px; letter-spacing: 1px; }
+      .rev-stars { color: #000; font-size: 14px; letter-spacing: 1px; }
       .rev-card-title {
         font-weight: 600;
         font-size: 15px;
@@ -571,7 +516,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         padding: 0;
       }
       .rev-star-select .star-btn.active,
-      .rev-star-select .star-btn:hover { color: #D4AF37; }
+      .rev-star-select .star-btn:hover { color: #000; }
       .rev-form-field { margin-bottom: 14px; }
       .rev-form-field label {
         display: block;
@@ -597,7 +542,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       .rev-form-field input:focus,
       .rev-form-field textarea:focus {
         outline: none;
-        border-color: #D4AF37;
+        border-color: #000;
       }
       .rev-form-field textarea { resize: vertical; min-height: 100px; }
       .rev-submit-btn {
@@ -615,7 +560,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         transition: all 0.25s;
         font-family: var(--font-body, 'Plus Jakarta Sans');
       }
-      .rev-submit-btn:hover { background: #D4AF37; transform: translateY(-1px); }
+      .rev-submit-btn:hover { background: #000; transform: translateY(-1px); }
       .rev-login-msg {
         text-align: center;
       }
@@ -650,12 +595,12 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         border-radius: 14px;
       }
       .rev-login-msg a {
-        color: #D4AF37;
+        color: #000;
         font-weight: 600;
         text-decoration: underline;
         text-underline-offset: 2px;
       }
-      .rev-login-msg a:hover { color: #B8960B; }
+      .rev-login-msg a:hover { color: #000; }
 
       @media (max-width: 700px) {
         .rev-summary { flex-direction: column; gap: 24px; text-align: center; }
@@ -786,8 +731,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
     }
 
     if (empty($relatedProducts)) {
-      $relatedProducts = array_filter($catalog ?? [], fn($p) => ($p['id'] ?? 0) != ($product['id'] ?? 0));
-      $relatedProducts = array_slice($relatedProducts, 0, 4);
+      $relatedProducts = [];
     }
     ?>
 
@@ -839,7 +783,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: var(--color-accent, #D4AF37);
+        color: var(--color-accent, #000);
         margin-bottom: 4px;
       }
       .rel-card-name {

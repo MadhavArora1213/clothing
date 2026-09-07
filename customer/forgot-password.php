@@ -67,13 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
             <div style="max-width:500px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
               <div style="background:#0f172a;padding:30px;text-align:center;">
-                <h1 style="color:#D4AF37;font-size:24px;margin:0;">Urban Outfit Collection</h1>
+                <h1 style="color:#000;font-size:24px;margin:0;">Urban Outfit Collection</h1>
               </div>
               <div style="padding:30px;">
                 <h2 style="color:#0f172a;font-size:20px;margin:0 0 16px;">Reset Your Password</h2>
                 <p style="color:#555;font-size:14px;line-height:1.6;">We received a request to reset the password for your account. Click the button below to set a new password. This link will expire in 1 hour.</p>
                 <div style="text-align:center;margin:30px 0;">
-                  <a href="' . $resetUrl . '" style="display:inline-block;padding:14px 32px;background:#D4AF37;color:#fff;font-weight:700;text-decoration:none;border-radius:8px;font-size:14px;">Reset Password</a>
+                  <a href="' . $resetUrl . '" style="display:inline-block;padding:14px 32px;background:#000;color:#fff;font-weight:700;text-decoration:none;border-radius:8px;font-size:14px;">Reset Password</a>
                 </div>
                 <p style="color:#999;font-size:12px;line-height:1.5;">If you did not request a password reset, please ignore this email. Your password will remain unchanged.</p>
                 <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               if ($emailSent) {
                 $success = 'A password reset link has been sent to your email address. Please check your inbox.';
               } else {
-                $success = 'Email could not be sent. Use this link to reset: <a href="' . $resetUrl . '" style="color:#D4AF37;font-weight:600;text-decoration:underline;">Click here to reset password</a>';
+                $success = 'Email could not be sent. Use this link to reset: <a href="' . $resetUrl . '" style="color:#000;font-weight:600;text-decoration:underline;">Click here to reset password</a>';
               }
               $emailSent = true;
             }
@@ -301,7 +301,7 @@ include dirname(__DIR__) . '/includes/header.php';
   .reset-form .form-group input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.12);
   }
   .reset-form .form-group input::placeholder {
     color: var(--color-text-muted);

@@ -413,7 +413,7 @@ include dirname(__DIR__) . '/includes/header.php';
   .profile-field input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.12);
   }
   .profile-field input:disabled {
     opacity: 0.55;

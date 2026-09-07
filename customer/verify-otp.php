@@ -28,13 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
         <div style="max-width:500px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
           <div style="background:#0f172a;padding:30px;text-align:center;">
-            <h1 style="color:#D4AF37;font-size:24px;margin:0;">Urban Outfit Collection</h1>
+            <h1 style="color:#000;font-size:24px;margin:0;">Urban Outfit Collection</h1>
           </div>
           <div style="padding:30px;text-align:center;">
             <h2 style="color:#0f172a;font-size:20px;margin:0 0 16px;">Verify Your Email</h2>
             <p style="color:#555;font-size:14px;line-height:1.6;">Here is your new OTP. This code expires in 10 minutes.</p>
             <div style="margin:30px 0;">
-              <span style="display:inline-block;font-size:36px;font-weight:700;letter-spacing:12px;color:#0f172a;background:#f8f8f8;padding:16px 28px;border-radius:8px;border:2px dashed #D4AF37;">' . $otp . '</span>
+              <span style="display:inline-block;font-size:28px;font-weight:700;letter-spacing:8px;color:#0f172a;background:#f8f8f8;padding:14px 24px;border-radius:8px;border:2px dashed #000;">' . $otp . '</span>
             </div>
             <p style="color:#999;font-size:12px;line-height:1.5;">If you did not create an account, please ignore this email.</p>
             <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
@@ -110,7 +110,7 @@ include dirname(__DIR__) . '/includes/header.php';
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(160deg, rgba(15,15,15,0.75) 0%, rgba(15,15,15,0.3) 50%, rgba(212,175,55,0.15) 100%);
+    background: linear-gradient(160deg, rgba(15,15,15,0.75) 0%, rgba(15,15,15,0.3) 50%, rgba(0,0,0,0.15) 100%);
   }
   .verify-left-content {
     position: relative;
@@ -209,7 +209,7 @@ include dirname(__DIR__) . '/includes/header.php';
   .otp-input-group input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.12);
   }
 
   .verify-submit {

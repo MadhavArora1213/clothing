@@ -143,22 +143,18 @@ if (!defined('BASE_URL')) {
           $currentPath = $_SERVER['REQUEST_URI'] ?? '';
           $catParam    = $_GET['category'] ?? '';
           ?>
-          <a href="<?= BASE_URL ?>/shop.php?category=men"
-             class="uoc-nav-link <?= ($catParam === 'men') ? 'active' : '' ?>">MEN</a>
-          <a href="<?= BASE_URL ?>/shop.php?category=women"
-             class="uoc-nav-link <?= ($catParam === 'women') ? 'active' : '' ?>">WOMEN</a>
-          <a href="<?= BASE_URL ?>/shop.php?category=kids"
-             class="uoc-nav-link <?= ($catParam === 'kids') ? 'active' : '' ?>">KIDS</a>
-          <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals"
-             class="uoc-nav-link <?= ($catParam === 'new-arrivals') ? 'active' : '' ?>">NEW</a>
-          <a href="<?= BASE_URL ?>/shop.php?sale=1"
-             class="uoc-nav-link uoc-nav-sale <?= isset($_GET['sale']) ? 'active' : '' ?>">SALE</a>
+          <a href="<?= BASE_URL ?>/men.php"
+             class="uoc-nav-link <?= ($currentPage === 'men') ? 'active' : '' ?>">MEN</a>
+          <a href="<?= BASE_URL ?>/women.php"
+             class="uoc-nav-link <?= ($currentPage === 'women') ? 'active' : '' ?>">WOMEN</a>
+          <a href="<?= BASE_URL ?>/kids.php"
+             class="uoc-nav-link <?= ($currentPage === 'kids') ? 'active' : '' ?>">KIDS</a>
         </nav>
       </div>
 
       <!-- CENTER: Logo -->
-      <a href="<?= BASE_URL ?>/" class="uoc-logo">
-        <img src="<?= BASE_URL ?>/src/Logo.png" alt="Urban Outfit Collection" style="height:44px;">
+      <a href="<?= BASE_URL ?>/men.php" class="uoc-logo">
+        <img src="<?= BASE_URL ?>/src/Logo.png" alt="Urban Outfit Collection" style="height:74px;">
       </a>
 
       <!-- RIGHT: Search + Icons -->
@@ -257,37 +253,105 @@ if (!defined('BASE_URL')) {
   }
   </script>
 
-  <!-- Mobile Drawer -->
+  <!-- Sidebar Drawer — The Souled Store Style -->
   <div class="uoc-drawer" id="mobileDrawer">
     <div class="uoc-drawer-backdrop" id="drawerBackdrop"></div>
     <div class="uoc-drawer-body">
-      <div class="uoc-drawer-head">
-        <span class="uoc-drawer-brand">UOC</span>
-        <button class="uoc-drawer-close" id="closeDrawerBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+      <!-- Drawer Top: Logo + Login + Close -->
+      <div class="drawer-top">
+        <a href="<?= BASE_URL ?>/men.php" class="drawer-logo">
+          <img src="<?= BASE_URL ?>/src/Logo.png" alt="Urban Outfit Collection" style="height:50px;">
+        </a>
+        <?php if (isset($_SESSION['customer_id'])): ?>
+          <a href="<?= BASE_URL ?>/customer/account.php" class="drawer-login-btn">My Account</a>
+        <?php else: ?>
+          <a href="<?= BASE_URL ?>/customer/login.php" class="drawer-login-btn">Log In/Register</a>
+        <?php endif; ?>
+        <button class="drawer-close-btn" id="closeDrawerBtn" aria-label="Close menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <nav class="uoc-drawer-links">
-        <a href="<?= BASE_URL ?>/">Home</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=new-arrivals">New Arrivals</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=men">Men</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=women">Women</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion">Ethnic Fusion</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=co-ords">Co-Ords</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=oversized">Oversized</a>
-        <a href="<?= BASE_URL ?>/shop.php?category=sale" style="color:#e11d48;font-weight:600;">Sale</a>
-        <div class="uoc-drawer-divider"></div>
-        <a href="<?= BASE_URL ?>/pages/about.php">About Us</a>
-        <a href="<?= BASE_URL ?>/pages/contact.php">Contact</a>
-        <?php if (isset($_SESSION['customer_id'])): ?>
-          <a href="<?= BASE_URL ?>/customer/account.php">My Account</a>
-          <a href="<?= BASE_URL ?>/customer/orders.php">Orders</a>
-        <?php else: ?>
-          <a href="<?= BASE_URL ?>/customer/login.php" style="font-weight:600;">Sign In</a>
-          <a href="<?= BASE_URL ?>/customer/register.php">Create Account</a>
-        <?php endif; ?>
-      </nav>
-    </div>
+
+      <!-- Department Tabs -->
+      <div class="drawer-tabs">
+        <button class="drawer-tab active" data-dept="men">MEN</button>
+        <button class="drawer-tab" data-dept="women">WOMEN</button>
+        <button class="drawer-tab" data-dept="kids">KIDS</button>
+      </div>
+
+      <!-- Scrollable Content -->
+      <?php
+      $drawerSubcats = ['men' => [], 'women' => [], 'kids' => []];
+      if ($mysqli) {
+        foreach (['men' => 2, 'women' => 1, 'kids' => 3] as $dept => $pid) {
+          $dRes = $mysqli->query("SELECT c.id, c.name, c.slug, c.image FROM categories c WHERE c.parent_id = {$pid} AND c.is_active = 1 ORDER BY c.sort_order");
+          if ($dRes) $drawerSubcats[$dept] = $dRes->fetch_all(MYSQLI_ASSOC);
+        }
+      }
+      $placeholderImg = BASE_URL . '/src/placeholder-cat.png';
+      ?>
+      <div class="drawer-scroll">
+
+        <?php foreach (['men', 'women', 'kids'] as $dept): ?>
+        <div class="drawer-dept-content" id="drawerDept<?= ucfirst($dept) ?>" style="<?= $dept !== 'men' ? 'display:none' : '' ?>">
+
+          <!-- Category Image Carousel -->
+          <div class="drawer-carousel">
+            <div class="drawer-carousel-track">
+              <?php foreach ($drawerSubcats[$dept] as $i => $sub): ?>
+              <a href="<?= BASE_URL ?>/shop.php?category=<?= htmlspecialchars($sub['slug']) ?>" class="drawer-carousel-card">
+                <img src="<?= !empty($sub['image']) ? htmlspecialchars($sub['image']) : $placeholderImg ?>" alt="<?= htmlspecialchars($sub['name']) ?>" loading="lazy">
+                <span><?= htmlspecialchars($sub['name']) ?></span>
+              </a>
+              <?php endforeach; ?>
+            </div>
+            <?php if (count($drawerSubcats[$dept]) > 4): ?>
+            <div class="drawer-carousel-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <?php endif; ?>
+          </div>
+
+          <!-- Shop All Categories Grid -->
+          <div class="drawer-section-label">Shop All</div>
+          <div class="drawer-cat-grid">
+            <?php foreach ($drawerSubcats[$dept] as $sub): ?>
+            <a href="<?= BASE_URL ?>/shop.php?category=<?= htmlspecialchars($sub['slug']) ?>" class="drawer-cat-item">
+              <img src="<?= !empty($sub['image']) ? htmlspecialchars($sub['image']) : $placeholderImg ?>" alt="<?= htmlspecialchars($sub['name']) ?>" loading="lazy">
+              <span><?= htmlspecialchars($sub['name']) ?></span>
+            </a>
+            <?php endforeach; ?>
+          </div>
+
+        </div>
+        <?php endforeach; ?>
+
+        <!-- Accordion: More -->
+        <div class="drawer-accordion">
+          <button class="drawer-accordion-header" data-target="moreContent">
+            <span>More</span>
+            <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="drawer-accordion-body" id="moreContent">
+            <div class="drawer-links-list">
+              <?php if (isset($_SESSION['customer_id'])): ?>
+                <a href="<?= BASE_URL ?>/customer/account.php">My Account</a>
+                <a href="<?= BASE_URL ?>/customer/orders.php">My Orders</a>
+                <a href="<?= BASE_URL ?>/customer/wishlist.php">My Wishlist</a>
+              <?php endif; ?>
+              <a href="<?= BASE_URL ?>/pages/about.php">About Us</a>
+              <a href="<?= BASE_URL ?>/pages/contact.php">Contact Us</a>
+              <a href="<?= BASE_URL ?>/pages/privacy.php">Privacy Policy</a>
+              <a href="<?= BASE_URL ?>/pages/terms.php">Terms & Conditions</a>
+              <a href="<?= BASE_URL ?>/pages/shipping.php">Shipping Info</a>
+              <a href="<?= BASE_URL ?>/pages/returns.php">Returns & Exchanges</a>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- .drawer-scroll -->
+    </div><!-- .drawer-body -->
   </div>
 
   <!-- Search Modal -->

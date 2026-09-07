@@ -66,311 +66,322 @@ include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <style>
-  .login-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: calc(100vh - var(--header-height));
-    margin-top: calc(-1 * var(--space-6));
-  }
+/* ====================== LOGIN PAGE ====================== */
+.login-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - var(--header-height, 70px));
+}
 
-  /* ── Left Panel (Brand Hero) ── */
-  .login-left {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    min-height: 600px;
-  }
-  .login-left-bg {
-    position: absolute;
-    inset: 0;
-    background: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=1000&fit=crop&crop=top') center/cover no-repeat;
-  }
-  .login-left-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(160deg, rgba(15,15,15,0.75) 0%, rgba(15,15,15,0.3) 50%, rgba(212,175,55,0.15) 100%);
-  }
-  .login-left-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: var(--space-10);
-    max-width: 400px;
-  }
-  .login-left-brand {
-    font-family: var(--font-display);
-    font-size: clamp(36px, 4vw, 52px);
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 0.04em;
-    margin-bottom: var(--space-3);
-  }
-  .login-left-tagline {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--color-accent);
-    margin-bottom: var(--space-6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-  .login-left-tagline::before,
-  .login-left-tagline::after {
-    content: '';
-    width: 32px;
-    height: 1px;
-    background: var(--color-accent);
-  }
-  .login-left-desc {
-    color: rgba(255,255,255,0.7);
-    font-size: 14px;
-    line-height: 1.7;
-    margin-bottom: var(--space-8);
-  }
-  .login-left-features {
-    display: flex;
-    gap: var(--space-6);
-    justify-content: center;
-  }
-  .login-feature {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .login-feature-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(6px);
-  }
-  .login-feature-icon svg { width: 18px; height: 18px; stroke: var(--color-accent); }
-  .login-feature span {
-    font-size: 11px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 500;
-  }
+/* Left Panel */
+.login-left {
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.login-left::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.login-left-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 320px;
+}
+.login-brand {
+  font-family: 'Inter', var(--font-body);
+  font-size: 48px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+.login-tagline {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.login-tagline::before,
+.login-tagline::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+}
+.login-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+.login-features {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+.login-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.login-feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-feature-icon svg { width: 18px; height: 18px; stroke: #fff; }
+.login-feature span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
 
-  /* ── Right Panel (Form) ── */
+/* Right Panel */
+.login-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: #fff;
+}
+.login-form-wrap {
+  width: 100%;
+  max-width: 360px;
+}
+.login-form-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.login-form-header h1 {
+  font-family: 'Inter', var(--font-body);
+  font-size: 28px;
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+.login-form-header p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Form */
+.login-form .form-group {
+  margin-bottom: 16px;
+}
+.login-form .form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.login-form .form-group input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #000;
+  background: #fafafa;
+  transition: all 0.2s;
+  font-family: 'Inter', var(--font-body);
+  box-sizing: border-box;
+}
+.login-form .form-group input:focus {
+  outline: none;
+  border-color: #000;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+.login-form .form-group input::placeholder {
+  color: #bbb;
+}
+
+/* Password field */
+.password-field { position: relative; }
+.password-field input { padding-right: 44px !important; }
+.toggle-pass {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.toggle-pass:hover { color: #000; }
+
+/* Submit */
+.login-submit {
+  width: 100%;
+  padding: 14px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', var(--font-body);
+  letter-spacing: 0.02em;
+  margin-top: 8px;
+}
+.login-submit:hover {
+  background: #222;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Links */
+.login-links {
+  text-align: center;
+  margin-top: 20px;
+}
+.login-links a {
+  font-size: 13px;
+  color: #000;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.login-links a:hover { opacity: 0.6; }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: #ccc;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+
+/* Footer */
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #999;
+}
+.login-footer a {
+  color: #000;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.login-footer a:hover { opacity: 0.6; }
+
+/* Error / Success */
+.login-error {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.login-success {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #166534;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .login-page { grid-template-columns: 1fr; }
+  .login-left { display: none; }
   .login-right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-10);
-    background: var(--color-bg);
+    min-height: calc(100vh - var(--header-height, 70px));
+    padding: 32px 24px;
   }
-  .login-form-wrap {
-    width: 100%;
-    max-width: 400px;
-  }
-  .login-form-header {
-    text-align: center;
-    margin-bottom: var(--space-8);
-  }
-  .login-form-header .brand {
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--color-text-main);
-    margin-bottom: var(--space-2);
-    letter-spacing: 0.02em;
-  }
-  .login-form-header h1 {
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-text-main);
-    margin-bottom: var(--space-2);
-  }
-  .login-form-header p {
-    color: var(--color-text-muted);
-    font-size: 14px;
-  }
-
-  .login-form .form-group {
-    margin-bottom: var(--space-4);
-  }
-  .login-form .form-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-main);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-  }
-  .login-form .form-group input {
-    width: 100%;
-    padding: 13px 16px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    color: var(--color-text-main);
-    background: var(--color-surface);
-    transition: var(--transition);
-    font-family: var(--font-body);
-    box-sizing: border-box;
-  }
-  .login-form .form-group input:focus {
-    outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
-  }
-  .login-form .form-group input::placeholder {
-    color: var(--color-text-muted);
-  }
-
-  .login-submit {
-    width: 100%;
-    padding: 14px;
-    background: var(--color-text-main);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: var(--font-body);
-    letter-spacing: 0.02em;
-    margin-top: var(--space-2);
-  }
-  .login-submit:hover { background: #333; transform: translateY(-1px); }
-
-  .password-field {
-    position: relative;
-  }
-  .password-field input {
-    padding-right: 44px !important;
-  }
-  .toggle-pass {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-  }
-  .toggle-pass:hover {
-    color: var(--color-text-main);
-  }
-
-  .login-divider {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin: var(--space-6) 0;
-    color: var(--color-text-muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .login-divider::before,
-  .login-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--color-border);
-  }
-
-  .login-social-btn {
-    width: 100%;
-    padding: 13px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-text-main);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-family: var(--font-body);
-  }
-  .login-social-btn:hover { border-color: var(--color-text-main); background: var(--color-bg); }
-
-  .login-footer {
-    text-align: center;
-    margin-top: var(--space-6);
-    font-size: 13px;
-    color: var(--color-text-muted);
-  }
-  .login-footer a {
-    color: var(--color-accent);
-    font-weight: 600;
-    text-decoration: none;
-    transition: var(--transition);
-  }
-  .login-footer a:hover { opacity: 0.7; }
-
-  .login-error {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    color: #991B1B;
-    padding: 12px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: var(--space-4);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  @media (max-width: 900px) {
-    .login-split { grid-template-columns: 1fr; }
-    .login-left { display: none; }
-    .login-right { min-height: calc(100vh - var(--header-height)); }
-  }
+}
+@media (max-width: 480px) {
+  .login-right { padding: 24px 16px; }
+}
 </style>
 
-<div class="login-split">
-  <!-- Left: Brand Hero -->
+<div class="login-page">
+  <!-- Left: Brand -->
   <div class="login-left">
-    <div class="login-left-bg"></div>
     <div class="login-left-content">
-      <div class="login-left-brand">UOC</div>
-      <div class="login-left-tagline">Fashion E-Commerce</div>
-      <p class="login-left-desc">
-        Discover curated collections that blend timeless elegance with contemporary design. Your style journey begins here.
+      <div class="login-brand">UOC</div>
+      <div class="login-tagline">Urban Outfit Collection</div>
+      <p class="login-desc">
+        Fashion and clothing store for men, women and kids. Mukerian, Punjab.
       </p>
-      <div class="login-left-features">
+      <div class="login-features">
         <div class="login-feature">
           <div class="login-feature-icon">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
           </div>
           <span>Premium Quality</span>
         </div>
         <div class="login-feature">
           <div class="login-feature-icon">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
           </div>
           <span>Free Shipping</span>
         </div>
         <div class="login-feature">
           <div class="login-feature-icon">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM12 12l6-3-6-3v6z"/></svg>
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg>
           </div>
           <span>Easy Returns</span>
         </div>
@@ -378,11 +389,10 @@ include dirname(__DIR__) . '/includes/header.php';
     </div>
   </div>
 
-  <!-- Right: Login Form -->
+  <!-- Right: Form -->
   <div class="login-right">
     <div class="login-form-wrap">
       <div class="login-form-header">
-        <div class="brand">UOC</div>
         <h1>Welcome Back</h1>
         <p>Sign in to your account to continue</p>
       </div>
@@ -395,7 +405,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <?php endif; ?>
 
       <?php if ($success): ?>
-        <div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;margin-bottom:var(--space-4);display:flex;align-items:center;gap:8px;">
+        <div class="login-success">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
           <?= sanitize($success) ?>
         </div>
@@ -420,8 +430,8 @@ include dirname(__DIR__) . '/includes/header.php';
         <button type="submit" class="login-submit">Sign In</button>
       </form>
 
-      <div style="text-align: center; margin-top: var(--space-4);">
-        <a href="<?= BASE_URL ?>/customer/forgot-password.php" style="font-size: 13px; color: var(--color-accent); font-weight: 600; text-decoration: none;">Forgot Password?</a>
+      <div class="login-links">
+        <a href="<?= BASE_URL ?>/customer/forgot-password.php">Forgot Password?</a>
       </div>
 
       <div class="login-footer">
