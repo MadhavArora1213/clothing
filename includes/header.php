@@ -161,13 +161,10 @@ if (!defined('BASE_URL')) {
       <div class="uoc-header-right">
 
         <!-- Search bar -->
-        <div class="uoc-search-bar" id="searchBarWrap">
+        <div class="uoc-search-bar" id="searchBarWrap" style="position:relative;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="searchInput" placeholder="What are you looking for?" autocomplete="off"
-            onkeydown="if(event.key==='Enter' && this.value.trim()) window.location='<?= BASE_URL ?>/shop.php?search='+encodeURIComponent(this.value.trim())">
-          <button class="uoc-search-mic" title="Search by voice" style="display:none;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          </button>
+          <input type="text" id="navSearchInput" placeholder="What are you looking for?" autocomplete="off">
+          <div id="navSearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;margin-top:6px;background:#fff;border:1px solid #e5e5e5;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.12);max-height:420px;overflow-y:auto;z-index:100;"></div>
         </div>
 
         <!-- Icon: Search (mobile only) -->
@@ -360,16 +357,10 @@ if (!defined('BASE_URL')) {
     <div class="uoc-search-card">
       <div class="uoc-search-input-wrap">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Search for products..." autocomplete="off">
+        <input type="text" id="modalSearchInput" placeholder="Search for products..." autocomplete="off">
         <button class="uoc-search-close" id="closeSearchBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-      </div>
-      <div class="uoc-search-tags">
-        <span>Popular:</span>
-        <a href="<?= BASE_URL ?>/shop.php?search=oversized">Oversized Tees</a>
-        <a href="<?= BASE_URL ?>/shop.php?search=linen">Linen Co-Ord</a>
-        <a href="<?= BASE_URL ?>/shop.php?search=kurta">Chikankari Kurta</a>
       </div>
       <div id="searchResults" class="uoc-search-results"></div>
     </div>
