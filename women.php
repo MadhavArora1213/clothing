@@ -37,7 +37,7 @@ if ($mysqli) {
     JOIN categories c ON p.category_id = c.id
     WHERE p.is_active = 1 AND c.department = 'women'
     ORDER BY p.is_featured DESC, p.created_at DESC 
-    LIMIT 8
+    LIMIT 40
   ");
   if ($query) $womenProducts = $query->fetch_all(MYSQLI_ASSOC);
 
