@@ -205,16 +205,153 @@ include __DIR__ . '/includes/header.php';
   </section>
   <?php endif; ?>
 
-  <!-- FULL WIDTH PROMO -->
-  <section class="uoc-promo">
-    <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=1600&h=600&auto=format&fit=crop&q=80" alt="Women's Heritage" loading="lazy">
-    <div class="uoc-promo-content">
-      <span class="uoc-promo-tag">Women's Heritage</span>
-      <h2>Grace Meets<br>Tradition</h2>
-      <p>Handcrafted ethnic wear celebrating Indian artistry.</p>
-      <a href="<?= BASE_URL ?>/shop.php?category=women" class="uoc-btn uoc-btn-white">Shop Heritage</a>
+  <!-- WOMEN'S CTA BANNER -->
+  <section class="women-cta">
+    <div class="uoc-container">
+      <div class="women-cta-box">
+        <div class="women-cta-content">
+          <span class="women-cta-badge">HERITAGE COLLECTION</span>
+          <h2 class="women-cta-title">Grace Meets<br>Tradition.</h2>
+          <p class="women-cta-text">Handcrafted ethnic wear celebrating Indian artistry — designed for women who carry culture with confidence.</p>
+          <a href="<?= BASE_URL ?>/shop.php?category=women" class="women-cta-btn">
+            Explore Collection
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="women-cta-deco">
+          <span>WOMEN</span>
+        </div>
+      </div>
     </div>
   </section>
+
+  <style>
+  .women-cta {
+    margin: 48px auto;
+  }
+  .women-cta-box {
+    background: linear-gradient(135deg, #1a0f0f 0%, #2a1515 50%, #1a0f0f 100%);
+    border-radius: 24px;
+    padding: 72px 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .women-cta-box::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(180,80,80,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .women-cta-box::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(180,80,80,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .women-cta-content {
+    position: relative;
+    z-index: 2;
+  }
+  .women-cta-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: #8a6a6a;
+    background: rgba(180,100,100,0.08);
+    border: 1px solid rgba(180,100,100,0.12);
+    padding: 6px 16px;
+    border-radius: 30px;
+    margin-bottom: 24px;
+  }
+  .women-cta-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.05;
+    margin: 0 0 16px;
+  }
+  .women-cta-text {
+    font-size: 15px;
+    color: #7a5a5a;
+    line-height: 1.7;
+    margin: 0 0 32px;
+    max-width: 420px;
+  }
+  .women-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    color: #1a0f0f;
+    padding: 16px 36px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 60px;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .women-cta-btn:hover {
+    background: #f5e6e6;
+    gap: 18px;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(180,80,80,0.15);
+  }
+  .women-cta-deco {
+    position: relative;
+    z-index: 1;
+  }
+  .women-cta-deco span {
+    font-family: var(--font-display);
+    font-size: 180px;
+    font-weight: 900;
+    color: rgba(180,100,100,0.04);
+    line-height: 1;
+    user-select: none;
+    letter-spacing: -0.02em;
+  }
+
+  @media (max-width: 900px) {
+    .women-cta-box {
+      padding: 48px 36px;
+      flex-direction: column;
+      text-align: center;
+      gap: 32px;
+    }
+    .women-cta-text {
+      margin-inline: auto;
+    }
+    .women-cta-deco span {
+      font-size: 100px;
+    }
+  }
+  @media (max-width: 600px) {
+    .women-cta-box {
+      padding: 40px 24px;
+      border-radius: 20px;
+    }
+    .women-cta-title {
+      font-size: 36px;
+    }
+    .women-cta-deco span {
+      font-size: 72px;
+    }
+  }
+  </style>
 
 </main>
 

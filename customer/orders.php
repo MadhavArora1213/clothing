@@ -448,7 +448,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <!-- Head -->
           <div class="ord-card-head">
             <div class="ord-card-head-left">
-              <div class="ord-num"><?= sanitize($order['order_number']) ?></div>
+              <div class="ord-num"><?= esc($order['order_number']) ?></div>
               <div class="ord-date">
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <?= date('d M Y, g:i A', strtotime($order['created_ist'] ?: $order['created_at'])) ?>
@@ -499,7 +499,7 @@ include dirname(__DIR__) . '/includes/header.php';
                   $img = !empty($item['image']) ? $item['image'] : 'https://via.placeholder.com/116x144?text=No+Image';
                 ?>
                   <div class="ord-thumb">
-                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= sanitize($item['product_name']) ?>" loading="lazy">
+                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= esc($item['product_name']) ?>" loading="lazy">
                   </div>
                 <?php endforeach; ?>
                 <?php if ($extraCount > 0): ?>
@@ -522,12 +522,12 @@ include dirname(__DIR__) . '/includes/header.php';
                 <div class="ord-item-row">
                   <div class="ord-item-info">
                     <div class="ord-item-img">
-                      <img src="<?= htmlspecialchars($img) ?>" alt="<?= sanitize($item['product_name']) ?>" loading="lazy">
+                      <img src="<?= htmlspecialchars($img) ?>" alt="<?= esc($item['product_name']) ?>" loading="lazy">
                     </div>
                     <div style="min-width:0;">
-                      <div class="ord-item-name"><?= sanitize($item['product_name']) ?></div>
+                      <div class="ord-item-name"><?= esc($item['product_name']) ?></div>
                       <div class="ord-item-meta">
-                        <?php if ($item['size']): ?>Size: <?= sanitize($item['size']) ?> · <?php endif; ?>
+                        <?php if ($item['size']): ?>Size: <?= esc($item['size']) ?> · <?php endif; ?>
                         Qty: <?= (int)$item['quantity'] ?>
                       </div>
                     </div>

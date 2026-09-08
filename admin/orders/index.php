@@ -101,7 +101,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <input type="hidden" name="status" value="<?= htmlspecialchars($statusFilter) ?>">
       <div class="search-box" style="flex: 1; max-width: 380px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" name="search" placeholder="Search order number, customer, phone..." value="<?= sanitize($search) ?>">
+        <input type="text" name="search" placeholder="Search order number, customer, phone..." value="<?= esc($search) ?>">
       </div>
       <button type="submit" class="btn btn-secondary btn-sm">Search</button>
       <?php if ($search): ?>
@@ -149,16 +149,16 @@ include dirname(__DIR__) . '/includes/header.php';
               <tr>
                 <td>
                   <a href="<?= adminUrl('orders/view.php?id=' . $order['id']) ?>" style="font-weight: 700; color: #0284c7; text-decoration: underline;">
-                    <?= sanitize($order['order_number']) ?>
+                    <?= esc($order['order_number']) ?>
                   </a>
                   <?php if (!empty($order['tracking_number'])): ?>
-                    <div style="font-size: 11px; color: var(--color-text-tertiary);">Track: <?= sanitize($order['tracking_number']) ?></div>
+                    <div style="font-size: 11px; color: var(--color-text-tertiary);">Track: <?= esc($order['tracking_number']) ?></div>
                   <?php endif; ?>
                 </td>
                 <td>
-                  <div style="font-weight: 600;"><?= sanitize($order['customer_name']) ?></div>
-                  <div style="font-size: 12px; color: var(--color-text-secondary);"><?= sanitize($order['customer_phone']) ?></div>
-                  <small style="color: var(--color-text-tertiary); font-size: 11px;"><?= sanitize($order['customer_email']) ?></small>
+                  <div style="font-weight: 600;"><?= esc($order['customer_name']) ?></div>
+                  <div style="font-size: 12px; color: var(--color-text-secondary);"><?= esc($order['customer_phone']) ?></div>
+                  <small style="color: var(--color-text-tertiary); font-size: 11px;"><?= esc($order['customer_email']) ?></small>
                 </td>
                 <td>
                   <span style="font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 12px;">
@@ -172,7 +172,7 @@ include dirname(__DIR__) . '/includes/header.php';
                   <?php endif; ?>
                 </td>
                 <td>
-                  <div style="font-weight: 500; font-size: 12px; text-transform: uppercase;"><?= sanitize($order['payment_method']) ?></div>
+                  <div style="font-weight: 500; font-size: 12px; text-transform: uppercase;"><?= esc($order['payment_method']) ?></div>
                   <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; <?= $order['payment_status'] === 'paid' ? 'background: #DCFCE7; color: #166534;' : 'background: #FEF3C7; color: #92400E;' ?>">
                     <?= ucfirst($order['payment_status']) ?>
                   </span>

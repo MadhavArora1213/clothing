@@ -103,7 +103,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; flex: 1;">
         <div class="search-box" style="flex: 1; min-width: 220px; max-width: 320px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" name="search" placeholder="Search title, SKU, brand..." value="<?= sanitize($search) ?>">
+          <input type="text" name="search" placeholder="Search title, SKU, brand..." value="<?= esc($search) ?>">
         </div>
 
         <select name="gender" class="filter-select" onchange="this.form.submit()">
@@ -118,7 +118,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <option value="">All Categories</option>
           <?php foreach ($categories as $cat): ?>
             <option value="<?= $cat['id'] ?>" <?= $categoryFilter == $cat['id'] ? 'selected' : '' ?>>
-              <?= $cat['parent_id'] > 0 ? '— ' : '' ?><?= sanitize($cat['name']) ?>
+              <?= $cat['parent_id'] > 0 ? '— ' : '' ?><?= esc($cat['name']) ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -200,7 +200,7 @@ include dirname(__DIR__) . '/includes/header.php';
                     <img src="<?= htmlspecialchars($imgUrl) ?>" alt="" style="width: 52px; height: 68px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid #e2e8f0; background: var(--color-bg-elevated); flex-shrink: 0;">
                     <div>
                       <div style="font-weight: 600; color: var(--color-text-primary); font-size: 14px; line-height: 1.3;">
-                        <?= sanitize($prod['name']) ?>
+                        <?= esc($prod['name']) ?>
                       </div>
                       <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
                         <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; <?= $genderBadgeClass ?>">
@@ -210,17 +210,17 @@ include dirname(__DIR__) . '/includes/header.php';
                           <span style="font-size: 10px; font-weight: 700; background: #FEF08A; color: #854D0E; padding: 2px 6px; border-radius: 4px; border: 1px solid #FDE047;">★ Featured</span>
                         <?php endif; ?>
                       </div>
-                      <small style="color: var(--color-text-tertiary); font-size: 11px;"><?= sanitize($prod['brand'] ?? 'AURA & CO.') ?></small>
+                      <small style="color: var(--color-text-tertiary); font-size: 11px;"><?= esc($prod['brand'] ?? 'AURA & CO.') ?></small>
                     </div>
                   </div>
                 </td>
                 <td style="font-family: monospace; font-size: 12px; color: #475569;">
-                  <?= sanitize($prod['sku'] ?? '—') ?>
+                  <?= esc($prod['sku'] ?? '—') ?>
                 </td>
                 <td>
-                  <div style="font-weight: 500;"><?= sanitize($prod['category_name'] ?? 'Uncategorized') ?></div>
+                  <div style="font-weight: 500;"><?= esc($prod['category_name'] ?? 'Uncategorized') ?></div>
                   <?php if (!empty($prod['subcategory_name'])): ?>
-                    <small style="color: var(--color-text-tertiary); font-size: 11px;">&rsaquo; <?= sanitize($prod['subcategory_name']) ?></small>
+                    <small style="color: var(--color-text-tertiary); font-size: 11px;">&rsaquo; <?= esc($prod['subcategory_name']) ?></small>
                   <?php endif; ?>
                 </td>
                 <td>
@@ -256,7 +256,7 @@ include dirname(__DIR__) . '/includes/header.php';
                     <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
                       <?php foreach ($prodSizes as $sz): ?>
                         <span style="font-size: 10px; background: #f1f5f9; padding: 1px 5px; border-radius: 3px; border: 1px solid #e2e8f0;">
-                          <strong><?= sanitize($sz['size']) ?>:</strong> <?= (int)$sz['stock'] ?>
+                          <strong><?= esc($sz['size']) ?>:</strong> <?= (int)$sz['stock'] ?>
                         </span>
                       <?php endforeach; ?>
                     </div>
@@ -276,7 +276,7 @@ include dirname(__DIR__) . '/includes/header.php';
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                       Edit
                     </a>
-                    <form method="POST" action="<?= adminUrl('products/delete.php?id=' . $prod['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete \'<?= addslashes(sanitize($prod['name'])) ?>\'?')">
+                    <form method="POST" action="<?= adminUrl('products/delete.php?id=' . $prod['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete \'<?= addslashes(esc($prod['name'])) ?>\'?')">
                       <?= getCSRFInput() ?>
                       <button type="submit" class="btn btn-danger btn-sm" title="Delete Product">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>

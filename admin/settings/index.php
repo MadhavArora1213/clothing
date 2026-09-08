@@ -93,13 +93,13 @@ $groupDescriptions = [
 
   <?php if ($error): ?>
     <div class="alert alert-error" style="margin-bottom: var(--space-6); background: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px 16px; border-radius: 8px;">
-      <?= sanitize($error) ?>
+      <?= esc($error) ?>
     </div>
   <?php endif; ?>
 
   <?php if ($success): ?>
     <div class="alert alert-success" style="margin-bottom: var(--space-6); background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; padding: 12px 16px; border-radius: 8px;">
-      <?= sanitize($success) ?>
+      <?= esc($success) ?>
     </div>
   <?php endif; ?>
 
@@ -118,13 +118,13 @@ $groupDescriptions = [
             <div class="form-group">
               <label><?= ucwords(str_replace('_', ' ', $setting['key'])) ?></label>
               <?php if ($setting['type'] === 'number'): ?>
-                <input type="number" step="0.01" min="0" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
+                <input type="number" step="0.01" min="0" name="settings[<?= $setting['key'] ?>]" value="<?= esc($setting['value']) ?>">
               <?php elseif ($setting['type'] === 'email'): ?>
-                <input type="email" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
+                <input type="email" name="settings[<?= $setting['key'] ?>]" value="<?= esc($setting['value']) ?>">
               <?php elseif ($setting['type'] === 'textarea'): ?>
-                <textarea name="settings[<?= $setting['key'] ?>]" rows="3"><?= sanitize($setting['value']) ?></textarea>
+                <textarea name="settings[<?= $setting['key'] ?>]" rows="3"><?= esc($setting['value']) ?></textarea>
               <?php else: ?>
-                <input type="text" name="settings[<?= $setting['key'] ?>]" value="<?= sanitize($setting['value']) ?>">
+                <input type="text" name="settings[<?= $setting['key'] ?>]" value="<?= esc($setting['value']) ?>">
               <?php endif; ?>
             </div>
           <?php endforeach; ?>

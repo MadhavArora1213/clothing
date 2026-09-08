@@ -387,7 +387,7 @@ include dirname(__DIR__) . '/includes/header.php';
       </div>
 
       <?php if ($error): ?>
-        <div class="reset-error"><?= sanitize($error) ?></div>
+        <div class="reset-error"><?= esc($error) ?></div>
       <?php endif; ?>
       <?php if ($success): ?>
         <div class="reset-success"><?= $success ?></div>
@@ -398,7 +398,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <form method="POST" class="reset-form">
           <?= getCSRFInput() ?>
           <input type="hidden" name="action" value="reset_password">
-          <input type="hidden" name="reset_token" value="<?= sanitize($resetToken) ?>">
+          <input type="hidden" name="reset_token" value="<?= esc($resetToken) ?>">
           <div class="form-group">
             <label>New Password</label>
             <input type="password" name="new_password" placeholder="Min. 6 characters" required minlength="6">
@@ -422,7 +422,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <input type="hidden" name="action" value="request_reset">
           <div class="form-group">
             <label>Email Address</label>
-            <input type="email" name="email" placeholder="you@example.com" required value="<?= sanitize($_POST['email'] ?? '') ?>">
+            <input type="email" name="email" placeholder="you@example.com" required value="<?= esc($_POST['email'] ?? '') ?>">
           </div>
           <button type="submit" class="reset-submit">Send Reset Link</button>
         </form>

@@ -86,13 +86,13 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <?php if ($error): ?>
     <div class="alert alert-error" style="margin-bottom: var(--space-6); background: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px 16px; border-radius: 8px;">
-      <?= sanitize($error) ?>
+      <?= esc($error) ?>
     </div>
   <?php endif; ?>
 
   <?php if (!empty($_GET['msg'])): ?>
     <div class="alert alert-success" style="margin-bottom: var(--space-6); background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; padding: 12px 16px; border-radius: 8px;">
-      <?= sanitize($_GET['msg']) ?>
+      <?= esc($_GET['msg']) ?>
     </div>
   <?php endif; ?>
 
@@ -132,7 +132,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <option value="0">None (Top Level Category)</option>
             <?php foreach ($parentCategories as $pCat): ?>
               <option value="<?= $pCat['id'] ?>">
-                <?= sanitize($pCat['name']) ?> (<?= ucfirst($pCat['department']) ?>)
+                <?= esc($pCat['name']) ?> (<?= ucfirst($pCat['department']) ?>)
               </option>
             <?php endforeach; ?>
           </select>
@@ -217,11 +217,11 @@ include dirname(__DIR__) . '/includes/header.php';
                     <?php if (!empty($cat['image'])): ?>
                       <img src="<?= htmlspecialchars($cat['image']) ?>" alt="" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px;">
                     <?php endif; ?>
-                    <span><?= sanitize($cat['name']) ?></span>
+                    <span><?= esc($cat['name']) ?></span>
                   </div>
                 </td>
                 <td style="font-family: monospace; font-size: 12px; color: #475569;">
-                  <?= sanitize($cat['slug']) ?>
+                  <?= esc($cat['slug']) ?>
                 </td>
                 <td>
                   <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; <?= $deptBadge ?>">
@@ -230,7 +230,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 </td>
                 <td>
                   <?php if ($isSub): ?>
-                    <span style="color: var(--color-text-secondary); font-size: 12px;">Subcategory of <strong><?= sanitize($cat['parent_name'] ?? 'Parent') ?></strong></span>
+                    <span style="color: var(--color-text-secondary); font-size: 12px;">Subcategory of <strong><?= esc($cat['parent_name'] ?? 'Parent') ?></strong></span>
                   <?php else: ?>
                     <span style="color: #0284c7; font-weight: 600; font-size: 12px;">★ Top Level (Parent)</span>
                   <?php endif; ?>
@@ -251,7 +251,7 @@ include dirname(__DIR__) . '/includes/header.php';
                     <button type="button" class="btn btn-secondary btn-sm" onclick="editCategory(<?= htmlspecialchars(json_encode($cat)) ?>)">
                       Edit
                     </button>
-                    <form method="POST" action="<?= adminUrl('categories/delete.php?id=' . $cat['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete category \'<?= addslashes(sanitize($cat['name'])) ?>\'?')">
+                    <form method="POST" action="<?= adminUrl('categories/delete.php?id=' . $cat['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete category \'<?= addslashes(esc($cat['name'])) ?>\'?')">
                       <?= getCSRFInput() ?>
                       <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>

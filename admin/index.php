@@ -60,7 +60,7 @@ include __DIR__ . '/includes/header.php';
   <div class="page-header">
     <div>
       <div class="page-header-overline">Overview</div>
-      <h1 class="page-header-title">Welcome back, <?= $admin ? sanitize($admin['name']) : 'Administrator' ?></h1>
+      <h1 class="page-header-title">Welcome back, <?= $admin ? esc($admin['name']) : 'Administrator' ?></h1>
       <p class="page-header-subtitle">Here's what's happening with your store today.</p>
     </div>
     <div>
@@ -219,8 +219,8 @@ include __DIR__ . '/includes/header.php';
             <?php else: ?>
               <?php foreach ($recentOrders as $ord): ?>
                 <tr class="table-row-hover">
-                  <td><a href="<?= adminUrl('orders/view.php?id=' . $ord['id']) ?>" class="order-link"><?= sanitize($ord['order_number']) ?></a></td>
-                  <td><?= sanitize($ord['customer_name']) ?></td>
+                  <td><a href="<?= adminUrl('orders/view.php?id=' . $ord['id']) ?>" class="order-link"><?= esc($ord['order_number']) ?></a></td>
+                  <td><?= esc($ord['customer_name']) ?></td>
                   <td class="table-amount"><?= formatPrice($ord['grand_total']) ?></td>
                   <td><span class="status-badge status-<?= $ord['order_status'] ?>"><?= ucfirst($ord['order_status']) ?></span></td>
                   <td class="table-date"><?= date('M d, Y', strtotime($ord['created_at'])) ?></td>
@@ -249,8 +249,8 @@ include __DIR__ . '/includes/header.php';
           <?php foreach ($lowStock as $ls): ?>
             <a href="<?= adminUrl('products/edit.php?id=' . $ls['id']) ?>" class="low-stock-item">
               <div class="low-stock-info">
-                <div class="low-stock-name"><?= sanitize($ls['name']) ?></div>
-                <div class="low-stock-meta">Size: <?= sanitize($ls['size']) ?></div>
+                <div class="low-stock-name"><?= esc($ls['name']) ?></div>
+                <div class="low-stock-meta">Size: <?= esc($ls['size']) ?></div>
               </div>
               <span class="low-stock-badge"><?= $ls['stock'] ?> left</span>
             </a>

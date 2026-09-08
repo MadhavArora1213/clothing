@@ -424,7 +424,7 @@ if ($subcategory && $mysqli) {
 .shop-card-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
 }
 .shop-card-img .hover-img {
@@ -437,7 +437,7 @@ if ($subcategory && $mysqli) {
 
 .shop-card-badges {
   position: absolute;
-  top: 10px;
+  bottom: 10px;
   left: 10px;
   display: flex;
   flex-direction: column;

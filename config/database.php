@@ -297,6 +297,10 @@ function redirect($url, $statusCode = 302) {
 }
 
 function sanitize($string) {
+  return trim((string)$string);
+}
+
+function esc($string) {
   return htmlspecialchars(trim((string)$string), ENT_QUOTES, 'UTF-8');
 }
 

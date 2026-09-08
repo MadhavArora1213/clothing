@@ -197,16 +197,153 @@ include __DIR__ . '/includes/header.php';
   </section>
   <?php endif; ?>
 
-  <!-- FULL WIDTH PROMO -->
-  <section class="uoc-promo">
-    <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1600&h=600&auto=format&fit=crop&q=80" alt="Men's Heritage" loading="lazy">
-    <div class="uoc-promo-content">
-      <span class="uoc-promo-tag">Men's Heritage</span>
-      <h2>Ethnic Roots,<br>Street Style</h2>
-      <p>Handcrafted kurtas & sherwanis for the modern man.</p>
-      <a href="<?= BASE_URL ?>/shop.php?category=men&subcategory=men-kurta-sets" class="uoc-btn uoc-btn-white">Shop Ethnic</a>
+  <!-- MEN'S CTA BANNER -->
+  <section class="men-cta">
+    <div class="uoc-container">
+      <div class="men-cta-box">
+        <div class="men-cta-content">
+          <span class="men-cta-badge">LIMITED DROP</span>
+          <h2 class="men-cta-title">New Season,<br>New Fits.</h2>
+          <p class="men-cta-text">Handpicked streetwear & ethnic fusion — designed for men who own the room.</p>
+          <a href="<?= BASE_URL ?>/shop.php?category=men" class="men-cta-btn">
+            Explore Collection
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="men-cta-deco">
+          <span>MEN</span>
+        </div>
+      </div>
     </div>
   </section>
+
+  <style>
+  .men-cta {
+    margin: 48px auto;
+  }
+  .men-cta-box {
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+    border-radius: 24px;
+    padding: 72px 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .men-cta-box::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .men-cta-box::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .men-cta-content {
+    position: relative;
+    z-index: 2;
+  }
+  .men-cta-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: #666;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 6px 16px;
+    border-radius: 30px;
+    margin-bottom: 24px;
+  }
+  .men-cta-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.05;
+    margin: 0 0 16px;
+  }
+  .men-cta-text {
+    font-size: 15px;
+    color: #666;
+    line-height: 1.7;
+    margin: 0 0 32px;
+    max-width: 420px;
+  }
+  .men-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    color: #000;
+    padding: 16px 36px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 60px;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .men-cta-btn:hover {
+    background: #e8e8e8;
+    gap: 18px;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255,255,255,0.1);
+  }
+  .men-cta-deco {
+    position: relative;
+    z-index: 1;
+  }
+  .men-cta-deco span {
+    font-family: var(--font-display);
+    font-size: 180px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    line-height: 1;
+    user-select: none;
+    letter-spacing: -0.02em;
+  }
+
+  @media (max-width: 900px) {
+    .men-cta-box {
+      padding: 48px 36px;
+      flex-direction: column;
+      text-align: center;
+      gap: 32px;
+    }
+    .men-cta-text {
+      margin-inline: auto;
+    }
+    .men-cta-deco span {
+      font-size: 100px;
+    }
+  }
+  @media (max-width: 600px) {
+    .men-cta-box {
+      padding: 40px 24px;
+      border-radius: 20px;
+    }
+    .men-cta-title {
+      font-size: 36px;
+    }
+    .men-cta-deco span {
+      font-size: 72px;
+    }
+  }
+  </style>
 
 </main>
 

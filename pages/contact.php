@@ -429,26 +429,26 @@ $csrfToken = generateCSRFToken();
       <div class="ct-row">
         <div class="ct-fld">
           <label>Full Name <span>*</span></label>
-          <input type="text" name="name" required placeholder="Your name" maxlength="100" pattern="[a-zA-Z\s.\-']+" title="Letters, spaces, hyphens only" value="<?= sanitize($_POST['name'] ?? '') ?>">
+          <input type="text" name="name" required placeholder="Your name" maxlength="100" pattern="[a-zA-Z\s.\-']+" title="Letters, spaces, hyphens only" value="<?= esc($_POST['name'] ?? '') ?>">
         </div>
         <div class="ct-fld">
           <label>Email <span>*</span></label>
-          <input type="email" name="email" required placeholder="you@email.com" maxlength="254" value="<?= sanitize($_POST['email'] ?? '') ?>">
+          <input type="email" name="email" required placeholder="you@email.com" maxlength="254" value="<?= esc($_POST['email'] ?? '') ?>">
         </div>
       </div>
       <div class="ct-row">
         <div class="ct-fld">
           <label>Phone</label>
-          <input type="tel" name="phone" placeholder="+91 97807 04131" maxlength="15" pattern="[6-9]\d{9}" title="10-digit Indian mobile number" value="<?= sanitize($_POST['phone'] ?? '') ?>">
+          <input type="tel" name="phone" placeholder="+91 97807 04131" maxlength="15" pattern="[6-9]\d{9}" title="10-digit Indian mobile number" value="<?= esc($_POST['phone'] ?? '') ?>">
         </div>
         <div class="ct-fld">
           <label>Subject <span>*</span></label>
-          <input type="text" name="subject" required placeholder="How can we help?" maxlength="200" value="<?= sanitize($_POST['subject'] ?? '') ?>">
+          <input type="text" name="subject" required placeholder="How can we help?" maxlength="200" value="<?= esc($_POST['subject'] ?? '') ?>">
         </div>
       </div>
       <div class="ct-fld">
         <label>Message <span>*</span></label>
-        <textarea name="message" rows="3" required placeholder="Tell us more..." maxlength="2000" minlength="5"><?= sanitize($_POST['message'] ?? '') ?></textarea>
+        <textarea name="message" rows="3" required placeholder="Tell us more..." maxlength="2000" minlength="5"><?= esc($_POST['message'] ?? '') ?></textarea>
       </div>
       <button type="submit" class="ct-submit">
         <span>Send Message</span>

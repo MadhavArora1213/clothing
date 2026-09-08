@@ -60,7 +60,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <form method="GET" action="" style="display: flex; gap: 8px;">
         <div style="position: relative;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" name="search" placeholder="Search customer, email, phone..." value="<?= sanitize($search) ?>" style="padding-left: 36px; width: 280px;">
+          <input type="text" name="search" placeholder="Search customer, email, phone..." value="<?= esc($search) ?>" style="padding-left: 36px; width: 280px;">
         </div>
         <button type="submit" class="btn btn-secondary btn-sm">Search</button>
         <?php if ($search): ?>
@@ -72,7 +72,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <?php if (!empty($_GET['msg'])): ?>
     <div class="alert alert-success" style="margin-bottom: var(--space-6); background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; padding: 12px 16px; border-radius: 8px;">
-      <?= sanitize($_GET['msg']) ?>
+      <?= esc($_GET['msg']) ?>
     </div>
   <?php endif; ?>
 
@@ -102,11 +102,11 @@ include dirname(__DIR__) . '/includes/header.php';
                     <div class="admin-avatar" style="width: 32px; height: 32px; font-size: 12px;">
                       <?= strtoupper(substr($cust['first_name'], 0, 1)) ?>
                     </div>
-                    <strong><?= sanitize($cust['first_name'] . ' ' . $cust['last_name']) ?></strong>
+                    <strong><?= esc($cust['first_name'] . ' ' . $cust['last_name']) ?></strong>
                   </div>
                 </td>
-                <td><a href="mailto:<?= sanitize($cust['email']) ?>"><?= sanitize($cust['email']) ?></a></td>
-                <td><?= sanitize($cust['phone'] ?? '—') ?></td>
+                <td><a href="mailto:<?= esc($cust['email']) ?>"><?= esc($cust['email']) ?></a></td>
+                <td><?= esc($cust['phone'] ?? '—') ?></td>
                 <td>
                   <span style="font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 12px;">
                     <?= (int)$cust['order_count'] ?> orders

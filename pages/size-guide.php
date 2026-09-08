@@ -43,7 +43,7 @@ include dirname(__DIR__) . '/includes/header.php';
       </div>
 
       <h2 style="font-family: var(--font-display); font-size: var(--text-h3); margin: var(--space-8) 0 var(--space-4);">Still Unsure?</h2>
-      <p style="color: var(--color-text-secondary);">If you are between sizes, we recommend sizing up for a more comfortable fit. You can also contact us at <?= sanitize(getSetting('site_email', 'hello@example.com')) ?> for personalized sizing advice.</p>
+      <p style="color: var(--color-text-secondary);">If you are between sizes, we recommend sizing up for a more comfortable fit. You can also contact us at <?= esc(getSetting('site_email', 'hello@example.com')) ?> for personalized sizing advice.</p>
     </div>
   </div>
 </main>

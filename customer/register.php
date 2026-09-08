@@ -386,7 +386,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <?php if ($error): ?>
         <div class="reg-error">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-          <?= sanitize($error) ?>
+          <?= esc($error) ?>
         </div>
       <?php endif; ?>
 
@@ -395,23 +395,23 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="form-row">
           <div class="field">
             <label>First Name <span class="req">*</span></label>
-            <input type="text" name="first_name" required placeholder="John" value="<?= sanitize($_POST['first_name'] ?? '') ?>">
+            <input type="text" name="first_name" required placeholder="John" value="<?= esc($_POST['first_name'] ?? '') ?>">
           </div>
           <div class="field">
             <label>Last Name <span class="req">*</span></label>
-            <input type="text" name="last_name" required placeholder="Doe" value="<?= sanitize($_POST['last_name'] ?? '') ?>">
+            <input type="text" name="last_name" required placeholder="Doe" value="<?= esc($_POST['last_name'] ?? '') ?>">
           </div>
         </div>
         <div class="form-row full">
           <div class="field">
             <label>Email Address <span class="req">*</span></label>
-            <input type="email" name="email" required placeholder="you@example.com" value="<?= sanitize($_POST['email'] ?? '') ?>">
+            <input type="email" name="email" required placeholder="you@example.com" value="<?= esc($_POST['email'] ?? '') ?>">
           </div>
         </div>
         <div class="form-row full">
           <div class="field">
             <label>Phone Number</label>
-            <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX" value="<?= sanitize($_POST['phone'] ?? '') ?>">
+            <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX" value="<?= esc($_POST['phone'] ?? '') ?>">
           </div>
         </div>
         <div class="form-row full">

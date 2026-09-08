@@ -88,7 +88,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="admin-page-header">
     <div>
       <div style="display: flex; align-items: center; gap: 12px;">
-        <h1>Order: <?= sanitize($order['order_number']) ?></h1>
+        <h1>Order: <?= esc($order['order_number']) ?></h1>
         <span class="status-badge status-<?= $order['order_status'] ?>" style="font-size: 13px; text-transform: uppercase;">
           <?= ucfirst($order['order_status']) ?>
         </span>
@@ -108,7 +108,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <?php if ($success): ?>
     <div class="alert alert-success" style="margin-bottom: var(--space-6); background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
-      <?= sanitize($success) ?>
+      <?= esc($success) ?>
     </div>
   <?php endif; ?>
 
@@ -141,8 +141,8 @@ include dirname(__DIR__) . '/includes/header.php';
                         <img src="<?= htmlspecialchars($item['fallback_img']) ?>" alt="" style="width: 44px; height: 56px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">
                       <?php endif; ?>
                       <div>
-                        <div style="font-weight: 600; font-size: 13px;"><?= sanitize($item['product_name']) ?></div>
-                        <small style="color: var(--color-text-tertiary); font-family: monospace; font-size: 11px;">SKU: <?= sanitize($item['product_sku'] ?? 'N/A') ?></small>
+                        <div style="font-weight: 600; font-size: 13px;"><?= esc($item['product_name']) ?></div>
+                        <small style="color: var(--color-text-tertiary); font-family: monospace; font-size: 11px;">SKU: <?= esc($item['product_sku'] ?? 'N/A') ?></small>
                       </div>
                     </div>
                   </td>
@@ -151,12 +151,12 @@ include dirname(__DIR__) . '/includes/header.php';
                       <?php if (!empty($item['color_code'])): ?>
                         <span class="color-swatch-square" style="background-color: <?= htmlspecialchars($item['color_code']) ?>; width: 18px; height: 18px;"></span>
                       <?php endif; ?>
-                      <span style="font-size: 13px; font-weight: 500;"><?= sanitize($item['color_name'] ?? 'Standard') ?></span>
+                      <span style="font-size: 13px; font-weight: 500;"><?= esc($item['color_name'] ?? 'Standard') ?></span>
                     </div>
                   </td>
                   <td>
                     <span style="font-weight: 600; font-size: 12px; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">
-                      <?= sanitize($item['size'] ?? 'Free Size') ?>
+                      <?= esc($item['size'] ?? 'Free Size') ?>
                     </span>
                   </td>
                   <td style="font-weight: 600;"><?= (int)$item['quantity'] ?></td>
@@ -177,7 +177,7 @@ include dirname(__DIR__) . '/includes/header.php';
             </div>
             <?php if ($order['discount_amount'] > 0): ?>
               <div style="display: flex; justify-content: space-between; color: #16a34a;">
-                <span>Discount <?= !empty($order['coupon_code']) ? '(' . sanitize($order['coupon_code']) . ')' : '' ?>:</span>
+                <span>Discount <?= !empty($order['coupon_code']) ? '(' . esc($order['coupon_code']) . ')' : '' ?>:</span>
                 <span>-<?= formatPrice($order['discount_amount']) ?></span>
               </div>
             <?php endif; ?>
@@ -202,14 +202,14 @@ include dirname(__DIR__) . '/includes/header.php';
             Shipping Address
           </h3>
           <p style="font-size: 13px; line-height: 1.6; color: var(--color-text-primary);">
-            <strong><?= sanitize($shippingAddr['full_name'] ?? $order['customer_name']) ?></strong><br>
-            <?= sanitize($shippingAddr['address_line1'] ?? 'N/A') ?><br>
+            <strong><?= esc($shippingAddr['full_name'] ?? $order['customer_name']) ?></strong><br>
+            <?= esc($shippingAddr['address_line1'] ?? 'N/A') ?><br>
             <?php if (!empty($shippingAddr['address_line2'])): ?>
-              <?= sanitize($shippingAddr['address_line2']) ?><br>
+              <?= esc($shippingAddr['address_line2']) ?><br>
             <?php endif; ?>
-            <?= sanitize($shippingAddr['city'] ?? '') ?>, <?= sanitize($shippingAddr['state'] ?? '') ?> - <?= sanitize($shippingAddr['postal_code'] ?? '') ?><br>
-            <?= sanitize($shippingAddr['country'] ?? 'India') ?><br>
-            <strong>Phone:</strong> <?= sanitize($shippingAddr['phone'] ?? $order['customer_phone']) ?>
+            <?= esc($shippingAddr['city'] ?? '') ?>, <?= esc($shippingAddr['state'] ?? '') ?> - <?= esc($shippingAddr['postal_code'] ?? '') ?><br>
+            <?= esc($shippingAddr['country'] ?? 'India') ?><br>
+            <strong>Phone:</strong> <?= esc($shippingAddr['phone'] ?? $order['customer_phone']) ?>
           </p>
         </div>
 
@@ -220,9 +220,9 @@ include dirname(__DIR__) . '/includes/header.php';
             Customer Contact
           </h3>
           <p style="font-size: 13px; line-height: 1.6;">
-            <strong>Name:</strong> <?= sanitize($order['customer_name']) ?><br>
-            <strong>Email:</strong> <a href="mailto:<?= sanitize($order['customer_email']) ?>"><?= sanitize($order['customer_email']) ?></a><br>
-            <strong>Phone:</strong> <a href="tel:<?= sanitize($order['customer_phone']) ?>"><?= sanitize($order['customer_phone']) ?></a><br>
+            <strong>Name:</strong> <?= esc($order['customer_name']) ?><br>
+            <strong>Email:</strong> <a href="mailto:<?= esc($order['customer_email']) ?>"><?= esc($order['customer_email']) ?></a><br>
+            <strong>Phone:</strong> <a href="tel:<?= esc($order['customer_phone']) ?>"><?= esc($order['customer_phone']) ?></a><br>
             <strong>Payment Method:</strong> <?= strtoupper($order['payment_method']) ?><br>
             <strong>Payment Status:</strong> <span class="status-badge status-<?= $order['payment_status'] ?>"><?= ucfirst($order['payment_status']) ?></span>
           </p>
@@ -262,7 +262,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
           <div class="form-group" style="margin-bottom: 14px;">
             <label>Tracking Number / Courier AWB</label>
-            <input type="text" name="tracking_number" placeholder="e.g. BLUEDART-8934278" value="<?= sanitize($order['tracking_number'] ?? '') ?>">
+            <input type="text" name="tracking_number" placeholder="e.g. BLUEDART-8934278" value="<?= esc($order['tracking_number'] ?? '') ?>">
           </div>
 
           <div class="form-group" style="margin-bottom: 16px;">
@@ -294,7 +294,7 @@ include dirname(__DIR__) . '/includes/header.php';
                   </small>
                 </div>
                 <?php if (!empty($h['note'])): ?>
-                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;"><?= sanitize($h['note']) ?></p>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;"><?= esc($h['note']) ?></p>
                 <?php endif; ?>
               </div>
             <?php endforeach; ?>

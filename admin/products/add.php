@@ -19,6 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = sanitize($_POST['name'] ?? '');
     $slug = sanitize($_POST['slug'] ?? '');
     $sku = sanitize($_POST['sku'] ?? '');
+    if (empty($sku)) {
+      $sku = 'UOC-' . strtoupper(substr(uniqid(), -6));
+    }
     $brand = sanitize($_POST['brand'] ?? 'urban outfit');
     $gender = sanitize($_POST['gender'] ?? 'women');
     $category_id = (int)($_POST['category_id'] ?? 0);
@@ -73,12 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $featuresJson = json_encode(array_values($features));
 
     $stmt = $mysqli->prepare("INSERT INTO products 
-      (name, slug, sku, brand, gender, description, features, material, care_instructions, price, original_price, discount_percent, shipping_charge, free_shipping, shipping_days, category_id, subcategory_id, image, is_featured, is_active) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      (name, slug, sku, brand, gender, description, features, material, care_instructions, price, original_price, discount_percent, category_id, subcategory_id, image, is_featured, is_active) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $stmt->bind_param('sssssssssdiiisiiiisii', 
+    $stmt->bind_param('sssssssssdiiiisii', 
       $name, $slug, $sku, $brand, $gender, $description, $featuresJson, $material, $care_instructions, 
-      $price, $original_price, $discount_percent, $shipping_charge, $free_shipping, $shipping_days, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active);
+      $price, $original_price, $discount_percent, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active);
 
     if ($stmt->execute()) {
       $productId = $mysqli->insert_id;
@@ -180,7 +183,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <?php if ($error): ?>
     <div class="alert alert-error" style="margin-bottom: var(--space-6); background: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
-      <?= sanitize($error) ?>
+      <?= esc($error) ?>
     </div>
   <?php endif; ?>
 
@@ -203,28 +206,28 @@ include dirname(__DIR__) . '/includes/header.php';
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Product Title / Name <span class="required" style="color: #ef4444;">*</span></label>
-              <input type="text" name="name" id="productName" required placeholder="e.g. Oversized Graphic Tee / Silk Kurta Set / Linen Co-Ord" value="<?= sanitize($_POST['name'] ?? '') ?>" oninput="autoGenerateSlug(this.value)">
+              <input type="text" name="name" id="productName" required placeholder="e.g. Oversized Graphic Tee / Silk Kurta Set / Linen Co-Ord" value="<?= esc($_POST['name'] ?? '') ?>" oninput="autoGenerateSlug(this.value)">
             </div>
 
             <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group" style="margin: 0;">
                 <label>Brand</label>
-                <input type="text" name="brand" value="<?= sanitize($_POST['brand'] ?? 'urban outfit') ?>">
+                <input type="text" name="brand" value="<?= esc($_POST['brand'] ?? 'urban outfit') ?>">
               </div>
               <div class="form-group" style="margin: 0;">
                 <label>SKU (Product Code)</label>
-                <input type="text" name="sku" placeholder="e.g. UO-MEN-TEE-001" value="<?= sanitize($_POST['sku'] ?? '') ?>">
+                <input type="text" name="sku" placeholder="e.g. UO-MEN-TEE-001" value="<?= esc($_POST['sku'] ?? '') ?>">
               </div>
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>URL Slug <span class="required" style="color: #ef4444;">*</span></label>
-              <input type="text" name="slug" id="productSlug" required placeholder="pure-georgette-embroidered-anarkali-suit-set" value="<?= sanitize($_POST['slug'] ?? '') ?>">
+              <input type="text" name="slug" id="productSlug" required placeholder="pure-georgette-embroidered-anarkali-suit-set" value="<?= esc($_POST['slug'] ?? '') ?>">
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>Product Description</label>
-              <textarea name="description" rows="4" placeholder="Product description, fabric details, fit, styling tips..."><?= sanitize($_POST['description'] ?? '') ?></textarea>
+              <textarea name="description" rows="4" placeholder="Product description, fabric details, fit, styling tips..."><?= esc($_POST['description'] ?? '') ?></textarea>
             </div>
 
             <div class="form-group" style="margin: 0;">
@@ -294,12 +297,12 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Fabric / Material</label>
-              <input type="text" name="material" placeholder="e.g. 100% Cotton / Linen Blend / Silk" value="<?= sanitize($_POST['material'] ?? '') ?>">
+              <input type="text" name="material" placeholder="e.g. 100% Cotton / Linen Blend / Silk" value="<?= esc($_POST['material'] ?? '') ?>">
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>Care Instructions</label>
-              <input type="text" name="care_instructions" placeholder="e.g. Dry Clean Only / Hand Wash" value="<?= sanitize($_POST['care_instructions'] ?? '') ?>">
+              <input type="text" name="care_instructions" placeholder="e.g. Dry Clean Only / Hand Wash" value="<?= esc($_POST['care_instructions'] ?? '') ?>">
             </div>
           </div>
         </div>
@@ -373,17 +376,17 @@ include dirname(__DIR__) . '/includes/header.php';
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
             <div class="form-group" style="margin: 0;">
               <label style="font-size: 11px;">Selling Price (₹) <span class="required" style="color: #ef4444;">*</span></label>
-              <input type="number" step="0.01" name="price" id="sellingPrice" required placeholder="2499" value="<?= sanitize($_POST['price'] ?? '') ?>" oninput="calcDiscount()">
+              <input type="number" step="0.01" name="price" id="sellingPrice" required placeholder="2499" value="<?= esc($_POST['price'] ?? '') ?>" oninput="calcDiscount()">
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label style="font-size: 11px;">Original / MRP (₹)</label>
-              <input type="number" step="0.01" name="original_price" id="originalPrice" placeholder="3999" value="<?= sanitize($_POST['original_price'] ?? '') ?>" oninput="calcDiscount()">
+              <input type="number" step="0.01" name="original_price" id="originalPrice" placeholder="3999" value="<?= esc($_POST['original_price'] ?? '') ?>" oninput="calcDiscount()">
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label style="font-size: 11px;">Discount (%)</label>
-              <input type="number" name="discount_percent" id="discountPercent" placeholder="0" value="<?= sanitize($_POST['discount_percent'] ?? '0') ?>">
+              <input type="number" name="discount_percent" id="discountPercent" placeholder="0" value="<?= esc($_POST['discount_percent'] ?? '0') ?>">
             </div>
           </div>
         </div>
@@ -406,11 +409,11 @@ include dirname(__DIR__) . '/includes/header.php';
             <div id="shippingChargeGroup" style="display: none;">
               <div class="form-group" style="margin: 0;">
                 <label style="font-size: 11px;">Shipping Charge (₹)</label>
-                <input type="number" step="0.01" min="0" name="shipping_charge" placeholder="0" value="<?= sanitize($_POST['shipping_charge'] ?? '0') ?>">
+                <input type="number" step="0.01" min="0" name="shipping_charge" placeholder="0" value="<?= esc($_POST['shipping_charge'] ?? '0') ?>">
               </div>
               <div class="form-group" style="margin: 0; margin-top: 8px;">
                 <label style="font-size: 11px;">Delivery Days</label>
-                <input type="text" name="shipping_days" placeholder="3-5" value="<?= sanitize($_POST['shipping_days'] ?? '3-5') ?>">
+                <input type="text" name="shipping_days" placeholder="3-5" value="<?= esc($_POST['shipping_days'] ?? '3-5') ?>">
               </div>
             </div>
           </div>
@@ -442,7 +445,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 <option value="">-- Select Main Category --</option>
                 <?php foreach ($parentCategories as $pCat): ?>
                   <option value="<?= $pCat['id'] ?>" data-dept="<?= $pCat['department'] ?>" <?= ($_POST['category_id'] ?? '') == $pCat['id'] ? 'selected' : '' ?>>
-                    <?= sanitize($pCat['name']) ?>
+                    <?= esc($pCat['name']) ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -454,7 +457,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 <option value="">-- Select Sub-Category --</option>
                 <?php foreach ($subCategories as $sCat): ?>
                   <option value="<?= $sCat['id'] ?>" data-parent="<?= $sCat['parent_id'] ?>" <?= ($_POST['subcategory_id'] ?? '') == $sCat['id'] ? 'selected' : '' ?>>
-                    <?= sanitize($sCat['name']) ?>
+                    <?= esc($sCat['name']) ?>
                   </option>
                 <?php endforeach; ?>
               </select>

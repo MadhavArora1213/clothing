@@ -75,12 +75,12 @@ include dirname(__DIR__) . '/includes/header.php';
                 };
               ?>
               <tr>
-                <td style="font-weight: 600;"><?= sanitize($enquiry['name']) ?></td>
+                <td style="font-weight: 600;"><?= esc($enquiry['name']) ?></td>
                 <td>
-                  <div><a href="mailto:<?= sanitize($enquiry['email']) ?>"><?= sanitize($enquiry['email']) ?></a></div>
-                  <small style="color: var(--color-text-tertiary);"><?= sanitize($enquiry['phone'] ?? 'No phone') ?></small>
+                  <div><a href="mailto:<?= esc($enquiry['email']) ?>"><?= esc($enquiry['email']) ?></a></div>
+                  <small style="color: var(--color-text-tertiary);"><?= esc($enquiry['phone'] ?? 'No phone') ?></small>
                 </td>
-                <td style="font-weight: 500;"><?= sanitize($enquiry['subject']) ?></td>
+                <td style="font-weight: 500;"><?= esc($enquiry['subject']) ?></td>
                 <td>
                   <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; <?= $statusClass ?>">
                     <?= ucfirst(str_replace('_', ' ', $enquiry['status'])) ?>

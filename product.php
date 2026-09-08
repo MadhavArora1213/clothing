@@ -158,7 +158,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       <!-- Product Image Gallery -->
       <div>
         <div class="pdp-main-img" style="border-radius: var(--radius-xl); overflow: hidden; background: #F1F5F9; aspect-ratio: 3/4; box-shadow: var(--shadow-md); margin-bottom: 16px;">
-          <img src="<?= $imageUrls[0] ?>" alt="<?= htmlspecialchars($product['name']) ?>" id="mainProductImg" style="width: 100%; height: 100%; object-fit: cover;">
+          <img src="<?= $imageUrls[0] ?>" alt="<?= htmlspecialchars($product['name']) ?>" id="mainProductImg" style="width: 100%; height: 100%; object-fit: contain;">
         </div>
 
         <div style="display: flex; gap: 12px;">
@@ -642,17 +642,17 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
                 <div class="rev-author">
                   <div class="rev-avatar"><?= $initials ?></div>
                   <div>
-                    <div class="rev-author-name"><?= sanitize($r['customer_name']) ?></div>
+                    <div class="rev-author-name"><?= esc($r['customer_name']) ?></div>
                     <div class="rev-author-date"><?= date('M d, Y', strtotime($r['created_at'])) ?></div>
                   </div>
                 </div>
                 <div class="rev-stars"><?= str_repeat('★', $r['rating']) ?><?= str_repeat('☆', 5 - $r['rating']) ?></div>
               </div>
               <?php if (!empty($r['title'])): ?>
-                <div class="rev-card-title"><?= sanitize($r['title']) ?></div>
+                <div class="rev-card-title"><?= esc($r['title']) ?></div>
               <?php endif; ?>
               <?php if (!empty($r['comment'])): ?>
-                <div class="rev-card-comment"><?= nl2br(sanitize($r['comment'])) ?></div>
+                <div class="rev-card-comment"><?= nl2br(esc($r['comment'])) ?></div>
               <?php endif; ?>
               <?php if (!empty($r['images'])): ?>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">

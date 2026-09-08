@@ -400,14 +400,14 @@ include dirname(__DIR__) . '/includes/header.php';
       <?php if ($error): ?>
         <div class="login-error">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-          <?= sanitize($error) ?>
+          <?= esc($error) ?>
         </div>
       <?php endif; ?>
 
       <?php if ($success): ?>
         <div class="login-success">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-          <?= sanitize($success) ?>
+          <?= esc($success) ?>
         </div>
       <?php endif; ?>
 
@@ -415,7 +415,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <?= getCSRFInput() ?>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" name="email" placeholder="you@example.com" required value="<?= sanitize($_POST['email'] ?? '') ?>">
+          <input type="email" name="email" placeholder="you@example.com" required value="<?= esc($_POST['email'] ?? '') ?>">
         </div>
         <div class="form-group">
           <label>Password</label>

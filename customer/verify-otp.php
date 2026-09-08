@@ -298,20 +298,20 @@ include dirname(__DIR__) . '/includes/header.php';
       <div class="verify-form-header">
         <div class="brand">UOC</div>
         <h1>Verify Email</h1>
-        <p>Enter the 6-digit OTP sent to <strong><?= sanitize($email) ?></strong></p>
+        <p>Enter the 6-digit OTP sent to <strong><?= esc($email) ?></strong></p>
       </div>
 
       <?php if ($error): ?>
         <div class="verify-error">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-          <?= sanitize($error) ?>
+          <?= esc($error) ?>
         </div>
       <?php endif; ?>
 
       <?php if ($success): ?>
         <div class="verify-success">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-          <?= sanitize($success) ?>
+          <?= esc($success) ?>
         </div>
       <?php endif; ?>
 

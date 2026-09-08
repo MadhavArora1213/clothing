@@ -11,7 +11,7 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= sanitize($pageTitle) ?></title>
+  <title><?= esc($pageTitle) ?></title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
 <body class="<?= $bodyClass ?? '' ?>">
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-header">
-      <a href="<?= adminUrl('index.php') ?>" class="sidebar-logo">UO</a>
+      <a href="<?= adminUrl('index.php') ?>" class="sidebar-logo">UOC</a>
       <span class="sidebar-brand">urban outfit<br><small>Admin Panel</small></span>
     </div>
     <nav class="sidebar-nav">
@@ -94,7 +94,7 @@ if (!$admin && basename($_SERVER['PHP_SELF']) !== 'login.php') {
         <a href="<?= siteUrl('index.php') ?>" target="_blank" class="btn btn-secondary btn-sm">View Store &rarr;</a>
         <div class="admin-user">
           <div class="admin-avatar"><?= $admin ? strtoupper(substr($admin['name'], 0, 1)) : 'A' ?></div>
-          <span><?= $admin ? sanitize($admin['name']) : 'Admin' ?></span>
+          <span><?= $admin ? esc($admin['name']) : 'Admin' ?></span>
         </div>
       </div>
     </header>

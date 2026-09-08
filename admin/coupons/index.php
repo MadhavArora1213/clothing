@@ -50,7 +50,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <?php if (!empty($_GET['msg'])): ?>
     <div class="alert alert-success" style="margin-bottom: var(--space-6); background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; padding: 12px 16px; border-radius: 8px;">
-      <?= sanitize($_GET['msg']) ?>
+      <?= esc($_GET['msg']) ?>
     </div>
   <?php endif; ?>
 
@@ -132,7 +132,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <tr>
                 <td>
                   <strong style="font-family: monospace; font-size: 14px; background: #f1f5f9; padding: 3px 8px; border-radius: 4px; border: 1px dashed #94a3b8;">
-                    <?= sanitize($coupon['code']) ?>
+                    <?= esc($coupon['code']) ?>
                   </strong>
                 </td>
                 <td><?= ucfirst($coupon['type']) ?></td>

@@ -29,7 +29,7 @@ $history = $mysqli->query("SELECT * FROM order_status_history WHERE order_id = $
   <div class="container">
     <div class="section-header">
       <h1 class="section-title">Track Order</h1>
-      <p class="section-subtitle">Order <?= sanitize($order['order_number']) ?></p>
+      <p class="section-subtitle">Order <?= esc($order['order_number']) ?></p>
     </div>
 
     <div class="admin-grid">
@@ -42,7 +42,7 @@ $history = $mysqli->query("SELECT * FROM order_status_history WHERE order_id = $
               <span style="color: var(--color-text-tertiary);"><?= date('M d, Y', strtotime($order['created_at'])) ?></span>
             </div>
             <?php if ($order['tracking_number']): ?>
-              <p><strong>Tracking Number:</strong> <?= sanitize($order['tracking_number']) ?></p>
+              <p><strong>Tracking Number:</strong> <?= esc($order['tracking_number']) ?></p>
             <?php endif; ?>
           </div>
         </div>
@@ -77,10 +77,10 @@ $history = $mysqli->query("SELECT * FROM order_status_history WHERE order_id = $
               $address = json_decode($order['shipping_address'], true);
               if ($address):
             ?>
-              <p><?= sanitize($address['name']) ?></p>
-              <p><?= sanitize($address['address']) ?></p>
-              <p><?= sanitize($address['city']) ?>, <?= sanitize($address['state']) ?> - <?= sanitize($address['postal_code']) ?></p>
-              <p><?= sanitize($address['phone']) ?></p>
+              <p><?= esc($address['name']) ?></p>
+              <p><?= esc($address['address']) ?></p>
+              <p><?= esc($address['city']) ?>, <?= esc($address['state']) ?> - <?= esc($address['postal_code']) ?></p>
+              <p><?= esc($address['phone']) ?></p>
             <?php endif; ?>
           </div>
         </div>
@@ -93,7 +93,7 @@ $history = $mysqli->query("SELECT * FROM order_status_history WHERE order_id = $
               <tbody>
                 <?php foreach ($items as $item): ?>
                   <tr>
-                    <td><?= sanitize($item['product_name']) ?></td>
+                    <td><?= esc($item['product_name']) ?></td>
                     <td><?= (int)$item['quantity'] ?></td>
                     <td><?= formatPrice($item['total_price']) ?></td>
                   </tr>

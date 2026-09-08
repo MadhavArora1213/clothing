@@ -612,10 +612,10 @@ include dirname(__DIR__) . '/includes/header.php';
                 </a>
 
                 <div class="ci-details">
-                  <h3><a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= sanitize($item['name']) ?></a></h3>
+                  <h3><a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= esc($item['name']) ?></a></h3>
                   <div class="ci-meta">
                     <?php if ($item['size']): ?>
-                      <span>Size: <?= sanitize($item['size']) ?></span>
+                      <span>Size: <?= esc($item['size']) ?></span>
                       <span class="dot"></span>
                     <?php endif; ?>
                     <span>SKU #<?= $item['product_id'] ?></span>
@@ -687,10 +687,10 @@ include dirname(__DIR__) . '/includes/header.php';
                 <?php foreach ($suggestedProducts as $sp): ?>
                   <a href="<?= BASE_URL ?>/product.php?slug=<?= $sp['slug'] ?>" class="look-card">
                     <div class="look-card-img">
-                      <img src="<?= htmlspecialchars($sp['image'] ?: 'https://via.placeholder.com/120x144?text=No+Image') ?>" alt="<?= sanitize($sp['name']) ?>" loading="lazy">
+                      <img src="<?= htmlspecialchars($sp['image'] ?: 'https://via.placeholder.com/120x144?text=No+Image') ?>" alt="<?= esc($sp['name']) ?>" loading="lazy">
                     </div>
                     <div class="look-card-info">
-                      <h5><?= sanitize($sp['name']) ?></h5>
+                      <h5><?= esc($sp['name']) ?></h5>
                       <div class="look-card-price"><?= formatPrice($sp['price']) ?></div>
                     </div>
                   </a>

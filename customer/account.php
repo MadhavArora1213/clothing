@@ -588,7 +588,7 @@ include dirname(__DIR__) . '/includes/header.php';
       <div class="acct-hero-content">
         <div class="acct-hero-left">
           <div class="acct-hero-eyebrow">Welcome back</div>
-          <h1>Hello, <em><?= sanitize($customer['first_name']) ?></em></h1>
+          <h1>Hello, <em><?= esc($customer['first_name']) ?></em></h1>
           <p>Discover the latest arrivals, manage your orders, and explore our curated collections — all in one place.</p>
         </div>
         <div class="acct-hero-right">
@@ -633,33 +633,33 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
         <div class="acct-panel-body">
           <?php if ($error): ?>
-            <div class="alert alert-error" style="margin-bottom: var(--space-4);"><?= sanitize($error) ?></div>
+            <div class="alert alert-error" style="margin-bottom: var(--space-4);"><?= esc($error) ?></div>
           <?php endif; ?>
           <?php if ($success): ?>
-            <div class="alert alert-success" style="margin-bottom: var(--space-4);"><?= sanitize($success) ?></div>
+            <div class="alert alert-success" style="margin-bottom: var(--space-4);"><?= esc($success) ?></div>
           <?php endif; ?>
           <form method="POST">
             <?= getCSRFInput() ?>
             <div class="profile-row">
               <div class="profile-field">
                 <label>First Name</label>
-                <input type="text" name="first_name" value="<?= sanitize($customer['first_name']) ?>" required>
+                <input type="text" name="first_name" value="<?= esc($customer['first_name']) ?>" required>
               </div>
               <div class="profile-field">
                 <label>Last Name</label>
-                <input type="text" name="last_name" value="<?= sanitize($customer['last_name']) ?>" required>
+                <input type="text" name="last_name" value="<?= esc($customer['last_name']) ?>" required>
               </div>
             </div>
             <div class="profile-row full">
               <div class="profile-field">
                 <label>Email Address</label>
-                <input type="email" value="<?= sanitize($customer['email']) ?>" disabled>
+                <input type="email" value="<?= esc($customer['email']) ?>" disabled>
               </div>
             </div>
             <div class="profile-row full">
               <div class="profile-field">
                 <label>Phone Number</label>
-                <input type="tel" name="phone" value="<?= sanitize($customer['phone'] ?? '') ?>" placeholder="+91 XXXXX XXXXX">
+                <input type="tel" name="phone" value="<?= esc($customer['phone'] ?? '') ?>" placeholder="+91 XXXXX XXXXX">
               </div>
             </div>
             <button type="submit" class="profile-save-btn">Save Changes</button>
@@ -686,7 +686,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <?php foreach ($orders as $order): ?>
               <div class="order-item">
                 <div class="order-item-left">
-                  <h4><?= sanitize($order['order_number']) ?></h4>
+                  <h4><?= esc($order['order_number']) ?></h4>
                   <p><?= date('M d, Y', strtotime($order['created_at'])) ?></p>
                 </div>
                 <div class="order-item-right">
@@ -740,12 +740,12 @@ include dirname(__DIR__) . '/includes/header.php';
               <?php if ($address['is_default']): ?>
                 <span style="position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #166534; background: #F0FDF4; border: 1px solid #BBF7D0; padding: 2px 8px; border-radius: 999px;">Default</span>
               <?php endif; ?>
-              <span style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent); background: var(--color-accent-light); padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;"><?= sanitize($address['label']) ?></span>
-              <div style="font-weight: 600; margin-bottom: 8px;"><?= sanitize($address['full_name']) ?></div>
+              <span style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent); background: var(--color-accent-light); padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;"><?= esc($address['label']) ?></span>
+              <div style="font-weight: 600; margin-bottom: 8px;"><?= esc($address['full_name']) ?></div>
               <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.7;">
-                <?= sanitize($address['address_line1']) ?><br>
-                <?= sanitize($address['city']) ?>, <?= sanitize($address['state']) ?> - <?= sanitize($address['postal_code']) ?><br>
-                <?= sanitize($address['phone']) ?>
+                <?= esc($address['address_line1']) ?><br>
+                <?= esc($address['city']) ?>, <?= esc($address['state']) ?> - <?= esc($address['postal_code']) ?><br>
+                <?= esc($address['phone']) ?>
               </div>
             </div>
           <?php endforeach; ?>

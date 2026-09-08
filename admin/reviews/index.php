@@ -213,12 +213,12 @@ include dirname(__DIR__) . '/includes/header.php';
                       <?= strtoupper(substr($review['customer_name'], 0, 1)) ?>
                     </div>
                     <div>
-                      <div style="font-weight: 600; font-size: 13px;"><?= sanitize($review['customer_name']) ?></div>
+                      <div style="font-weight: 600; font-size: 13px;"><?= esc($review['customer_name']) ?></div>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <div style="font-weight: 600; font-size: 13px;"><?= sanitize($review['product_name'] ?? 'N/A') ?></div>
+                  <div style="font-weight: 600; font-size: 13px;"><?= esc($review['product_name'] ?? 'N/A') ?></div>
                   <?php if (!empty($review['product_price'])): ?>
                     <div style="font-size: 12px; color: #9A8E7E;">₹<?= number_format($review['product_price']) ?></div>
                   <?php endif; ?>
@@ -228,9 +228,9 @@ include dirname(__DIR__) . '/includes/header.php';
                 </td>
                 <td>
                   <?php if (!empty($review['title'])): ?>
-                    <div class="rev-title"><?= sanitize($review['title']) ?></div>
+                    <div class="rev-title"><?= esc($review['title']) ?></div>
                   <?php endif; ?>
-                  <div class="rev-comment"><?= sanitize($review['comment'] ?? '') ?></div>
+                  <div class="rev-comment"><?= esc($review['comment'] ?? '') ?></div>
                 </td>
                 <td>
                   <?php if (!empty($review['images'])): ?>

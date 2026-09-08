@@ -155,12 +155,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id']) &
 
     $upStmt = $mysqli->prepare("UPDATE products SET 
       name=?, slug=?, sku=?, brand=?, gender=?, description=?, features=?, material=?, care_instructions=?, 
-      price=?, original_price=?, discount_percent=?, shipping_charge=?, free_shipping=?, shipping_days=?, category_id=?, subcategory_id=?, image=?, is_featured=?, is_active=? 
+      price=?, original_price=?, discount_percent=?, category_id=?, subcategory_id=?, image=?, is_featured=?, is_active=? 
       WHERE id=?");
 
-    $upStmt->bind_param('sssssssssdiiisiiiiiii', 
+    $upStmt->bind_param('sssssssssdiiiiiiii', 
       $name, $slug, $sku, $brand, $gender, $description, $featuresJson, $material, $care_instructions, 
-      $price, $original_price, $discount_percent, $shipping_charge, $free_shipping, $shipping_days, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active, $id);
+      $price, $original_price, $discount_percent, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active, $id);
 
     if ($upStmt->execute()) {
       if (isset($_FILES['subimage_files']['name']) && is_array($_FILES['subimage_files']['name'])) {
@@ -255,7 +255,7 @@ include dirname(__DIR__) . '/includes/header.php';
   <div class="page-header" style="margin-bottom: var(--space-6);">
     <div class="page-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
       <div>
-        <h1 style="margin: 0; font-size: 26px;">Edit Product: <?= sanitize($product['name']) ?></h1>
+        <h1 style="margin: 0; font-size: 26px;">Edit Product: <?= esc($product['name']) ?></h1>
         <p style="margin: 4px 0 0 0; color: #64748b;">Update product details, photos, colors, and inventory.</p>
       </div>
       <div class="page-header-actions" style="display: flex; gap: 8px;">
@@ -268,13 +268,13 @@ include dirname(__DIR__) . '/includes/header.php';
 
   <?php if ($error): ?>
     <div class="alert alert-error" style="margin-bottom: var(--space-6); background: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
-      <?= sanitize($error) ?>
+      <?= esc($error) ?>
     </div>
   <?php endif; ?>
 
   <?php if ($success || !empty($_GET['msg'])): ?>
     <div class="alert alert-success" style="margin-bottom: var(--space-6); background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
-      <?= sanitize($success ?: $_GET['msg']) ?>
+      <?= esc($success ?: $_GET['msg']) ?>
     </div>
   <?php endif; ?>
 
@@ -297,28 +297,28 @@ include dirname(__DIR__) . '/includes/header.php';
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Product Title / Name <span class="required" style="color: #ef4444;">*</span></label>
-              <input type="text" name="name" id="productName" required value="<?= sanitize($product['name']) ?>">
+              <input type="text" name="name" id="productName" required value="<?= esc($product['name']) ?>">
             </div>
 
             <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <div class="form-group" style="margin: 0;">
                 <label>Brand</label>
-                <input type="text" name="brand" value="<?= sanitize($product['brand'] ?? 'urban outfit') ?>">
+                <input type="text" name="brand" value="<?= esc($product['brand'] ?? 'urban outfit') ?>">
               </div>
               <div class="form-group" style="margin: 0;">
                 <label>SKU (Product Code)</label>
-                <input type="text" name="sku" value="<?= sanitize($product['sku'] ?? '') ?>">
+                <input type="text" name="sku" value="<?= esc($product['sku'] ?? '') ?>">
               </div>
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>URL Slug <span class="required" style="color: #ef4444;">*</span></label>
-              <input type="text" name="slug" id="productSlug" required value="<?= sanitize($product['slug']) ?>">
+              <input type="text" name="slug" id="productSlug" required value="<?= esc($product['slug']) ?>">
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>Product Description</label>
-              <textarea name="description" rows="4"><?= sanitize($product['description'] ?? '') ?></textarea>
+              <textarea name="description" rows="4"><?= esc($product['description'] ?? '') ?></textarea>
             </div>
 
             <div class="form-group" style="margin: 0;">
@@ -330,7 +330,7 @@ include dirname(__DIR__) . '/includes/header.php';
                   foreach ($features as $f):
                 ?>
                   <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                    <input type="text" name="features[]" value="<?= sanitize($f) ?>" placeholder="e.g. 260 GSM Premium Cotton" style="flex: 1;">
+                    <input type="text" name="features[]" value="<?= esc($f) ?>" placeholder="e.g. 260 GSM Premium Cotton" style="flex: 1;">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()">✕</button>
                   </div>
                 <?php endforeach; ?>
@@ -374,7 +374,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 <div class="color-card-item">
                   <div class="color-preview-box" style="background: <?= htmlspecialchars($clr['color_code']) ?>; width: 30px; height: 30px;"></div>
                   <div style="flex: 1;">
-                    <input type="text" name="colors[<?= $idx ?>][name]" value="<?= sanitize($clr['color_name']) ?>" required placeholder="Color Name">
+                    <input type="text" name="colors[<?= $idx ?>][name]" value="<?= esc($clr['color_name']) ?>" required placeholder="Color Name">
                   </div>
                   <input type="color" name="colors[<?= $idx ?>][code]" value="<?= htmlspecialchars($clr['color_code']) ?>" title="Change color" onchange="updateColorPreview(this)">
                   <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.color-card-item').remove()" title="Remove" style="padding: 2px 6px;">✕</button>
@@ -407,12 +407,12 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="form-inline-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div class="form-group" style="margin: 0;">
               <label>Fabric / Material</label>
-              <input type="text" name="material" value="<?= sanitize($product['material'] ?? '') ?>">
+              <input type="text" name="material" value="<?= esc($product['material'] ?? '') ?>">
             </div>
 
             <div class="form-group" style="margin: 0;">
               <label>Care Instructions</label>
-              <input type="text" name="care_instructions" value="<?= sanitize($product['care_instructions'] ?? '') ?>">
+              <input type="text" name="care_instructions" value="<?= esc($product['care_instructions'] ?? '') ?>">
             </div>
           </div>
         </div>
@@ -431,6 +431,23 @@ include dirname(__DIR__) . '/includes/header.php';
             </h3>
           </div>
 
+          <!-- Main Image Preview -->
+          <?php if (!empty($product['image'])): ?>
+            <div style="margin-bottom: 14px; text-align: center;">
+              <strong style="font-size: 11px; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 6px;">Main Image</strong>
+              <img src="<?= esc($product['image']) ?>" alt="Main" style="max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; border: 2px solid #e2e8f0; background: #f8fafc;">
+            </div>
+          <?php endif; ?>
+
+          <!-- Upload New Main Image -->
+          <div style="margin-bottom: 14px;">
+            <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Replace Main Image</label>
+            <input type="file" name="main_image_file" accept="image/*" onchange="previewMainFile(this)" style="font-size: 12px; width: 100%;">
+            <div id="mainImagePreviewContainer" style="margin-top: 8px; display: none;">
+              <img id="mainImagePreview" src="" alt="Preview" style="max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px; border: 2px solid #0284c7;">
+            </div>
+          </div>
+
           <!-- Existing Images Grid -->
           <?php if (!empty($existingImages)): ?>
             <div class="gallery-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px;">
@@ -438,7 +455,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 <div class="gallery-card <?= $img['is_primary'] ? 'is-primary' : '' ?>" style="border-radius: 8px;">
                   <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="" style="width: 100%; height: 110px; object-fit: cover; background: #f1f5f9;">
                   <div style="padding: 6px 8px; display: flex; flex-direction: column; gap: 4px;">
-                    <span class="gallery-label-badge" style="font-size: 10px; padding: 2px 4px;"><?= sanitize($img['image_label'] ?? 'View') ?></span>
+                    <span class="gallery-label-badge" style="font-size: 10px; padding: 2px 4px;"><?= esc($img['image_label'] ?? 'View') ?></span>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
                       <?php if (!$img['is_primary']): ?>
                         <form method="POST" style="display: inline;">
@@ -534,7 +551,7 @@ include dirname(__DIR__) . '/includes/header.php';
               </div>
               <div class="form-group" style="margin: 0; margin-top: 8px;">
                 <label style="font-size: 11px;">Delivery Days</label>
-                <input type="text" name="shipping_days" placeholder="3-5" value="<?= sanitize($product['shipping_days'] ?? '3-5') ?>">
+                <input type="text" name="shipping_days" placeholder="3-5" value="<?= esc($product['shipping_days'] ?? '3-5') ?>">
               </div>
             </div>
           </div>
@@ -566,7 +583,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 <option value="">-- Select Main Category --</option>
                 <?php foreach ($parentCategories as $pCat): ?>
                   <option value="<?= $pCat['id'] ?>" <?= $product['category_id'] == $pCat['id'] ? 'selected' : '' ?>>
-                    <?= sanitize($pCat['name']) ?>
+                    <?= esc($pCat['name']) ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -578,7 +595,7 @@ include dirname(__DIR__) . '/includes/header.php';
                 <option value="">-- Select Sub-Category --</option>
                 <?php foreach ($subCategories as $sCat): ?>
                   <option value="<?= $sCat['id'] ?>" <?= ($product['subcategory_id'] ?? 0) == $sCat['id'] ? 'selected' : '' ?>>
-                    <?= sanitize($sCat['name']) ?>
+                    <?= esc($sCat['name']) ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -606,7 +623,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <?php if (!empty($existingSizes)): ?>
               <?php foreach ($existingSizes as $sIdx => $sz): ?>
                 <div class="size-item-row">
-                  <input type="text" name="sizes[<?= $sIdx ?>][name]" value="<?= sanitize($sz['size']) ?>" placeholder="Size" required>
+                  <input type="text" name="sizes[<?= $sIdx ?>][name]" value="<?= esc($sz['size']) ?>" placeholder="Size" required>
                   <input type="number" name="sizes[<?= $sIdx ?>][stock]" value="<?= (int)$sz['stock'] ?>" min="0" placeholder="Qty" required>
                   <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.size-item-row').remove()" style="padding: 4px 8px;">✕</button>
                 </div>
@@ -649,6 +666,16 @@ include dirname(__DIR__) . '/includes/header.php';
 </div>
 
 <script>
+function previewMainFile(input) {
+  if (input.files && input.files[0]) {
+    var e = new FileReader();
+    e.onload = function(ev) {
+      document.getElementById('mainImagePreview').src = ev.target.result;
+      document.getElementById('mainImagePreviewContainer').style.display = 'block';
+    };
+    e.readAsDataURL(input.files[0]);
+  }
+}
 function calcDiscount() {
   const sp = parseFloat(document.getElementById('sellingPrice').value) || 0;
   const mrp = parseFloat(document.getElementById('originalPrice').value) || 0;

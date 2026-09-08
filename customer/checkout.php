@@ -256,7 +256,7 @@ include dirname(__DIR__) . '/includes/header.php';
       ?>
         <div class="ck-product">
           <img class="ck-product-img" src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy">
-          <div class="ck-product-name"><?= sanitize($item['name']) ?></div>
+          <div class="ck-product-name"><?= esc($item['name']) ?></div>
           <div class="ck-product-price"><?= formatPrice($item['unit_price']) ?></div>
           <?php if ($item['quantity'] > 1): ?>
             <div class="ck-product-qty">Qty: <?= (int)$item['quantity'] ?></div>
@@ -274,22 +274,22 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="ck-customer-card">
           <div class="ck-customer-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           <div class="ck-customer-info">
-            <h4><?= sanitize($customer['first_name'] . ' ' . $customer['last_name']) ?></h4>
-            <p><?= sanitize($customer['email'] ?? '') ?></p>
+            <h4><?= esc($customer['first_name'] . ' ' . $customer['last_name']) ?></h4>
+            <p><?= esc($customer['email'] ?? '') ?></p>
           </div>
         </div>
       </div>
 
       <div class="ck-section">
         <div class="ck-section-header"><h3><span class="ck-section-num">2</span> Shipping</h3></div>
-        <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= sanitize($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'])) ?>"></div>
-        <div class="ck-field"><label>Phone <span>*</span></label><input type="tel" name="shipping_phone" required value="<?= sanitize($_POST['shipping_phone'] ?? $customer['phone'] ?? '') ?>"></div>
-        <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= sanitize($_POST['shipping_address'] ?? '') ?></textarea></div>
+        <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= esc($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'])) ?>"></div>
+        <div class="ck-field"><label>Phone <span>*</span></label><input type="tel" name="shipping_phone" required value="<?= esc($_POST['shipping_phone'] ?? $customer['phone'] ?? '') ?>"></div>
+        <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= esc($_POST['shipping_address'] ?? '') ?></textarea></div>
         <div class="ck-row">
-          <div class="ck-field"><label>City <span>*</span></label><input type="text" name="shipping_city" required value="<?= sanitize($_POST['shipping_city'] ?? '') ?>"></div>
-          <div class="ck-field"><label>State <span>*</span></label><input type="text" name="shipping_state" required value="<?= sanitize($_POST['shipping_state'] ?? '') ?>"></div>
+          <div class="ck-field"><label>City <span>*</span></label><input type="text" name="shipping_city" required value="<?= esc($_POST['shipping_city'] ?? '') ?>"></div>
+          <div class="ck-field"><label>State <span>*</span></label><input type="text" name="shipping_state" required value="<?= esc($_POST['shipping_state'] ?? '') ?>"></div>
         </div>
-        <div class="ck-field"><label>Postal Code <span>*</span></label><input type="text" name="shipping_postal" required value="<?= sanitize($_POST['shipping_postal'] ?? '') ?>"></div>
+        <div class="ck-field"><label>Postal Code <span>*</span></label><input type="text" name="shipping_postal" required value="<?= esc($_POST['shipping_postal'] ?? '') ?>"></div>
       </div>
 
       <div class="ck-section">
