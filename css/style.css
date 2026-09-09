@@ -6614,6 +6614,7 @@ button, input, select, textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
 }
 .dept-hero-content {
   position: relative;
@@ -6766,34 +6767,15 @@ button, input, select, textarea {
 }
 @media(max-width:768px) {
   .dept-hero {
-    flex-direction: column;
-    height: 280px;
+    height: 260px;
   }
   .dept-hero-content {
-    flex-direction: column;
-    padding: 30px 20px;
-  }
-  .dept-hero-left {
-    flex: none;
-    width: 100%;
-    padding: 0 0 24px;
-    text-align: center;
-    align-items: center;
-  }
-  .dept-hero-left h1 { font-size: 32px; }
-  .dept-hero-left h1 span { font-size: 38px; }
-  .dept-hero-left p { text-align: center; }
-  .dept-hero-left .dept-hero-btns { justify-content: center; }
-  .dept-hero-right {
-    flex: none;
-    width: 100%;
-    height: 200px;
-    grid-template-columns: repeat(3, 1fr);
+    display: none;
   }
   .dept-hero-arrows { display: none; }
 }
 @media(max-width:480px) {
-  .dept-hero { height: 220px; }
+  .dept-hero { height: 200px; }
 }
 
 /* Buttons */
