@@ -16,7 +16,7 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERV
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 
-// Detect root or subfolder (e.g., /clothing)
+// Detect root or subfolder (e.g., /admin, /api, /customer, /pages)
 $baseFolder = '';
 if (strpos($scriptDir, '/admin') !== false) {
   $baseFolder = substr($scriptDir, 0, strpos($scriptDir, '/admin'));
@@ -28,6 +28,13 @@ if (strpos($scriptDir, '/admin') !== false) {
   $baseFolder = substr($scriptDir, 0, strpos($scriptDir, '/pages'));
 } else {
   $baseFolder = rtrim($scriptDir, '/');
+}
+
+// If current folder IS the document root, don't include it in BASE_URL
+$docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? '');
+$absScriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
+if ($docRoot && rtrim($absScriptDir, '/') === rtrim($docRoot, '/')) {
+  $baseFolder = '';
 }
 
 define('BASE_URL', rtrim($protocol . $host . $baseFolder, '/'));

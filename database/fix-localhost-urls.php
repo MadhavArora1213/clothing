@@ -11,7 +11,7 @@ if (!$mysqli) {
 }
 
 $oldBase = 'http://localhost/urban_outfit/clothing';
-$newBase = 'https://urbanoutfitshop.com/clothing';
+$newBase = 'https://urbanoutfitshop.com';
 
 $totalFixed = 0;
 
