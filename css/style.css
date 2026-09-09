@@ -6767,7 +6767,7 @@ button, input, select, textarea {
 @media(max-width:768px) {
   .dept-hero {
     flex-direction: column;
-    height: auto;
+    height: 280px;
   }
   .dept-hero-content {
     flex-direction: column;
@@ -6791,6 +6791,9 @@ button, input, select, textarea {
     grid-template-columns: repeat(3, 1fr);
   }
   .dept-hero-arrows { display: none; }
+}
+@media(max-width:480px) {
+  .dept-hero { height: 220px; }
 }
 
 /* Buttons */
