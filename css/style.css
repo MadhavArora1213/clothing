@@ -1178,7 +1178,7 @@ button, input, select, textarea {
 .card-image-wrap .main-img, .card-image-wrap .hover-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

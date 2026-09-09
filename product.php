@@ -723,9 +723,9 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       $catId = isset($product['category_id']) ? (int)$product['category_id'] : 0;
       $pId = (int)$product['id'];
       if ($catId > 0) {
-        $relRes = $mysqli->query("SELECT p.*, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order LIMIT 1) as thumb FROM products p WHERE p.category_id = $catId AND p.id != $pId AND p.is_active = 1 ORDER BY RAND() LIMIT 4");
+        $relRes = $mysqli->query("SELECT p.*, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order LIMIT 1) as thumb FROM products p WHERE p.category_id = $catId AND p.id != $pId AND p.is_active = 1 ORDER BY RAND() LIMIT 8");
       } else {
-        $relRes = $mysqli->query("SELECT p.*, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order LIMIT 1) as thumb FROM products p WHERE p.id != $pId AND p.is_active = 1 ORDER BY RAND() LIMIT 4");
+        $relRes = $mysqli->query("SELECT p.*, (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order LIMIT 1) as thumb FROM products p WHERE p.id != $pId AND p.is_active = 1 ORDER BY RAND() LIMIT 8");
       }
       if ($relRes) $relatedProducts = $relRes->fetch_all(MYSQLI_ASSOC);
     }
@@ -773,7 +773,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
       .rel-card-img img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         transition: transform 0.4s ease;
       }
       .rel-card:hover .rel-card-img img { transform: scale(1.05); }
