@@ -6613,8 +6613,9 @@ button, input, select, textarea {
 .dept-hero-slide img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: left center;
+  background: #1a1a1a;
 }
 .dept-hero-content {
   position: relative;
@@ -6767,7 +6768,9 @@ button, input, select, textarea {
 }
 @media(max-width:768px) {
   .dept-hero {
-    height: 260px;
+    height: auto;
+    aspect-ratio: 2146 / 732;
+    max-height: 400px;
   }
   .dept-hero-content {
     display: none;
@@ -6775,7 +6778,9 @@ button, input, select, textarea {
   .dept-hero-arrows { display: none; }
 }
 @media(max-width:480px) {
-  .dept-hero { height: 200px; }
+  .dept-hero {
+    max-height: 300px;
+  }
 }
 
 /* Buttons */
