@@ -6613,9 +6613,8 @@ button, input, select, textarea {
 .dept-hero-slide img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: left center;
-  background: #1a1a1a;
 }
 .dept-hero-content {
   position: relative;
