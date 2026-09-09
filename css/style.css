@@ -6592,10 +6592,11 @@ button, input, select, textarea {
 .dept-hero {
   position: relative;
   width: 100%;
-  height: 400px;
   overflow: hidden;
   display: flex;
   background: #1a1a1a;
+  aspect-ratio: 2146 / 732;
+  max-height: 400px;
 }
 .dept-hero-slider {
   position: absolute;
@@ -6761,15 +6762,13 @@ button, input, select, textarea {
   transform: scale(1.2);
 }
 @media(max-width:1024px) {
-  .dept-hero { height: 340px; }
+  .dept-hero { max-height: 340px; }
   .dept-hero-left { flex: 0 0 45%; }
   .dept-hero-right { flex: 0 0 55%; }
 }
 @media(max-width:768px) {
   .dept-hero {
-    height: auto;
-    aspect-ratio: 2146 / 732;
-    max-height: 400px;
+    max-height: 280px;
   }
   .dept-hero-content {
     display: none;
@@ -6778,7 +6777,7 @@ button, input, select, textarea {
 }
 @media(max-width:480px) {
   .dept-hero {
-    max-height: 300px;
+    max-height: 200px;
   }
 }
 
