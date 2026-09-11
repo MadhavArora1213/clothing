@@ -437,17 +437,17 @@ if ($subcategory && $mysqli) {
 
 /* Add to Bag Button */
 .shop-card-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
   gap: 6px;
 }
 .shop-add-btn {
-  flex: 1;
   padding: 9px 0;
   background: #000;
   color: #fff;
   border: none;
-  border-radius: 7px;
-  font-size: 11px;
+  border-radius: 0;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -457,6 +457,24 @@ if ($subcategory && $mysqli) {
 }
 .shop-add-btn:hover {
   background: #333;
+}
+.shop-buy-btn {
+  padding: 9px 0;
+  background: transparent;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 0;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.shop-buy-btn:hover {
+  background: #000;
+  color: #fff;
 }
 .shop-add-btn.adding {
   opacity: 0.6;
@@ -672,7 +690,8 @@ if ($subcategory && $mysqli) {
                 <?php endif; ?>
               </div>
               <div class="shop-card-actions">
-                <button class="shop-add-btn" onclick="shopAddToCart(this, <?= $item['id'] ?>, '<?= htmlspecialchars(addslashes($item['name'])) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars(addslashes($item['image'])) ?>', '<?= htmlspecialchars(addslashes($item['slug'])) ?>', '<?= $firstSize ?>')">Add to Bag</button>
+                <button class="shop-add-btn" onclick="event.preventDefault();event.stopPropagation();openSizePicker(this,'cart')" data-id="<?= $item['id'] ?>" data-sizes='<?= htmlspecialchars(json_encode($item['sizes'] ?? []), ENT_QUOTES) ?>'>Add to Cart</button>
+                <button class="shop-buy-btn" onclick="event.preventDefault();event.stopPropagation();openSizePicker(this,'buynow')" data-id="<?= $item['id'] ?>" data-sizes='<?= htmlspecialchars(json_encode($item['sizes'] ?? []), ENT_QUOTES) ?>'>Buy Now</button>
                 <button class="shop-wish-btn <?= in_array($item['id'], $wishlistedIds) ? 'wishlisted' : '' ?>" onclick="toggleWishlist(this, <?= $item['id'] ?>)" title="Add to Wishlist">
                   <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -708,6 +727,10 @@ function shopAddToCart(btn, productId, name, price, image, slug, size) {
   }).then(r => r.json()).then(data => {
     btn.classList.remove('adding');
     btn.textContent = 'Add to Bag';
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to add items to your bag.', 'error');
+      return;
+    }
     if (data.success) {
       document.querySelectorAll('.cart-count').forEach(b => b.textContent = data.cart_count || 1);
       showToast(name + ' added to your bag!');
@@ -717,7 +740,7 @@ function shopAddToCart(btn, productId, name, price, image, slug, size) {
   }).catch(() => {
     btn.classList.remove('adding');
     btn.textContent = 'Add to Bag';
-    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+    showToast('Please login to add items to your bag.', 'error');
   });
 }
 
@@ -728,7 +751,7 @@ function toggleWishlist(btn, productId) {
     body: 'action=toggle&product_id=' + productId
   }).then(r => r.json()).then(data => {
     if (data.action === 'login_required') {
-      window.location.href = '<?= BASE_URL ?>/customer/login.php';
+      showToast('Please login to add to wishlist.', 'error');
       return;
     }
     if (data.success) {
@@ -740,7 +763,9 @@ function toggleWishlist(btn, productId) {
         badge.style.display = data.wishlist_count > 0 ? '' : 'none';
       }
     }
-  }).catch(() => {});
+  }).catch(() => {
+    showToast('Please login to add to wishlist.', 'error');
+  });
 }
 
 function subscribeNewsletter(e) {
@@ -770,6 +795,104 @@ function subscribeNewsletter(e) {
     btn.disabled = false;
     showToast('Subscribed successfully! Welcome aboard.', false);
     form.querySelector('input[type=email]').value = '';
+  });
+}
+
+/* ── SIZE PICKER ── */
+var sizePickerOverlay = null;
+var sizePickerModal = null;
+var sizePickerData = { id: 0, sizes: [], mode: '' };
+
+function ensureSizePicker() {
+  if (sizePickerModal) return;
+  sizePickerOverlay = document.createElement('div');
+  sizePickerOverlay.className = 'uoc-sz-overlay';
+  sizePickerOverlay.onclick = closeSizePicker;
+  sizePickerModal = document.createElement('div');
+  sizePickerModal.className = 'uoc-sz-modal';
+  sizePickerModal.innerHTML = '<div class="uoc-sz-header"><span class="uoc-sz-title">Select Size</span><button class="uoc-sz-close" onclick="closeSizePicker()">&times;</button></div><div class="uoc-sz-grid" id="szGrid"></div><div class="uoc-sz-note">Select a size to continue</div>';
+  document.body.appendChild(sizePickerOverlay);
+  document.body.appendChild(sizePickerModal);
+}
+
+function openSizePicker(btn, mode) {
+  ensureSizePicker();
+  var id = parseInt(btn.getAttribute('data-id'));
+  var sizes = [];
+  try { sizes = JSON.parse(btn.getAttribute('data-sizes')); } catch(e) { sizes = []; }
+  sizePickerData = { id: id, sizes: sizes, mode: mode };
+  var grid = document.getElementById('szGrid');
+  grid.innerHTML = '';
+  if (sizes.length === 0) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;grid-column:1/-1;">No sizes available</div>';
+  } else {
+    sizes.forEach(function(sz) {
+      var b = document.createElement('button');
+      b.className = 'uoc-sz-btn';
+      b.textContent = sz;
+      b.onclick = function() { selectSizeAndAct(sz); };
+      grid.appendChild(b);
+    });
+  }
+  sizePickerOverlay.classList.add('show');
+  sizePickerModal.classList.add('show');
+}
+
+function closeSizePicker() {
+  if (sizePickerOverlay) sizePickerOverlay.classList.remove('show');
+  if (sizePickerModal) sizePickerModal.classList.remove('show');
+}
+
+function selectSizeAndAct(size) {
+  var id = sizePickerData.id;
+  var mode = sizePickerData.mode;
+  closeSizePicker();
+  if (mode === 'buynow') {
+    doBuyNow(id, size);
+  } else {
+    doAddToCart(id, size);
+  }
+}
+
+function doAddToCart(pid, size) {
+  fetch('<?= BASE_URL ?>/api/cart.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=add&product_id=' + pid + '&size=' + encodeURIComponent(size) + '&quantity=1'
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to add items to your bag.', 'error');
+      return;
+    }
+    if (data.success) {
+      document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
+      showToast('Size ' + size + ' added to your bag!');
+    } else {
+      showToast(data.message || 'Failed to add', 'error');
+    }
+  }).catch(function() {
+    showToast('Please login to add items to your bag.', 'error');
+  });
+}
+
+function doBuyNow(pid, size) {
+  fetch('<?= BASE_URL ?>/api/cart.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=add&product_id=' + pid + '&size=' + encodeURIComponent(size) + '&quantity=1'
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to continue checkout.', 'error');
+      return;
+    }
+    if (data.success) {
+      document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
+      window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
+    } else {
+      showToast(data.message || 'Failed', 'error');
+    }
+  }).catch(function() {
+    showToast('Please login to continue checkout.', 'error');
   });
 }
 </script>

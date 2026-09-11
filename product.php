@@ -901,6 +901,10 @@ function handleAddToCart() {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'action=add&product_id=<?= $product['id'] ?>&size=' + encodeURIComponent(activeSize) + '&quantity=1&product_name=' + encodeURIComponent(<?= json_encode($product['name']) ?>) + '&product_price=<?= $product['price'] ?>&product_image=' + encodeURIComponent(<?= json_encode($imageUrls[0] ?? '') ?>) + '&product_slug=<?= $product['slug'] ?? '' ?>'
   }).then(r => r.json()).then(data => {
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to add items to your bag.', 'error');
+      return;
+    }
     if (data.success) {
       const badges = document.querySelectorAll('.cart-count');
       badges.forEach(b => b.textContent = data.cart_count || 1);
@@ -909,7 +913,7 @@ function handleAddToCart() {
       showToast(data.message || 'Failed to add to cart', 'error');
     }
   }).catch(() => {
-    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+    showToast('Please login to add items to your bag.', 'error');
   });
 }
 
@@ -919,6 +923,10 @@ function handleBuyNow() {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'action=add&product_id=<?= $product['id'] ?>&size=' + encodeURIComponent(activeSize) + '&quantity=1&product_name=' + encodeURIComponent(<?= json_encode($product['name']) ?>) + '&product_price=<?= $product['price'] ?>&product_image=' + encodeURIComponent(<?= json_encode($imageUrls[0] ?? '') ?>) + '&product_slug=<?= $product['slug'] ?? '' ?>'
   }).then(r => r.json()).then(data => {
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to continue checkout.', 'error');
+      return;
+    }
     if (data.success) {
       const badges = document.querySelectorAll('.cart-count');
       badges.forEach(b => b.textContent = data.cart_count || 1);
@@ -927,17 +935,14 @@ function handleBuyNow() {
       showToast(data.message || 'Failed to add to cart', 'error');
     }
   }).catch(() => {
-    window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
+    showToast('Please login to continue checkout.', 'error');
   });
 }
 
 function toggleProductWishlist() {
   const isLoggedIn = <?= isset($_SESSION['customer_id']) ? 'true' : 'false' ?>;
   if (!isLoggedIn) {
-    showToast('Please login first to add to wishlist', 'error');
-    setTimeout(() => {
-      window.location.href = '<?= BASE_URL ?>/customer/login.php?redirect=' + encodeURIComponent(window.location.href);
-    }, 1500);
+    showToast('Please login to add to wishlist.', 'error');
     return;
   }
   const btn = document.getElementById('productWishlistBtn');
@@ -953,10 +958,7 @@ function toggleProductWishlist() {
     btn.style.pointerEvents = 'auto';
     btn.style.opacity = '1';
     if (data.action === 'login_required') {
-    showToast('Please login first to add to wishlist', 'error');
-      setTimeout(() => {
-        window.location.href = '<?= BASE_URL ?>/customer/login.php?redirect=' + encodeURIComponent(window.location.href);
-      }, 1500);
+    showToast('Please login to add to wishlist.', 'error');
       return;
     }
     if (data.success) {

@@ -18,6 +18,11 @@ $productPrice = (float)($_POST['product_price'] ?? 0);
 $productImage = $_POST['product_image'] ?? '';
 $productSlug = $_POST['product_slug'] ?? '';
 
+if (!$customerId) {
+  echo json_encode(['success' => false, 'action' => 'login_required', 'message' => 'Please login to use cart.']);
+  exit;
+}
+
 if ($productId <= 0) {
   echo json_encode(['success' => false, 'message' => 'Invalid product']);
   exit;
@@ -43,13 +48,6 @@ if ($customerId) {
   $stmt = $mysqli->prepare('SELECT id FROM carts WHERE customer_id = ?');
   if ($stmt) {
     $stmt->bind_param('i', $customerId);
-    $stmt->execute();
-    $cart = $stmt->get_result()->fetch_assoc();
-  }
-} else {
-  $stmt = $mysqli->prepare('SELECT id FROM carts WHERE session_id = ?');
-  if ($stmt) {
-    $stmt->bind_param('s', $sessionId);
     $stmt->execute();
     $cart = $stmt->get_result()->fetch_assoc();
   }

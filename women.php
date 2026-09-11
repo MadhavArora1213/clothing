@@ -427,6 +427,10 @@ function doAddToCart(productId, size) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1'
   }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to add items to your bag.', 'error');
+      return;
+    }
     if (data.success) {
       document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
       showToast('Size ' + size + ' added to your bag!');
@@ -434,7 +438,7 @@ function doAddToCart(productId, size) {
       showToast(data.message || 'Failed to add', 'error');
     }
   }).catch(function() {
-    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+    showToast('Please login to add items to your bag.', 'error');
   });
 }
 
@@ -444,6 +448,10 @@ function doBuyNow(productId, size) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1'
   }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.action === 'login_required' || (data.success === false && data.message && data.message.toLowerCase().includes('login'))) {
+      showToast('Please login to continue checkout.', 'error');
+      return;
+    }
     if (data.success) {
       document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
       window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
@@ -451,7 +459,7 @@ function doBuyNow(productId, size) {
       showToast(data.message || 'Failed', 'error');
     }
   }).catch(function() {
-    window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
+    showToast('Please login to continue checkout.', 'error');
   });
 }
 
@@ -466,7 +474,7 @@ function toggleWishlist(productId, btn) {
     body: 'action=toggle&product_id=' + productId
   }).then(r => r.json()).then(data => {
     if (data.action === 'login_required') {
-      window.location.href = '<?= BASE_URL ?>/customer/login.php';
+      showToast('Please login to add to wishlist.', 'error');
       return;
     }
     if (data.success) {
@@ -479,7 +487,9 @@ function toggleWishlist(productId, btn) {
         badge.style.display = data.wishlist_count > 0 ? '' : 'none';
       }
     }
-  }).catch(() => {});
+  }).catch(() => {
+    showToast('Please login to add to wishlist.', 'error');
+  });
 }
 
 // Hero Slider
