@@ -208,6 +208,13 @@ include __DIR__ . '/includes/header.php';
             </button>
           </div>
         </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- WOMEN'S CTA BANNER -->
   <section class="women-cta">
     <div class="uoc-container">
       <div class="women-cta-box">

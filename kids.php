@@ -200,6 +200,13 @@ include __DIR__ . '/includes/header.php';
             </button>
           </div>
         </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- KIDS CTA BANNER -->
   <section class="kids-cta">
     <div class="uoc-container">
       <div class="kids-cta-box">
