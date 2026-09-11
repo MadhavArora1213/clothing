@@ -153,7 +153,7 @@ if (!defined('BASE_URL')) {
       </div>
 
       <!-- CENTER: Logo -->
-      <a href="<?= BASE_URL ?>/men.php" class="uoc-logo">
+      <a href="<?= BASE_URL ?>/" class="uoc-logo">
         <img src="<?= BASE_URL ?>/src/Logo.png" alt="Urban Outfit Collection" style="height:74px;">
       </a>
 
