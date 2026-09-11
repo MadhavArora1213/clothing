@@ -2,6 +2,7 @@
 if (!defined('BASE_URL')) {
   define('BASE_URL', '/clothing');
 }
+header("Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()");
 ?>
 <!DOCTYPE html>
 <html lang="en">

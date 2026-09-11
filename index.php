@@ -107,13 +107,13 @@ if ($mysqli) {
                (
                    SELECT COUNT(*)
                    FROM products p
-                   WHERE p.category_id = c.id
+                   WHERE p.category_id = c.parent_id
                      AND p.is_active = 1
                ) AS product_count
         FROM categories c
         WHERE c.parent_id IN (1, 2, 3)
           AND c.is_active = 1
-        ORDER BY c.sort_order
+        ORDER BY c.parent_id, c.sort_order
     ");
 
     if ($scResult) {
@@ -148,8 +148,106 @@ $heroSlides = [
     ],
 ];
 
-$newArrivals = fetchProducts($mysqli, '', 'p.created_at DESC', 8);
-$bestsellers = fetchProducts($mysqli, '', 'p.is_featured DESC, p.created_at DESC', 8);
+$newArrivals = [];
+if ($mysqli) {
+    $allQ = $mysqli->query("
+        SELECT p.*, c.name AS category_name, c.id AS cat_id, c.parent_id,
+          (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY sort_order LIMIT 1) AS image,
+          (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY sort_order LIMIT 1 OFFSET 1) AS hover_image
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        WHERE p.is_active = 1
+        ORDER BY p.created_at DESC
+    ");
+    if ($allQ && $allQ->num_rows > 0) {
+        $all = $allQ->fetch_all(MYSQLI_ASSOC);
+        $men = []; $women = []; $kids = [];
+        foreach ($all as $p) {
+            $catId = (int)$p['cat_id'];
+            if ($catId === 2) $men[] = $p;
+            elseif ($catId === 1) $women[] = $p;
+            elseif ($catId === 3) $kids[] = $p;
+            else $men[] = $p;
+        }
+        foreach (array_slice($men, 0, 3) as $p) $newArrivals[] = $p;
+        foreach (array_slice($women, 0, 3) as $p) $newArrivals[] = $p;
+        foreach (array_slice($kids, 0, 2) as $p) $newArrivals[] = $p;
+
+        if (!empty($newArrivals)) {
+            $ids = array_column($newArrivals, 'id');
+            $ph = implode(',', array_fill(0, count($ids), '?'));
+            $ss = $mysqli->prepare("SELECT product_id, size FROM product_sizes WHERE product_id IN ($ph) AND stock > 0 ORDER BY product_id, size");
+            if ($ss) {
+                $types = str_repeat('i', count($ids));
+                $ss->bind_param($types, ...$ids);
+                $ss->execute();
+                $rows = $ss->get_result()->fetch_all(MYSQLI_ASSOC);
+                $szMap = [];
+                foreach ($rows as $r) $szMap[$r['product_id']][] = $r['size'];
+                foreach ($newArrivals as &$p) $p['sizes'] = $szMap[$p['id']] ?? [];
+                unset($p);
+            }
+        }
+    }
+}
+if (empty($newArrivals)) {
+    $newArrivals = fetchProducts($mysqli, '', 'p.created_at DESC', 8);
+}
+$bestsellers = [];
+if ($mysqli) {
+    // Check if order_items table exists
+    $tblCheck = $mysqli->query("SHOW TABLES LIKE 'order_items'");
+    if ($tblCheck && $tblCheck->num_rows > 0) {
+        $bsQ = $mysqli->query("
+            SELECT p.*, c.name AS category_name, c.id AS cat_id,
+              COALESCE(SUM(oi.quantity), 0) AS total_sold,
+              (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY sort_order LIMIT 1) AS image,
+              (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY sort_order LIMIT 1 OFFSET 1) AS hover_image
+            FROM products p
+            JOIN categories c ON p.category_id = c.id
+            LEFT JOIN order_items oi ON oi.product_id = p.id
+            WHERE p.is_active = 1
+            GROUP BY p.id
+            ORDER BY total_sold DESC, p.created_at DESC
+            LIMIT 24
+        ");
+        if ($bsQ && $bsQ->num_rows > 0) {
+            $all = $bsQ->fetch_all(MYSQLI_ASSOC);
+            $men = []; $women = []; $kids = [];
+            foreach ($all as $p) {
+                $catId = (int)$p['cat_id'];
+                if ($catId === 2) $men[] = $p;
+                elseif ($catId === 1) $women[] = $p;
+                elseif ($catId === 3) $kids[] = $p;
+                else $men[] = $p;
+            }
+            $rounds = max(count($men), count($women), count($kids));
+            for ($i = 0; $i < $rounds && count($bestsellers) < 8; $i++) {
+                if (!empty($men[$i])) $bestsellers[] = $men[$i];
+                if (!empty($women[$i]) && count($bestsellers) < 8) $bestsellers[] = $women[$i];
+                if (!empty($kids[$i]) && count($bestsellers) < 8) $bestsellers[] = $kids[$i];
+            }
+        }
+    }
+}
+if (empty($bestsellers)) {
+    $bestsellers = fetchProducts($mysqli, '', 'p.is_featured DESC, p.created_at DESC', 8);
+}
+if (!empty($bestsellers)) {
+    $ids = array_column($bestsellers, 'id');
+    $ph = implode(',', array_fill(0, count($ids), '?'));
+    $ss = $mysqli->prepare("SELECT product_id, size FROM product_sizes WHERE product_id IN ($ph) AND stock > 0 ORDER BY product_id, size");
+    if ($ss) {
+        $types = str_repeat('i', count($ids));
+        $ss->bind_param($types, ...$ids);
+        $ss->execute();
+        $rows = $ss->get_result()->fetch_all(MYSQLI_ASSOC);
+        $szMap = [];
+        foreach ($rows as $r) $szMap[$r['product_id']][] = $r['size'];
+        foreach ($bestsellers as &$p) $p['sizes'] = $szMap[$p['id']] ?? [];
+        unset($p);
+    }
+}
 
 $menImage   = !empty($departments['men'][0]['image']) ? $departments['men'][0]['image'] : 'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=1000&h=1200&auto=format&fit=crop&q=85';
 $womenImage = !empty($departments['women'][0]['image']) ? $departments['women'][0]['image'] : 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1000&h=1200&auto=format&fit=crop&q=85';
@@ -226,7 +324,6 @@ function uocProductCard(array $item, string $variant = 'grid'): void {
             </div>
         </a>
 
-        <?php if ($variant !== 'rail'): ?>
         <div class="uoc-product-actions">
             <button
                 type="button"
@@ -243,7 +340,6 @@ function uocProductCard(array $item, string $variant = 'grid'): void {
                 Buy now
             </button>
         </div>
-        <?php endif; ?>
     </article>
     <?php
 }
@@ -278,15 +374,20 @@ include __DIR__ . '/includes/header.php';
     --uoc-ease: cubic-bezier(.16,1,.3,1);
 }
 
-html { overflow-x: clip; }
+html { overflow-x: hidden; }
 body {
     background: var(--uoc-paper);
     color: var(--uoc-ink);
     font-family: var(--uoc-sans);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 .uoc-main {
     background: var(--uoc-paper);
+    margin: 0;
+    padding: 0;
 }
 
 .uoc-container {
@@ -413,42 +514,42 @@ body {
 /* ── Hero: full-bleed image, editorial copy block ── */
 .uoc-hero {
     position: relative;
-    min-height: min(760px, 78vh);
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
     overflow: hidden;
-    background: #cfc8bc;
 }
 
-.uoc-hero-slider,
+.uoc-hero-slider {
+    position: relative;
+}
+
 .uoc-hero-slide {
     position: absolute;
     inset: 0;
-}
-
-.uoc-hero-slide {
     opacity: 0;
-    transition: opacity .9s ease;
 }
 
-.uoc-hero-slide.active { opacity: 1; }
+.uoc-hero-slide.active {
+    position: relative;
+    opacity: 1;
+}
 
 .uoc-hero-slide img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    filter: saturate(.86);
+    height: auto;
+    display: block;
 }
 
-.uoc-hero::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 38%;
-    background: linear-gradient(to top, rgba(0,0,0,.42), transparent);
-    pointer-events: none;
+@media (max-width: 768px) {
+    .uoc-hero { height: auto !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; }
+    .uoc-hero-slider { position: relative !important; inset: unset !important; }
+    .uoc-hero-slide { display: none !important; position: static !important; inset: unset !important; }
+    .uoc-hero-slide.active { display: block !important; }
+    .uoc-hero-slide img { width: 100% !important; height: auto !important; display: block !important; object-fit: unset !important; }
 }
+
+/* hero ::after removed — no text overlay needed */
 
 .uoc-hero-copy {
     position: absolute;
@@ -750,7 +851,6 @@ body {
 .uoc-product-media {
     position: relative;
     overflow: hidden;
-    aspect-ratio: 3 / 4;
     background: #ddd7cc;
 }
 
@@ -779,10 +879,10 @@ body {
 
 .uoc-product-topline {
     position: absolute;
-    inset: 14px 14px auto;
+    inset: auto 14px 14px;
     display: flex;
     justify-content: space-between;
-    align-items: start;
+    align-items: end;
     z-index: 2;
 }
 
@@ -815,21 +915,11 @@ body {
 }
 
 .uoc-quick-add {
-    position: absolute;
-    z-index: 3;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    padding: 10px;
-    background: rgba(255,253,248,.94);
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity .3s ease, transform .3s var(--uoc-ease);
+    display: none !important;
 }
 
 .uoc-product-card:hover .uoc-quick-add {
-    opacity: 1;
-    transform: translateY(0);
+    display: none !important;
 }
 
 .uoc-quick-add > span {
@@ -955,7 +1045,7 @@ body {
 
 .uoc-collection-row {
     display: grid;
-    grid-template-columns: 48px 1fr auto 90px;
+    grid-template-columns: 48px 1fr 90px;
     gap: 20px;
     align-items: center;
     min-height: 88px;
@@ -1122,8 +1212,8 @@ body {
 
 .uoc-social-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 3px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
 }
 
 .uoc-social-item {
@@ -1131,6 +1221,13 @@ body {
     aspect-ratio: 1;
     overflow: hidden;
     background: #d7d0c4;
+    border-radius: 4px;
+}
+
+.uoc-social-item iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 .uoc-social-item img {
@@ -1225,21 +1322,27 @@ body {
 }
 
 .uoc-sz-modal {
-    position: fixed;
-    z-index: 9998;
-    left: 50%;
-    top: 50%;
-    width: min(430px, calc(100% - 32px));
+    position: fixed !important;
+    z-index: 9998 !important;
+    left: 50% !important;
+    top: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(430px, calc(100% - 32px)) !important;
     transform: translate(-50%, -46%);
-    background: var(--uoc-paper);
-    border: 1px solid var(--uoc-ink);
+    background: var(--uoc-paper) !important;
+    border: 1px solid var(--uoc-ink) !important;
+    border-radius: 0 !important;
     opacity: 0;
     pointer-events: none;
     transition: opacity .25s ease, transform .35s var(--uoc-ease);
+    max-height: none !important;
+    overflow: hidden !important;
+    padding: 0 !important;
 }
 
 .uoc-sz-modal.show {
-    opacity: 1;
+    opacity: 1 !important;
     pointer-events: auto;
     transform: translate(-50%, -50%);
 }
@@ -1248,8 +1351,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--uoc-line);
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--uoc-line) !important;
+    margin: 0 !important;
 }
 
 .uoc-sz-title {
@@ -1266,10 +1370,10 @@ body {
 }
 
 .uoc-sz-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 7px;
-    padding: 20px;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    padding: 20px !important;
 }
 
 .uoc-sz-btn {
@@ -1277,7 +1381,8 @@ body {
     border: 1px solid var(--uoc-line);
     background: transparent;
     cursor: pointer;
-    font: 800 10px var(--uoc-sans);
+    font: 800 13px var(--uoc-sans);
+    border-radius: 0;
 }
 
 .uoc-sz-btn:hover {
@@ -1289,115 +1394,102 @@ body {
 .uoc-sz-note {
     padding: 0 20px 20px;
     color: var(--uoc-muted);
-    font-size: 10px;
+    font-size: 11px;
+    text-align: center;
 }
 
 /* ── Responsive ── */
 @media (max-width: 1050px) {
-    .uoc-masthead-inner { grid-template-columns: 1fr auto; }
-    .uoc-masthead-left { display: none; }
-    .uoc-masthead-right { justify-content: flex-end; }
+    .uoc-intro-grid { gap: 50px; }
 
-    .uoc-intro-grid,
-    .uoc-newsletter-grid { gap: 50px; }
+    .uoc-product-rail { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .uoc-product-card--rail { min-width: 0; }
 
-    .uoc-product-rail { grid-template-columns: repeat(4, minmax(220px, 1fr)); overflow-x: auto; scrollbar-width: none; }
-    .uoc-product-rail::-webkit-scrollbar { display: none; }
-    .uoc-product-card--rail { min-width: 220px; }
-
-    .uoc-social-grid { grid-template-columns: repeat(3, 1fr); }
+    .uoc-social-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .uoc-container { width: min(100% - 32px, 1360px); }
-
-    .uoc-editorial-bar-inner span:last-child { display: none; }
-    .uoc-masthead-inner { min-height: 72px; }
-    .uoc-wordmark { font-size: 38px; }
-
-    .uoc-hero { min-height: 650px; }
-    .uoc-hero-copy {
-        left: 16px;
-        bottom: 48px;
-        width: calc(100% - 32px);
-    }
-    .uoc-hero-copy h1 { font-size: clamp(50px, 15vw, 74px); }
-    .uoc-hero-copy p { font-size: 13px; }
-    .uoc-hero-actions { flex-wrap: wrap; }
 
     .uoc-trust-inner { grid-template-columns: 1fr 1fr; }
     .uoc-trust-item { min-height: 64px; border-bottom: 1px solid var(--uoc-line); }
     .uoc-trust-item:nth-child(2) { border-right: 0; }
 
     .uoc-intro { padding: 72px 0; }
-    .uoc-intro-grid,
-    .uoc-newsletter-grid,
-    .uoc-collection-layout,
-    .uoc-feature-story { grid-template-columns: 1fr; }
-
+    .uoc-intro-grid { grid-template-columns: 1fr; gap: 36px; }
     .uoc-intro h2 { font-size: 48px; }
-    .uoc-intro-copy { margin-top: 38px; }
+    .uoc-intro-copy { margin-top: 0; border-top: none; padding-top: 0; }
 
     .uoc-category-section,
     .uoc-products-section,
     .uoc-collection-index,
-    .uoc-proof,
-    .uoc-newsletter { padding: 72px 0; }
+    .uoc-proof { padding: 72px 0; }
 
     .uoc-category-grid {
         grid-template-columns: 1fr 1fr;
         gap: 8px;
     }
-
     .uoc-category-card:nth-child(1) { grid-column: span 1; }
     .uoc-category-card:nth-child(2) { grid-column: span 2; }
     .uoc-category-card:nth-child(3) { grid-column: span 1; }
 
-    .uoc-products-head { grid-template-columns: 1fr; }
-    .uoc-products-note { justify-self: start; }
+    .uoc-products-head { grid-template-columns: 1fr; gap: 12px; }
+    .uoc-products-note { justify-self: start; max-width: 100%; }
 
-    .uoc-collection-layout { gap: 36px; }
-    .uoc-collection-row { grid-template-columns: 30px 1fr auto; }
-    .uoc-collection-arrow { display: none; }
-    .uoc-collection-row h3 { font-size: 23px; }
+    .uoc-product-rail { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 
-    .uoc-feature-story-image { min-height: 360px; }
-    .uoc-feature-story-copy { min-height: 430px; }
+    .uoc-collection-layout { grid-template-columns: 1fr; gap: 36px; }
+    .uoc-collection-row { grid-template-columns: 30px 1fr auto; gap: 12px; }
+    .uoc-collection-row h3 { font-size: 22px; }
 
     .uoc-proof-grid { grid-template-columns: 1fr; }
-    .uoc-proof-card {
-        border-right: 0;
-        border-bottom: 1px solid var(--uoc-line);
-    }
+    .uoc-proof-card { border-right: 0; border-bottom: 1px solid var(--uoc-line); }
     .uoc-proof-card:last-child { border-bottom: 0; }
 
     .uoc-social-grid { grid-template-columns: repeat(2, 1fr); }
 
-    .uoc-newsletter-grid { gap: 40px; }
+    .uoc-marquee-item { padding: 14px 16px; font-size: 9px; gap: 16px; }
 }
 
 @media (max-width: 480px) {
-    .uoc-masthead-right .uoc-masthead-link:nth-child(1) { display: none; }
-    .uoc-wordmark { font-size: 32px; }
+    .uoc-container { width: min(100% - 20px, 1360px); }
 
-    .uoc-hero { min-height: 600px; }
-    .uoc-hero-dots { right: 16px; bottom: 22px; }
+    .uoc-trust-inner { grid-template-columns: 1fr 1fr; }
+    .uoc-trust-item { border-right: 0; border-bottom: 1px solid var(--uoc-line); min-height: 0; padding: 10px 12px; font-size: 9px; gap: 8px; }
+    .uoc-trust-num { font-size: 16px; }
+    .uoc-trust-item:nth-child(2) { border-right: 0; }
+    .uoc-trust-item:nth-child(odd) { border-right: 1px solid var(--uoc-line); }
+    .uoc-trust-item:nth-last-child(-n+2) { border-bottom: 0; }
 
-    .uoc-category-grid {
-        grid-template-columns: 1fr;
-    }
+    .uoc-intro { padding: 48px 0; }
+    .uoc-intro h2 { font-size: 36px; }
+
+    .uoc-category-section,
+    .uoc-products-section,
+    .uoc-collection-index,
+    .uoc-proof { padding: 48px 0; }
+
+    .uoc-category-grid { grid-template-columns: 1fr; }
     .uoc-category-card:nth-child(1),
     .uoc-category-card:nth-child(2),
-    .uoc-category-card:nth-child(3) {
-        grid-column: span 1;
-        aspect-ratio: 4 / 5;
-    }
+    .uoc-category-card:nth-child(3) { grid-column: span 1; aspect-ratio: 4/5; }
 
+    .uoc-product-rail { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .uoc-quick-add { display: none; }
-    .uoc-product-rail { gap: 12px; }
-    .uoc-product-card--rail { min-width: 72vw; }
+    .uoc-product-actions { grid-template-columns: 1fr; }
+    .uoc-product-name { font-size: 15px; }
 
-    .uoc-social-grid { grid-template-columns: repeat(2, 1fr); }
+    .uoc-collection-row { grid-template-columns: 24px 1fr; gap: 10px; }
+    .uoc-collection-arrow { display: none; }
+    .uoc-collection-row h3 { font-size: 19px; }
+
+    .uoc-proof-card { padding: 24px 20px; }
+    .uoc-proof-card blockquote,
+    .uoc-proof-card p { font-size: 17px; }
+
+    .uoc-social-grid { grid-template-columns: 1fr; }
+
+    .uoc-marquee-item { padding: 12px 12px; font-size: 8px; gap: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1580,7 +1672,6 @@ body {
                     <a class="uoc-collection-row" href="<?= htmlspecialchars($url) ?>">
                         <span class="uoc-collection-row-num"><?= str_pad((string)($idx + 1), 2, '0', STR_PAD_LEFT) ?></span>
                         <h3><?= htmlspecialchars($sc['name']) ?></h3>
-                        <span class="uoc-collection-count"><?= (int)$sc['product_count'] ?> products</span>
                         <span class="uoc-collection-arrow">↗</span>
                     </a>
                 <?php endforeach; ?>
@@ -1614,27 +1705,6 @@ body {
     </section>
     <?php endif; ?>
 
-    <!-- 09 / HERITAGE STORY -->
-    <section class="uoc-feature-story">
-        <div class="uoc-feature-story-image">
-            <img
-                src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1500&h=1000&auto=format&fit=crop&q=85"
-                alt="Heritage collection"
-                loading="lazy">
-        </div>
-
-        <div class="uoc-feature-story-copy">
-            <span class="uoc-eyebrow">A closer look / Heritage</span>
-            <h2>Tradition, re-cut for the street.</h2>
-            <p>
-                Chikankari textures, relaxed proportions and breathable fabrics —
-                made for the person who wants heritage without looking costume-y.
-            </p>
-            <a class="uoc-btn-dark-story" href="<?= BASE_URL ?>/shop.php?category=ethnic-fusion">
-                Explore heritage ↗
-            </a>
-        </div>
-    </section>
 
     <!-- 10 / SOCIAL -->
     <section class="uoc-social">
@@ -1656,18 +1726,27 @@ body {
 
         <div class="uoc-social-grid">
             <?php
-            $instaImages = [
-                'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&h=600&auto=format&fit=crop&q=85',
-                'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&h=600&auto=format&fit=crop&q=85',
-                'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=600&auto=format&fit=crop&q=85',
-                'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&h=600&auto=format&fit=crop&q=85',
-                'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=600&h=600&auto=format&fit=crop&q=85',
-                'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=600&h=600&auto=format&fit=crop&q=85',
+            $instaPosts = [
+                'https://www.instagram.com/p/DdGbM_9Esjd/',
+                'https://www.instagram.com/p/DdGa3n-EkX1/',
+                'https://www.instagram.com/p/DdGcBNQEkY2/',
+                'https://www.instagram.com/p/DdENrEvklM1/',
+                'https://www.instagram.com/p/DdEQ1dKktcz/',
+                'https://www.instagram.com/p/DdGbM_9Esjd/',
             ];
-            foreach ($instaImages as $img):
+            foreach ($instaPosts as $post):
             ?>
-                <a class="uoc-social-item" href="https://instagram.com/urban_0utfit_mukerian/" target="_blank" rel="noopener">
-                    <img src="<?= htmlspecialchars($img) ?>" alt="Urban Outfit on Instagram" loading="lazy">
+                <a class="uoc-social-item" href="<?= htmlspecialchars($post) ?>" target="_blank" rel="noopener">
+                    <iframe
+                        src="<?= htmlspecialchars($post) ?>embed/"
+                        width="100%"
+                        height="100%"
+                        frameborder="0"
+                        scrolling="no"
+                        allowtransparency="true"
+                        loading="lazy"
+                        style="border:none;pointer-events:none;">
+                    </iframe>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -1686,20 +1765,20 @@ body {
             <div class="uoc-proof-grid">
                 <article class="uoc-proof-card">
                     <div class="uoc-proof-stars">★★★★★</div>
-                    <blockquote>“The acid-wash oversized tee feels properly premium. The fabric is substantial without being stiff.”</blockquote>
-                    <div class="uoc-proof-author">Rohit S. · Verified buyer</div>
+                    <blockquote>"The oversized tee fabric is top notch. Wore it three days in a row and it still looks brand new. Best purchase this year."</blockquote>
+                    <div class="uoc-proof-author">Arjun M. · Verified buyer</div>
                 </article>
 
                 <article class="uoc-proof-card">
                     <div class="uoc-proof-stars">★★★★★</div>
-                    <p>“Finally found ethnic fusion that doesn't feel overdone. The chikankari set is breathable and sharp.”</p>
-                    <div class="uoc-proof-author">Ananya P. · Verified buyer</div>
+                    <p>"Ordered the chikankari kurta set for Diwali. Everyone at the family function asked where I got it from. The stitching and fabric are premium quality."</p>
+                    <div class="uoc-proof-author">Priya S. · Verified buyer</div>
                 </article>
 
                 <article class="uoc-proof-card">
                     <div class="uoc-proof-stars">★★★★★</div>
-                    <p>“The linen co-ord became my airport and holiday uniform. Easy fit, easy compliments.”</p>
-                    <div class="uoc-proof-author">Vikram K. · Verified buyer</div>
+                    <p>"Bought a co-ord set for my Goa trip. Got so many compliments. The fabric is breathable and the fit is exactly as shown on the site. Already ordering more."</p>
+                    <div class="uoc-proof-author">Rohit K. · Verified buyer</div>
                 </article>
             </div>
         </div>
@@ -1804,6 +1883,10 @@ function doAddToCart(pid, size) {
     })
     .then(r => r.json())
     .then(d => {
+        if (d.action === 'login_required' || d.success === false && d.message && d.message.toLowerCase().includes('login')) {
+            showToast('Please login to add items to your bag.', 'error');
+            return;
+        }
         if (d.success) {
             document.querySelectorAll('.cart-count').forEach(el => {
                 el.textContent = d.cart_count || 1;
@@ -1814,7 +1897,7 @@ function doAddToCart(pid, size) {
         }
     })
     .catch(() => {
-        window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+        showToast('Please login to add items to your bag.', 'error');
     });
 }
 
@@ -1830,6 +1913,10 @@ function doBuyNow(pid, size) {
     })
     .then(r => r.json())
     .then(d => {
+        if (d.action === 'login_required' || d.success === false && d.message && d.message.toLowerCase().includes('login')) {
+            showToast('Please login to continue checkout.', 'error');
+            return;
+        }
         if (d.success) {
             document.querySelectorAll('.cart-count').forEach(el => {
                 el.textContent = d.cart_count || 1;
@@ -1840,7 +1927,7 @@ function doBuyNow(pid, size) {
         }
     })
     .catch(() => {
-        window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
+        showToast('Please login to continue checkout.', 'error');
     });
 }
 
@@ -1857,7 +1944,7 @@ function toggleWishlist(pid, btn) {
     .then(r => r.json())
     .then(d => {
         if (d.action === 'login_required') {
-            window.location.href = '<?= BASE_URL ?>/customer/login.php';
+            showToast('Please login to add to wishlist.', 'error');
             return;
         }
 
@@ -1882,7 +1969,9 @@ function toggleWishlist(pid, btn) {
             }
         }
     })
-    .catch(() => {});
+    .catch(() => {
+        showToast('Please login to add to wishlist.', 'error');
+    });
 }
 
 /* ─────────────────────────────────────────────────────────────
