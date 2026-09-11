@@ -191,11 +191,11 @@ include __DIR__ . '/includes/header.php';
             </div>
           </a>
           <div class="uoc-product-actions">
-            <button class="uoc-btn-add-cart" onclick="menAddToCart(<?= $item['id'] ?>, <?= json_encode($item['sizes'] ?? []) ?>)" title="Add to Cart">
+            <button class="uoc-btn-add-cart" onclick="event.preventDefault();event.stopPropagation();openSizePicker(this,'cart')" data-id="<?= $item['id'] ?>" data-sizes='<?= htmlspecialchars(json_encode($item['sizes'] ?? []), ENT_QUOTES) ?>' title="Add to Cart">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
               Add to Cart
             </button>
-            <button class="uoc-btn-buy-now" onclick="menBuyNow(<?= $item['id'] ?>, <?= json_encode($item['sizes'] ?? []) ?>)" title="Buy Now">
+            <button class="uoc-btn-buy-now" onclick="event.preventDefault();event.stopPropagation();openSizePicker(this,'buynow')" data-id="<?= $item['id'] ?>" data-sizes='<?= htmlspecialchars(json_encode($item['sizes'] ?? []), ENT_QUOTES) ?>' title="Buy Now">
               Buy Now
             </button>
           </div>
@@ -357,25 +357,63 @@ include __DIR__ . '/includes/header.php';
 </main>
 
 <script>
-function quickAddToCart(productId, size) {
-  fetch('<?= BASE_URL ?>/api/cart.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1'
-  }).then(r => r.json()).then(data => {
-    if (data.success) {
-      document.querySelectorAll('.cart-count').forEach(b => b.textContent = data.cart_count || 1);
-      showToast('Size ' + size + ' added to your bag!');
-    } else {
-      window.location.href = '<?= BASE_URL ?>/customer/cart.php';
-    }
-  }).catch(() => {
-    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
-  });
+/* ── SIZE PICKER MODAL ── */
+var sizePickerOverlay = null;
+var sizePickerModal = null;
+var sizePickerData = { id: 0, sizes: [], mode: '' };
+
+function ensureSizePicker() {
+  if (sizePickerModal) return;
+  sizePickerOverlay = document.createElement('div');
+  sizePickerOverlay.className = 'uoc-sz-overlay';
+  sizePickerOverlay.onclick = closeSizePicker;
+  sizePickerModal = document.createElement('div');
+  sizePickerModal.className = 'uoc-sz-modal';
+  sizePickerModal.innerHTML = '<div class="uoc-sz-header"><span class="uoc-sz-title">Select Size</span><button class="uoc-sz-close" onclick="closeSizePicker()">&times;</button></div><div class="uoc-sz-grid" id="szGrid"></div><div class="uoc-sz-note">Please select a size to continue</div>';
+  document.body.appendChild(sizePickerOverlay);
+  document.body.appendChild(sizePickerModal);
 }
 
-function menAddToCart(productId, sizes) {
-  var size = (sizes && sizes.length > 0) ? sizes[0] : '';
+function openSizePicker(btn, mode) {
+  ensureSizePicker();
+  var id = parseInt(btn.getAttribute('data-id'));
+  var sizes = [];
+  try { sizes = JSON.parse(btn.getAttribute('data-sizes')); } catch(e) { sizes = []; }
+  sizePickerData = { id: id, sizes: sizes, mode: mode };
+  var grid = document.getElementById('szGrid');
+  grid.innerHTML = '';
+  if (sizes.length === 0) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">No sizes available</div>';
+  } else {
+    sizes.forEach(function(sz) {
+      var b = document.createElement('button');
+      b.className = 'uoc-sz-btn';
+      b.textContent = sz;
+      b.onclick = function() { selectSizeAndAct(sz); };
+      grid.appendChild(b);
+    });
+  }
+  sizePickerOverlay.classList.add('show');
+  sizePickerModal.classList.add('show');
+}
+
+function closeSizePicker() {
+  if (sizePickerOverlay) sizePickerOverlay.classList.remove('show');
+  if (sizePickerModal) sizePickerModal.classList.remove('show');
+}
+
+function selectSizeAndAct(size) {
+  var id = sizePickerData.id;
+  var mode = sizePickerData.mode;
+  closeSizePicker();
+  if (mode === 'buynow') {
+    doBuyNow(id, size);
+  } else {
+    doAddToCart(id, size);
+  }
+}
+
+function doAddToCart(productId, size) {
   fetch('<?= BASE_URL ?>/api/cart.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -383,7 +421,7 @@ function menAddToCart(productId, sizes) {
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.success) {
       document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
-      showToast('Added to your bag!');
+      showToast('Size ' + size + ' added to your bag!');
     } else {
       showToast(data.message || 'Failed to add', 'error');
     }
@@ -392,8 +430,7 @@ function menAddToCart(productId, sizes) {
   });
 }
 
-function menBuyNow(productId, sizes) {
-  var size = (sizes && sizes.length > 0) ? sizes[0] : '';
+function doBuyNow(productId, size) {
   fetch('<?= BASE_URL ?>/api/cart.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -408,6 +445,10 @@ function menBuyNow(productId, sizes) {
   }).catch(function() {
     window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
   });
+}
+
+function quickAddToCart(productId, size) {
+  doAddToCart(productId, size);
 }
 
 function toggleWishlist(productId, btn) {

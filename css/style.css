@@ -7163,6 +7163,107 @@ button, input, select, textarea {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* Size Picker Modal */
+.uoc-sz-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+}
+.uoc-sz-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.uoc-sz-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  z-index: 9999;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 24px 32px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.uoc-sz-modal.show {
+  transform: translateY(0);
+}
+.uoc-sz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.uoc-sz-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--uoc-black);
+}
+.uoc-sz-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--uoc-gray-100);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uoc-gray-600);
+  transition: background 0.2s;
+}
+.uoc-sz-close:hover {
+  background: var(--uoc-gray-200);
+}
+.uoc-sz-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.uoc-sz-btn {
+  min-width: 56px;
+  padding: 10px 18px;
+  border: 1.5px solid var(--uoc-gray-200);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--uoc-gray-700);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.uoc-sz-btn:hover {
+  border-color: var(--uoc-black);
+  background: var(--uoc-black);
+  color: #fff;
+}
+.uoc-sz-note {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--uoc-gray-400);
+  text-align: center;
+}
+@media (min-width: 600px) {
+  .uoc-sz-modal {
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, 100%);
+    border-radius: 20px;
+    max-width: 400px;
+    bottom: 40px;
+  }
+  .uoc-sz-modal.show {
+    transform: translate(-50%, 0);
+  }
+}
+
 /* ─── FULL WIDTH PROMO ─── */
 .uoc-promo {
   position: relative;
