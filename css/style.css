@@ -7119,6 +7119,50 @@ button, input, select, textarea {
   text-decoration: line-through;
 }
 
+/* Product Card Action Buttons */
+.uoc-product-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.uoc-btn-add-cart,
+.uoc-btn-buy-now {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 6px;
+}
+.uoc-btn-add-cart {
+  background: var(--uoc-black);
+  color: var(--uoc-white);
+}
+.uoc-btn-add-cart:hover {
+  background: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.uoc-btn-buy-now {
+  background: #fff;
+  color: var(--uoc-black);
+  border: 1.5px solid var(--uoc-black);
+}
+.uoc-btn-buy-now:hover {
+  background: var(--uoc-black);
+  color: var(--uoc-white);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
 /* ─── FULL WIDTH PROMO ─── */
 .uoc-promo {
   position: relative;

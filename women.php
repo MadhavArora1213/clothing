@@ -198,14 +198,16 @@ include __DIR__ . '/includes/header.php';
               </div>
             </div>
           </a>
+          <div class="uoc-product-actions">
+            <button class="uoc-btn-add-cart" onclick="deptAddToCart(<?= $item['id'] ?>, <?= json_encode($item['sizes'] ?? []) ?>)" title="Add to Cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              Add to Cart
+            </button>
+            <button class="uoc-btn-buy-now" onclick="deptBuyNow(<?= $item['id'] ?>, <?= json_encode($item['sizes'] ?? []) ?>)" title="Buy Now">
+              Buy Now
+            </button>
+          </div>
         </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  </section>
-  <?php endif; ?>
-
-  <!-- WOMEN'S CTA BANNER -->
   <section class="women-cta">
     <div class="uoc-container">
       <div class="women-cta-box">
@@ -370,6 +372,42 @@ function quickAddToCart(productId, size) {
     }
   }).catch(() => {
     window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+  });
+}
+
+function deptAddToCart(productId, sizes) {
+  var size = (sizes && sizes.length > 0) ? sizes[0] : '';
+  fetch('<?= BASE_URL ?>/api/cart.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1'
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
+      showToast('Added to your bag!');
+    } else {
+      showToast(data.message || 'Failed to add', 'error');
+    }
+  }).catch(function() {
+    window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+  });
+}
+
+function deptBuyNow(productId, sizes) {
+  var size = (sizes && sizes.length > 0) ? sizes[0] : '';
+  fetch('<?= BASE_URL ?>/api/cart.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=add&product_id=' + productId + '&size=' + encodeURIComponent(size) + '&quantity=1'
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      document.querySelectorAll('.cart-count').forEach(function(b) { b.textContent = data.cart_count || 1; });
+      window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
+    } else {
+      showToast(data.message || 'Failed', 'error');
+    }
+  }).catch(function() {
+    window.location.href = '<?= BASE_URL ?>/customer/checkout.php';
   });
 }
 
