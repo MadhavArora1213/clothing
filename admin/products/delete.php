@@ -21,8 +21,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect(adminUrl('products/?msg=Invalid+request'));
   }
 
-  // Soft delete — set is_active = 0 so order history is preserved
-  $stmt = $mysqli->prepare('UPDATE products SET is_active = 0 WHERE id = ?');
+  // Delete related records first
+  $delColors = $mysqli->prepare('DELETE FROM product_colors WHERE product_id = ?');
+  $delColors->bind_param('i', $id);
+  $delColors->execute();
+
+  $delSizes = $mysqli->prepare('DELETE FROM product_sizes WHERE product_id = ?');
+  $delSizes->bind_param('i', $id);
+  $delSizes->execute();
+
+  $delImages = $mysqli->prepare('DELETE FROM product_images WHERE product_id = ?');
+  $delImages->bind_param('i', $id);
+  $delImages->execute();
+
+  // Hard delete — actually remove product from database
+  $stmt = $mysqli->prepare('DELETE FROM products WHERE id = ?');
   $stmt->bind_param('i', $id);
   $stmt->execute();
 
@@ -44,7 +57,7 @@ include dirname(__DIR__) . '/includes/header.php';
       </div>
       <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Delete "<?= esc($product['name']) ?>"?</h2>
       <p style="color: #666; font-size: 14px;">
-        This product will be hidden from the store. Existing orders will not be affected.
+        This product will be permanently deleted from the database. This action cannot be undone.
       </p>
     </div>
 
