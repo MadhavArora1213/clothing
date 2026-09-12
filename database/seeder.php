@@ -235,11 +235,12 @@ $sampleProducts = [
       ['name' => 'Mint Green', 'code' => '#A7F3D0'],
     ],
     'sizes' => [
-      ['size' => '2-3 Years', 'stock' => 8, 'sku' => 'AUR-KID-23Y'],
-      ['size' => '4-5 Years', 'stock' => 12, 'sku' => 'AUR-KID-45Y'],
-      ['size' => '6-7 Years', 'stock' => 10, 'sku' => 'AUR-KID-67Y'],
-      ['size' => '8-9 Years', 'stock' => 6, 'sku' => 'AUR-KID-89Y'],
-      ['size' => '10-11 Years', 'stock' => 5, 'sku' => 'AUR-KID-1011Y'],
+      ['size' => '3-4 Years', 'stock' => 8, 'sku' => 'AUR-KID-34Y'],
+      ['size' => '5-6 Years', 'stock' => 12, 'sku' => 'AUR-KID-56Y'],
+      ['size' => '7-8 Years', 'stock' => 10, 'sku' => 'AUR-KID-78Y'],
+      ['size' => '9-10 Years', 'stock' => 6, 'sku' => 'AUR-KID-910Y'],
+      ['size' => '11-12 Years', 'stock' => 5, 'sku' => 'AUR-KID-1112Y'],
+      ['size' => '13-14 Years', 'stock' => 4, 'sku' => 'AUR-KID-1314Y'],
     ]
   ],
 
@@ -273,10 +274,12 @@ $sampleProducts = [
       ['name' => 'Pure White', 'code' => '#FFFFFF'],
     ],
     'sizes' => [
-      ['size' => '2-3 Years', 'stock' => 10, 'sku' => 'AUR-BOY-23Y'],
-      ['size' => '4-5 Years', 'stock' => 12, 'sku' => 'AUR-BOY-45Y'],
-      ['size' => '6-7 Years', 'stock' => 10, 'sku' => 'AUR-BOY-67Y'],
-      ['size' => '8-9 Years', 'stock' => 7, 'sku' => 'AUR-BOY-89Y'],
+      ['size' => '3-4 Years', 'stock' => 10, 'sku' => 'AUR-BOY-34Y'],
+      ['size' => '5-6 Years', 'stock' => 12, 'sku' => 'AUR-BOY-56Y'],
+      ['size' => '7-8 Years', 'stock' => 10, 'sku' => 'AUR-BOY-78Y'],
+      ['size' => '9-10 Years', 'stock' => 7, 'sku' => 'AUR-BOY-910Y'],
+      ['size' => '11-12 Years', 'stock' => 5, 'sku' => 'AUR-BOY-1112Y'],
+      ['size' => '13-14 Years', 'stock' => 4, 'sku' => 'AUR-BOY-1314Y'],
     ]
   ]
 ];

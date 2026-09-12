@@ -42,6 +42,30 @@ include dirname(__DIR__) . '/includes/header.php';
         </table>
       </div>
 
+      <h2 style="font-family: var(--font-display); font-size: var(--text-h3); margin: var(--space-8) 0 var(--space-4);">Kids Size Chart (Age in Years)</h2>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Age (Years)</th>
+              <th>Chest (Inches)</th>
+              <th>Waist (Inches)</th>
+              <th>Hips (Inches)</th>
+              <th>Height (Inches)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>3-4Y</td><td>3 - 4</td><td>21 - 22</td><td>20 - 21</td><td>22 - 23</td><td>36 - 40</td></tr>
+            <tr><td>5-6Y</td><td>5 - 6</td><td>22 - 23</td><td>21 - 22</td><td>23 - 24</td><td>41 - 45</td></tr>
+            <tr><td>7-8Y</td><td>7 - 8</td><td>24 - 25</td><td>22 - 23</td><td>25 - 26</td><td>46 - 50</td></tr>
+            <tr><td>9-10Y</td><td>9 - 10</td><td>26 - 27</td><td>23 - 24</td><td>27 - 28</td><td>51 - 55</td></tr>
+            <tr><td>11-12Y</td><td>11 - 12</td><td>28 - 29</td><td>24 - 25</td><td>29 - 30</td><td>56 - 60</td></tr>
+            <tr><td>13-14Y</td><td>13 - 14</td><td>30 - 32</td><td>25 - 27</td><td>31 - 33</td><td>61 - 65</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <h2 style="font-family: var(--font-display); font-size: var(--text-h3); margin: var(--space-8) 0 var(--space-4);">Still Unsure?</h2>
       <p style="color: var(--color-text-secondary);">If you are between sizes, we recommend sizing up for a more comfortable fit. You can also contact us at <?= esc(getSetting('site_email', 'hello@example.com')) ?> for personalized sizing advice.</p>
     </div>

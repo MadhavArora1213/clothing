@@ -183,8 +183,17 @@ include dirname(__DIR__) . '/includes/header.php';
 
                 $totalStock = array_sum(array_column($prodSizes, 'stock'));
 
-                // Determine Main Image
-                $imgUrl = !empty($prod['image']) ? $prod['image'] : siteUrl('assets/images/placeholder.jpg');
+                // Determine Main Image - fallback to product_images if products.image is empty/invalid
+                $imgUrl = '';
+                if (!empty($prod['image']) && $prod['image'] !== '0' && filter_var($prod['image'], FILTER_VALIDATE_URL)) {
+                    $imgUrl = $prod['image'];
+                } else {
+                    $fallbackStmt = $mysqli->prepare("SELECT image_url FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC LIMIT 1");
+                    $fallbackStmt->bind_param('i', $prod['id']);
+                    $fallbackStmt->execute();
+                    $fallbackResult = $fallbackStmt->get_result()->fetch_assoc();
+                    $imgUrl = $fallbackResult ? $fallbackResult['image_url'] : siteUrl('assets/images/placeholder.jpg');
+                }
 
                 // Gender Badge Color
                 $genderBadgeClass = match($prod['gender'] ?? 'women') {

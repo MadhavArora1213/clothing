@@ -477,7 +477,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
             <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('standard')">Standard (XS-XXL)</button>
             <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('free')">Free Size</button>
-            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('kids')">Kids (Age)</button>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('kids')">Kids (3-14Y)</button>
             <button type="button" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="applySizePreset('numeric')">Numeric (38-46)</button>
           </div>
 
@@ -646,7 +646,7 @@ function applySizePreset(type) {
   } else if (type === 'free') {
     ['Free Size'].forEach(s => addSizeRow(s, 15));
   } else if (type === 'kids') {
-    ['2-3Y', '4-5Y', '6-7Y', '8-9Y', '10-11Y', '12-13Y'].forEach(s => addSizeRow(s, 8));
+    ['3-4Y', '5-6Y', '7-8Y', '9-10Y', '11-12Y', '13-14Y'].forEach(s => addSizeRow(s, 8));
   } else if (type === 'numeric') {
     ['38', '40', '42', '44', '46'].forEach(s => addSizeRow(s, 10));
   }

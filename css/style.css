@@ -7062,11 +7062,13 @@ button, input, select, textarea {
 .uoc-product-sizes {
   display: flex;
   gap: 4px;
+  flex-wrap: wrap;
+  max-width: 220px;
 }
 .uoc-product-sizes button {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 3px 7px;
   background: var(--uoc-gray-100);
   color: var(--uoc-gray-700);
   border: 1px solid var(--uoc-gray-200);
