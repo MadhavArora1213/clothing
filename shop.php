@@ -59,21 +59,32 @@ $pageSchema = '{
 }';
 
 $products = [];
+$totalProducts = 0;
+$perPage = 12;
 if ($mysqli) {
   $where = ['p.is_active = 1'];
   $params = [];
   $types = '';
 
   if ($category) {
-    $catStmt = $mysqli->prepare("SELECT id FROM categories WHERE slug = ?");
+    $catStmt = $mysqli->prepare("SELECT id, parent_id FROM categories WHERE slug = ?");
     if ($catStmt) {
       $catStmt->bind_param('s', $category);
       $catStmt->execute();
       $cat = $catStmt->get_result()->fetch_assoc();
       if ($cat) {
-        $where[] = 'p.category_id = ?';
-        $params[] = $cat['id'];
-        $types .= 'i';
+        if ($cat['parent_id'] > 0) {
+          $where[] = 'p.category_id = ?';
+          $params[] = $cat['parent_id'];
+          $types .= 'i';
+          $where[] = 'p.subcategory_id = ?';
+          $params[] = $cat['id'];
+          $types .= 'i';
+        } else {
+          $where[] = 'p.category_id = ?';
+          $params[] = $cat['id'];
+          $types .= 'i';
+        }
       }
     }
   }
@@ -114,23 +125,34 @@ if ($mysqli) {
     default => 'p.created_at DESC'
   };
 
-  $sql = "SELECT p.*, 
+  $countSql = "SELECT COUNT(*) as total FROM products p WHERE $whereClause";
+  $countStmt = $mysqli->prepare($countSql);
+  if ($countStmt) {
+    if (!empty($params)) {
+      $pClone = $params;
+      $countStmt->bind_param($types, ...$pClone);
+    }
+    $countStmt->execute();
+    $totalProducts = (int)$countStmt->get_result()->fetch_assoc()['total'];
+  }
+
+  $sql = "SELECT p.*,
             (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order LIMIT 1) as image,
             (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY sort_order LIMIT 1 OFFSET 1) as hover_image
-          FROM products p 
-          WHERE $whereClause 
-          ORDER BY $orderBy LIMIT 20";
+          FROM products p
+          WHERE $whereClause
+          ORDER BY $orderBy LIMIT $perPage";
 
   $stmt = $mysqli->prepare($sql);
   if ($stmt) {
     if (!empty($params)) {
-      $stmt->bind_param($types, ...$params);
+      $pClone = $params;
+      $stmt->bind_param($types, ...$pClone);
     }
     $stmt->execute();
     $products = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
 
-  // Fetch available sizes per product (stock > 0)
   if (!empty($products)) {
     $productIds = array_column($products, 'id');
     $placeholders = implode(',', array_fill(0, count($productIds), '?'));
@@ -520,6 +542,36 @@ if ($subcategory && $mysqli) {
 .shop-empty a { display: inline-block; margin-top: 16px; padding: 10px 24px; background: #000; color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; }
 .shop-empty a:hover { background: #333; }
 
+/* Infinite Scroll Loader */
+.shop-loader {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: #999;
+  font-size: 13px;
+}
+.shop-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #eee;
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: shopSpin 0.7s linear infinite;
+}
+@keyframes shopSpin { to { transform: rotate(360deg); } }
+.shop-end {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px 0;
+  color: #bbb;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
 /* ─── MOBILE FILTER TOGGLE ─── */
 .shop-mobile-filter-btn {
   display: none;
@@ -584,7 +636,7 @@ if ($subcategory && $mysqli) {
       <div>
         <div class="shop-hero-eyebrow">urban outfit</div>
         <h1 class="shop-hero-title"><?= $pageName ?></h1>
-        <p class="shop-hero-count"><?= count($products) ?> products</p>
+        <p class="shop-hero-count" id="shopProductCount"><?= $totalProducts ?> products</p>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
         <button class="shop-mobile-filter-btn" onclick="toggleSidebar()">
@@ -649,7 +701,7 @@ if ($subcategory && $mysqli) {
 
     <!-- RIGHT: PRODUCTS -->
     <div class="shop-content">
-      <?php if (empty($products)): ?>
+      <?php if (empty($products) && $totalProducts === 0): ?>
       <div class="shop-grid">
         <div class="shop-empty">
           <div class="shop-empty-icon">:(</div>
@@ -659,7 +711,7 @@ if ($subcategory && $mysqli) {
         </div>
       </div>
       <?php else: ?>
-      <div class="shop-grid">
+      <div class="shop-grid" id="shopGrid">
         <?php foreach ($products as $item): ?>
           <?php $firstSize = !empty($item['sizes']) ? $item['sizes'][0] : ''; ?>
           <div class="shop-card">
@@ -702,6 +754,12 @@ if ($subcategory && $mysqli) {
           </div>
         <?php endforeach; ?>
       </div>
+      <div id="shopSentinel" style="height:1px;"></div>
+      <div id="shopLoader" class="shop-loader" style="visibility:hidden;">
+        <div class="shop-spinner"></div>
+        <span>Loading more products...</span>
+      </div>
+      <div id="shopEnd" class="shop-end" style="display:none;">All products loaded</div>
       <?php endif; ?>
     </div>
 
@@ -895,6 +953,72 @@ function doBuyNow(pid, size) {
     showToast('Please login to continue checkout.', 'error');
   });
 }
+
+/* ── INFINITE SCROLL ── */
+(function() {
+  var grid = document.getElementById('shopGrid');
+  var loader = document.getElementById('shopLoader');
+  var endMsg = document.getElementById('shopEnd');
+  var sentinel = document.getElementById('shopSentinel');
+  if (!grid || !loader || !endMsg || !sentinel) return;
+
+  var currentPage = 1;
+  var loading = false;
+  var hasMore = <?= $totalProducts > $perPage ? 'true' : 'false' ?>;
+  var baseUrl = '<?= BASE_URL ?>/api/shop-products.php';
+
+  var params = new URLSearchParams(window.location.search);
+  params.set('page', '2');
+
+  if (!hasMore) {
+    endMsg.style.display = 'block';
+    return;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !loading && hasMore) {
+      loadMore();
+    }
+  }, { rootMargin: '400px' });
+
+  observer.observe(sentinel);
+
+  function loadMore() {
+    loading = true;
+    loader.style.visibility = 'visible';
+    currentPage++;
+    params.set('page', currentPage);
+
+    fetch(baseUrl + '?' + params.toString())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success && data.html) {
+          var temp = document.createElement('div');
+          temp.innerHTML = data.html;
+          while (temp.firstChild) {
+            grid.appendChild(temp.firstChild);
+          }
+          hasMore = data.hasMore;
+          if (!data.hasMore) {
+            loader.style.visibility = 'hidden';
+            endMsg.style.display = 'block';
+            observer.disconnect();
+          } else {
+            loader.style.visibility = 'hidden';
+          }
+        } else {
+          loader.style.visibility = 'hidden';
+          endMsg.style.display = 'block';
+          observer.disconnect();
+        }
+        loading = false;
+      })
+      .catch(function() {
+        loader.style.visibility = 'hidden';
+        loading = false;
+      });
+  }
+})();
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
