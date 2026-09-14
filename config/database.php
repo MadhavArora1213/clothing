@@ -275,6 +275,47 @@ function siteUrl($path = '') {
   return BASE_URL . ($path ? '/' . ltrim($path, '/') : '');
 }
 
+/**
+ * Fix image URL for current environment.
+ * If stored URL has wrong domain (e.g. urbanoutfitshop.com on localhost, or vice versa),
+ * replace with current BASE_URL + relative path.
+ * External URLs (Unsplash etc.) returned as-is.
+ */
+function fixImageUrl($url) {
+  if (empty($url)) return '';
+  $url = trim($url);
+
+  // External URLs — return as-is
+  if (strpos($url, 'http://') === 0 || strpos($url, 'https://') === 0) {
+    // Check if URL belongs to any known domain (ours or external)
+    $currentHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $parsed = parse_url($url);
+    $urlHost = $parsed['host'] ?? '';
+
+    // If URL host matches current host, it's fine
+    if ($urlHost === $currentHost) {
+      return $url;
+    }
+
+    // If URL is an uploaded image (contains /uploads/) but wrong domain, fix it
+    if (strpos($url, '/uploads/') !== false) {
+      $pathStart = strpos($url, '/uploads/');
+      $relativePath = substr($url, $pathStart);
+      return BASE_URL . $relativePath;
+    }
+
+    // External image (Unsplash, etc.) — return as-is
+    return $url;
+  }
+
+  // Relative path — prepend BASE_URL
+  if (strpos($url, '/') === 0 || strpos($url, 'uploads/') === 0) {
+    return BASE_URL . '/' . ltrim($url, '/');
+  }
+
+  return $url;
+}
+
 function isAdminLoggedIn() {
   return isset($_SESSION['admin_id']) && !empty($_SESSION['admin_id']);
 }

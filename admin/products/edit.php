@@ -435,7 +435,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <?php if (!empty($product['image'])): ?>
             <div style="margin-bottom: 14px; text-align: center;">
               <strong style="font-size: 11px; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 6px;">Main Image</strong>
-              <img src="<?= esc($product['image']) ?>" alt="Main" style="max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; border: 2px solid #e2e8f0; background: #f8fafc;">
+              <img src="<?= esc(fixImageUrl($product['image'])) ?>" alt="Main" style="max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; border: 2px solid #e2e8f0; background: #f8fafc;">
             </div>
           <?php endif; ?>
 
@@ -453,7 +453,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <div class="gallery-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px;">
               <?php foreach ($existingImages as $img): ?>
                 <div class="gallery-card <?= $img['is_primary'] ? 'is-primary' : '' ?>" style="border-radius: 8px;">
-                  <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="" style="width: 100%; height: 110px; object-fit: cover; background: #f1f5f9;">
+                  <img src="<?= htmlspecialchars(fixImageUrl($img['image_url'])) ?>" alt="" style="width: 100%; height: 110px; object-fit: cover; background: #f1f5f9;">
                   <div style="padding: 6px 8px; display: flex; flex-direction: column; gap: 4px;">
                     <span class="gallery-label-badge" style="font-size: 10px; padding: 2px 4px;"><?= esc($img['image_label'] ?? 'View') ?></span>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 4px;">

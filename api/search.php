@@ -28,7 +28,10 @@ if ($mysqli) {
   if ($stmt) {
     $stmt->bind_param('sss', $searchTerm, $searchTerm, $searchTerm);
     $stmt->execute();
-    $results['products'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $results['products'] = array_map(function($row) {
+      $row['image'] = fixImageUrl($row['image'] ?? '');
+      return $row;
+    }, $stmt->get_result()->fetch_all(MYSQLI_ASSOC));
   }
 
   // Search categories & subcategories

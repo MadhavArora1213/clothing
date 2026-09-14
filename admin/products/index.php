@@ -206,7 +206,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <tr>
                 <td>
                   <div style="display: flex; align-items: center; gap: 14px;">
-                    <img src="<?= htmlspecialchars($imgUrl) ?>" alt="" style="width: 52px; height: 68px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid #e2e8f0; background: var(--color-bg-elevated); flex-shrink: 0;">
+                    <img src="<?= htmlspecialchars(fixImageUrl($imgUrl)) ?>" alt="" style="width: 52px; height: 68px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid #e2e8f0; background: var(--color-bg-elevated); flex-shrink: 0;">
                     <div>
                       <div style="font-weight: 600; color: var(--color-text-primary); font-size: 14px; line-height: 1.3;">
                         <?= esc($prod['name']) ?>

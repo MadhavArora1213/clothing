@@ -27,7 +27,7 @@ if (empty($imageUrls) && !empty($product['id']) && $mysqli) {
     $imgStmt->bind_param('i', $product['id']);
     $imgStmt->execute();
     $imgRows = $imgStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $imageUrls = array_column($imgRows, 'image_url');
+    $imageUrls = array_map('fixImageUrl', array_column($imgRows, 'image_url'));
   }
 }
 if (empty($imageUrls)) {
@@ -831,7 +831,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
           $rpBrand = $rp['brand'] ?? '';
           $rpPrice = $rp['price'] ?? 0;
           $rpOrig = $rp['original_price'] ?? 0;
-          $rpImg = $rp['thumb'] ?? ($rp['images'][0] ?? 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=85');
+          $rpImg = fixImageUrl($rp['thumb'] ?? '') ?: ($rp['images'][0] ?? 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=85');
         ?>
           <a href="<?= BASE_URL ?>/product.php?slug=<?= htmlspecialchars($rpSlug) ?>" class="rel-card">
             <div class="rel-card-img">

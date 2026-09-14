@@ -3,7 +3,7 @@
  * Product card partial — ARYA CREATION style
  * Expects $product array with: slug, name, price, original_price, discount_percent, image
  */
-$cardImage = $product['image'] ?? 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=800&fit=crop';
+$cardImage = fixImageUrl($product['image'] ?? '') ?: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=800&fit=crop';
 $hasDiscount = !empty($product['original_price']) && (float)$product['original_price'] > (float)$product['price'];
 ?>
 <article class="arya-product-card">
