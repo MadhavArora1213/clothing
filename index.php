@@ -124,6 +124,7 @@ if ($mysqli) {
 $heroSlides = [
     [
         'image' => BASE_URL . '/images/hero1.png',
+        'desktop_image' => BASE_URL . '/images/desktophero1.png',
         'eyebrow' => '01 / New season',
         'title' => 'Dress outside the expected.',
         'copy' => 'Contemporary Indian clothing with a street-level attitude.',
@@ -132,6 +133,7 @@ $heroSlides = [
     ],
     [
         'image' => BASE_URL . '/images/hero2.png',
+        'desktop_image' => BASE_URL . '/images/desktophero2.png',
         'eyebrow' => '02 / Everyday uniform',
         'title' => 'Built for the way you move.',
         'copy' => 'Relaxed silhouettes, substantial fabrics and easy layers.',
@@ -140,6 +142,7 @@ $heroSlides = [
     ],
     [
         'image' => BASE_URL . '/images/hero3.png',
+        'desktop_image' => BASE_URL . '/images/desktophero3.png',
         'eyebrow' => '03 / Heritage, remixed',
         'title' => 'Tradition. Re-cut.',
         'copy' => 'Craft-led pieces designed for a modern Indian wardrobe.',
@@ -515,9 +518,8 @@ body {
 .uoc-hero {
     position: relative;
     width: 100%;
-    height: auto !important;
-    min-height: 0 !important;
     overflow: hidden;
+    background: #1a1a1a;
 }
 
 .uoc-hero-slider {
@@ -528,6 +530,7 @@ body {
     position: absolute;
     inset: 0;
     opacity: 0;
+    transition: opacity 1s ease;
 }
 
 .uoc-hero-slide.active {
@@ -535,18 +538,28 @@ body {
     opacity: 1;
 }
 
+.uoc-hero-slide picture {
+    display: block;
+    width: 100%;
+    line-height: 0;
+}
+
 .uoc-hero-slide img {
     width: 100%;
     height: auto;
     display: block;
+    max-height: 85vh;
+    object-fit: contain;
+    object-position: center top;
 }
 
 @media (max-width: 768px) {
-    .uoc-hero { height: auto !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; }
-    .uoc-hero-slider { position: relative !important; inset: unset !important; }
-    .uoc-hero-slide { display: none !important; position: static !important; inset: unset !important; }
-    .uoc-hero-slide.active { display: block !important; }
-    .uoc-hero-slide img { width: 100% !important; height: auto !important; display: block !important; object-fit: unset !important; }
+    .uoc-hero { height: auto !important; max-height: none !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; background: transparent !important; }
+    .uoc-hero-slider { position: static !important; display: block !important; height: auto !important; }
+    .uoc-hero-slide { display: none !important; position: static !important; inset: unset !important; height: 0 !important; min-height: 0 !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important; opacity: 1 !important; }
+    .uoc-hero-slide.active { display: block !important; height: auto !important; }
+    .uoc-hero-slide picture { line-height: normal !important; display: block !important; }
+    .uoc-hero-slide img { width: 100% !important; height: auto !important; max-height: none !important; object-fit: fill !important; object-position: center top !important; display: block !important; }
 }
 
 /* hero ::after removed — no text overlay needed */
@@ -1412,8 +1425,11 @@ body {
     .uoc-container { width: min(100% - 32px, 1360px); }
 
     .uoc-trust-inner { grid-template-columns: 1fr 1fr; }
-    .uoc-trust-item { min-height: 64px; border-bottom: 1px solid var(--uoc-line); }
-    .uoc-trust-item:nth-child(2) { border-right: 0; }
+    .uoc-trust-item { min-height: 56px; border-bottom: 1px solid var(--uoc-line); border-right: 1px solid var(--uoc-line) !important; padding: 10px 14px; font-size: 10px; gap: 10px; }
+    .uoc-trust-num { font-size: 18px; }
+    .uoc-trust-item:nth-child(2) { border-right: 0 !important; }
+    .uoc-trust-item:nth-child(3) { border-bottom: 0; }
+    .uoc-trust-item:nth-child(4) { border-bottom: 0; border-right: 0 !important; }
 
     .uoc-intro { padding: 72px 0; }
     .uoc-intro-grid { grid-template-columns: 1fr; gap: 36px; }
@@ -1455,11 +1471,11 @@ body {
     .uoc-container { width: min(100% - 20px, 1360px); }
 
     .uoc-trust-inner { grid-template-columns: 1fr 1fr; }
-    .uoc-trust-item { border-right: 0; border-bottom: 1px solid var(--uoc-line); min-height: 0; padding: 10px 12px; font-size: 9px; gap: 8px; }
+    .uoc-trust-item { border-right: 1px solid var(--uoc-line) !important; border-bottom: 1px solid var(--uoc-line); min-height: 0; padding: 8px 10px; font-size: 9px; gap: 8px; }
     .uoc-trust-num { font-size: 16px; }
-    .uoc-trust-item:nth-child(2) { border-right: 0; }
-    .uoc-trust-item:nth-child(odd) { border-right: 1px solid var(--uoc-line); }
-    .uoc-trust-item:nth-last-child(-n+2) { border-bottom: 0; }
+    .uoc-trust-item:nth-child(2) { border-right: 0 !important; }
+    .uoc-trust-item:nth-child(3) { border-bottom: 0; }
+    .uoc-trust-item:nth-child(4) { border-bottom: 0; border-right: 0 !important; }
 
     .uoc-intro { padding: 48px 0; }
     .uoc-intro h2 { font-size: 36px; }
@@ -1513,10 +1529,13 @@ body {
         <div class="uoc-hero-slider">
             <?php foreach ($heroSlides as $i => $slide): ?>
                 <div class="uoc-hero-slide <?= $i === 0 ? 'active' : '' ?>">
-                    <img
-                        src="<?= htmlspecialchars($slide['image']) ?>"
-                        alt=""
-                        <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
+                    <picture>
+                        <source media="(min-width: 1600px)" srcset="<?= htmlspecialchars($slide['desktop_image'] ?? $slide['image']) ?>">
+                        <img
+                            src="<?= htmlspecialchars($slide['image']) ?>"
+                            alt=""
+                            <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
+                    </picture>
                 </div>
             <?php endforeach; ?>
         </div>
