@@ -18,10 +18,7 @@ $productPrice = (float)($_POST['product_price'] ?? 0);
 $productImage = $_POST['product_image'] ?? '';
 $productSlug = $_POST['product_slug'] ?? '';
 
-if (!$customerId) {
-  echo json_encode(['success' => false, 'action' => 'login_required', 'message' => 'Please login to use cart.']);
-  exit;
-}
+// Guest carts allowed - no login required
 
 if ($productId <= 0) {
   echo json_encode(['success' => false, 'message' => 'Invalid product']);
@@ -48,6 +45,15 @@ if ($customerId) {
   $stmt = $mysqli->prepare('SELECT id FROM carts WHERE customer_id = ?');
   if ($stmt) {
     $stmt->bind_param('i', $customerId);
+    $stmt->execute();
+    $cart = $stmt->get_result()->fetch_assoc();
+  }
+}
+
+if (!$cart && !$customerId) {
+  $stmt = $mysqli->prepare('SELECT id FROM carts WHERE session_id = ? AND customer_id IS NULL');
+  if ($stmt) {
+    $stmt->bind_param('s', $sessionId);
     $stmt->execute();
     $cart = $stmt->get_result()->fetch_assoc();
   }

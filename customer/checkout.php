@@ -6,24 +6,35 @@ if (ob_get_level()) ob_end_clean();
 require_once dirname(__DIR__) . '/config/database.php';
 
 if (!isset($_SESSION['customer_id'])) {
-  if (isset($_POST['ajax'])) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Please login first']);
-    exit;
-  }
-  redirect('/customer/login.php?redirect=' . urlencode('/customer/checkout.php'));
+  // Guest checkout allowed - no redirect to login
 }
 
-$customerId = $_SESSION['customer_id'];
-$stmt = $mysqli->prepare('SELECT * FROM customers WHERE id = ?');
-$stmt->bind_param('i', $customerId);
-$stmt->execute();
-$customer = $stmt->get_result()->fetch_assoc();
+$customerId = $_SESSION['customer_id'] ?? null;
+$sessionId = session_id();
+$customer = null;
 
-$stmt = $mysqli->prepare('SELECT * FROM carts WHERE customer_id = ?');
-$stmt->bind_param('i', $customerId);
-$stmt->execute();
-$cart = $stmt->get_result()->fetch_assoc();
+if ($customerId) {
+  $stmt = $mysqli->prepare('SELECT * FROM customers WHERE id = ?');
+  $stmt->bind_param('i', $customerId);
+  $stmt->execute();
+  $customer = $stmt->get_result()->fetch_assoc();
+}
+
+$cart = null;
+if ($customerId) {
+  $stmt = $mysqli->prepare('SELECT * FROM carts WHERE customer_id = ?');
+  $stmt->bind_param('i', $customerId);
+  $stmt->execute();
+  $cart = $stmt->get_result()->fetch_assoc();
+}
+
+if (!$cart) {
+  $stmt = $mysqli->prepare('SELECT * FROM carts WHERE session_id = ? AND customer_id IS NULL');
+  $stmt->bind_param('s', $sessionId);
+  $stmt->execute();
+  $cart = $stmt->get_result()->fetch_assoc();
+}
+
 if (!$cart) redirect('/customer/cart.php');
 
 $items = [];
@@ -66,11 +77,19 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
   $shippingCity = sanitize($_POST['shipping_city'] ?? '');
   $shippingState = sanitize($_POST['shipping_state'] ?? '');
   $shippingPostal = sanitize($_POST['shipping_postal'] ?? '');
+  $shippingEmail = sanitize($_POST['shipping_email'] ?? '');
 
   if (empty($shippingName) || empty($shippingPhone) || empty($shippingAddress) || empty($shippingCity) || empty($shippingState) || empty($shippingPostal)) {
     echo json_encode(['success' => false, 'message' => 'Please fill in all shipping details.']);
     exit;
   }
+
+  if (!$customerId && empty($shippingEmail)) {
+    echo json_encode(['success' => false, 'message' => 'Please enter your email address.']);
+    exit;
+  }
+
+  $customerEmail = $customer['email'] ?? $shippingEmail;
 
   // 1. Create order in DB
   $orderNumber = generateOrderNumber();
@@ -84,7 +103,8 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
   $paymentStatus = 'pending';
   $orderStatus = 'pending';
   $paymentMethod = 'online';
-  $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customer['email'], $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+  $customerIdParam = $customerId ?? 0;
+  $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerIdParam, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
     exit;
@@ -135,9 +155,9 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
     'order_amount' => (float)$grandTotal,
     'order_currency' => 'INR',
     'customer_details' => [
-      'customer_id' => 'CUST_' . $customerId,
+      'customer_id' => $customerId ? 'CUST_' . $customerId : 'GUEST_' . $orderId,
       'customer_name' => $shippingName,
-      'customer_email' => $customer['email'],
+      'customer_email' => $customerEmail,
       'customer_phone' => $phone,
     ],
     'order_meta' => [
@@ -270,7 +290,8 @@ include dirname(__DIR__) . '/includes/header.php';
     <form method="POST" id="checkoutForm" onsubmit="return handleCheckout(event)" style="display: flex; flex-direction: column; flex: 1;">
       <?= getCSRFInput() ?>
       <div class="ck-section">
-        <div class="ck-section-header"><h3><span class="ck-section-num">1</span> Customer</h3></div>
+        <div class="ck-section-header"><h3><span class="ck-section-num">1</span> <?php echo $customerId ? 'Customer' : 'Contact'; ?></h3></div>
+        <?php if ($customer): ?>
         <div class="ck-customer-card">
           <div class="ck-customer-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           <div class="ck-customer-info">
@@ -278,11 +299,14 @@ include dirname(__DIR__) . '/includes/header.php';
             <p><?= esc($customer['email'] ?? '') ?></p>
           </div>
         </div>
+        <?php else: ?>
+        <div class="ck-field"><label>Email <span>*</span></label><input type="email" name="shipping_email" required placeholder="your@email.com" value="<?= esc($_POST['shipping_email'] ?? '') ?>"></div>
+        <?php endif; ?>
       </div>
 
       <div class="ck-section">
         <div class="ck-section-header"><h3><span class="ck-section-num">2</span> Shipping</h3></div>
-        <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= esc($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'])) ?>"></div>
+        <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= esc($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'] ?? '')) ?>"></div>
         <div class="ck-field"><label>Phone <span>*</span></label><input type="tel" name="shipping_phone" required value="<?= esc($_POST['shipping_phone'] ?? $customer['phone'] ?? '') ?>"></div>
         <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= esc($_POST['shipping_address'] ?? '') ?></textarea></div>
         <div class="ck-row">

@@ -203,9 +203,14 @@ header("Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyrosco
           <span class="uoc-badge cart-count">
             <?php
             $cartCount = 0;
-            if (isset($_SESSION['customer_id']) && $mysqli) {
-              $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity),0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id=c.id WHERE c.customer_id=?');
-              if ($ccStmt) { $ccStmt->bind_param('i', $_SESSION['customer_id']); $ccStmt->execute(); $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0; }
+            if ($mysqli) {
+              if (isset($_SESSION['customer_id'])) {
+                $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity),0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id=c.id WHERE c.customer_id=?');
+                if ($ccStmt) { $ccStmt->bind_param('i', $_SESSION['customer_id']); $ccStmt->execute(); $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0; }
+              } else {
+                $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity),0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id=c.id WHERE c.session_id=? AND c.customer_id IS NULL');
+                if ($ccStmt) { $ccStmt->bind_param('s', session_id()); $ccStmt->execute(); $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0; }
+              }
             }
             echo (int)$cartCount;
             ?>

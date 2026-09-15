@@ -1902,10 +1902,6 @@ function doAddToCart(pid, size) {
     })
     .then(r => r.json())
     .then(d => {
-        if (d.action === 'login_required' || d.success === false && d.message && d.message.toLowerCase().includes('login')) {
-            showToast('Please login to add items to your bag.', 'error');
-            return;
-        }
         if (d.success) {
             document.querySelectorAll('.cart-count').forEach(el => {
                 el.textContent = d.cart_count || 1;
@@ -1916,7 +1912,7 @@ function doAddToCart(pid, size) {
         }
     })
     .catch(() => {
-        showToast('Please login to add items to your bag.', 'error');
+        showToast('Something went wrong. Please try again.', 'error');
     });
 }
 
@@ -1932,10 +1928,6 @@ function doBuyNow(pid, size) {
     })
     .then(r => r.json())
     .then(d => {
-        if (d.action === 'login_required' || d.success === false && d.message && d.message.toLowerCase().includes('login')) {
-            showToast('Please login to continue checkout.', 'error');
-            return;
-        }
         if (d.success) {
             document.querySelectorAll('.cart-count').forEach(el => {
                 el.textContent = d.cart_count || 1;
@@ -1946,7 +1938,7 @@ function doBuyNow(pid, size) {
         }
     })
     .catch(() => {
-        showToast('Please login to continue checkout.', 'error');
+        showToast('Something went wrong. Please try again.', 'error');
     });
 }
 
