@@ -61,15 +61,15 @@ $couponCode = '';
 $grandTotal = $subtotal - $discountAmount + $shippingAmount;
 
 // ─── AJAX: Create Order + Cashfree ───
-  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+  try {
+  while (ob_get_level()) ob_end_clean();
+  header('Content-Type: application/json');
+
   if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
-    while (ob_get_level()) ob_end_clean();
-    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Invalid request. Please refresh and try again.']);
     exit;
   }
-  while (ob_get_level()) ob_end_clean();
-  header('Content-Type: application/json');
 
   $shippingName = sanitize($_POST['shipping_name'] ?? '');
   $shippingPhone = sanitize($_POST['shipping_phone'] ?? '');
@@ -89,22 +89,22 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
     exit;
   }
 
-  $customerEmail = $customer['email'] ?? $shippingEmail;
+  $customerEmail = $customerId && $customer ? ($customer['email'] ?? $shippingEmail) : $shippingEmail;
 
-  // 1. Create order in DB
   $orderNumber = generateOrderNumber();
   $addressJson = json_encode(['name' => $shippingName, 'phone' => $shippingPhone, 'address' => $shippingAddress, 'city' => $shippingCity, 'state' => $shippingState, 'postal_code' => $shippingPostal]);
 
-  $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-  if (!$stmt) {
-    echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
-    exit;
+  if ($customerId) {
+    $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    if (!$stmt) { echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']); exit; }
+    $paymentStatus = 'pending'; $orderStatus = 'pending'; $paymentMethod = 'online';
+    $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+  } else {
+    $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    if (!$stmt) { echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']); exit; }
+    $paymentStatus = 'pending'; $orderStatus = 'pending'; $paymentMethod = 'online';
+    $stmt->bind_param('ssssssdddsdddsss', $orderNumber, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   }
-  $paymentStatus = 'pending';
-  $orderStatus = 'pending';
-  $paymentMethod = 'online';
-  $customerIdParam = $customerId ?? 0;
-  $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerIdParam, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
     exit;
@@ -123,7 +123,6 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
 
   $mysqli->query("DELETE FROM cart_items WHERE cart_id = " . (int)$cart['id']);
 
-  // 2. Load .env
   $envFile = dirname(__DIR__) . '/.env';
   if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -138,7 +137,6 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
     }
   }
 
-  // 3. Call Cashfree API
   $cfOrderId = $orderNumber . '_' . time();
   $phone = preg_replace('/[^0-9]/', '', $shippingPhone);
   if (strlen($phone) > 10) $phone = substr($phone, -10);
@@ -203,11 +201,13 @@ $grandTotal = $subtotal - $discountAmount + $shippingAmount;
   if (isset($result['cf_order_id'])) {
     $upd = $mysqli->prepare('UPDATE orders SET payment_session_id = ? WHERE id = ?');
     if ($upd) { $upd->bind_param('si', $cfOrderId, $orderId); $upd->execute(); }
-
     echo json_encode(['success' => true, 'payment_session_id' => $result['payment_session_id'] ?? '', 'order_id' => $orderId]);
   } else {
     $errMsg = $result['message'] ?? $result['error_description'] ?? 'Payment gateway error (HTTP ' . $httpCode . ')';
     echo json_encode(['success' => false, 'message' => $errMsg]);
+  }
+  } catch (\Throwable $e) {
+    echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
   }
   exit;
 }
@@ -306,7 +306,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
       <div class="ck-section">
         <div class="ck-section-header"><h3><span class="ck-section-num">2</span> Shipping</h3></div>
-        <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= esc($_POST['shipping_name'] ?? ($customer['first_name'] . ' ' . $customer['last_name'] ?? '')) ?>"></div>
+        <div class="ck-field"><label>Full Name <span>*</span></label><input type="text" name="shipping_name" required value="<?= esc($_POST['shipping_name'] ?? ($customer['first_name'] ?? '') . ' ' . ($customer['last_name'] ?? '')) ?>"></div>
         <div class="ck-field"><label>Phone <span>*</span></label><input type="tel" name="shipping_phone" required value="<?= esc($_POST['shipping_phone'] ?? $customer['phone'] ?? '') ?>"></div>
         <div class="ck-field"><label>Address <span>*</span></label><textarea name="shipping_address" rows="2" required placeholder="Street, landmark..."><?= esc($_POST['shipping_address'] ?? '') ?></textarea></div>
         <div class="ck-row">
