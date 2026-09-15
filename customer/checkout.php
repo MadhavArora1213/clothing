@@ -275,6 +275,9 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="ck-product">
           <img class="ck-product-img" src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy">
           <div class="ck-product-name"><?= esc($item['name']) ?></div>
+          <?php if (!empty($item['size'])): ?>
+            <div class="ck-product-qty">Size: <?= esc($item['size']) ?></div>
+          <?php endif; ?>
           <div class="ck-product-price"><?= formatPrice($item['unit_price']) ?></div>
           <?php if ($item['quantity'] > 1): ?>
             <div class="ck-product-qty">Qty: <?= (int)$item['quantity'] ?></div>
