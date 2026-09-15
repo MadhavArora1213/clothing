@@ -208,8 +208,9 @@ header("Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyrosco
                 $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity),0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id=c.id WHERE c.customer_id=?');
                 if ($ccStmt) { $ccStmt->bind_param('i', $_SESSION['customer_id']); $ccStmt->execute(); $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0; }
               } else {
+                $guestSid = session_id();
                 $ccStmt = $mysqli->prepare('SELECT COALESCE(SUM(ci.quantity),0) as cnt FROM carts c JOIN cart_items ci ON ci.cart_id=c.id WHERE c.session_id=? AND c.customer_id IS NULL');
-                if ($ccStmt) { $ccStmt->bind_param('s', session_id()); $ccStmt->execute(); $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0; }
+                if ($ccStmt) { $ccStmt->bind_param('s', $guestSid); $ccStmt->execute(); $cartCount = $ccStmt->get_result()->fetch_assoc()['cnt'] ?? 0; }
               }
             }
             echo (int)$cartCount;

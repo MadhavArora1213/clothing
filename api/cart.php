@@ -41,6 +41,7 @@ if (!$product) {
 // Always use DB price, never client-supplied
 $unitPrice = $product['price'];
 
+$cart = null;
 if ($customerId) {
   $stmt = $mysqli->prepare('SELECT id FROM carts WHERE customer_id = ?');
   if ($stmt) {

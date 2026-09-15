@@ -141,10 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
   if (strlen($phone) !== 10) $phone = '9999999999';
 
   $host = $_SERVER['HTTP_HOST'];
-  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
   $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
   $baseFolder = preg_replace('#/customer$#', '', $scriptDir);
-  $baseUrl = $protocol . '://' . $host . $baseFolder;
+  // Cashfree requires HTTPS for return_url
+  $baseUrl = 'https://' . $host . $baseFolder;
 
   $payload = [
     'order_id' => $cfOrderId,
