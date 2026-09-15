@@ -173,38 +173,92 @@ if ($action === 'create_order') {
 if ($action === 'callback') {
   if (session_status() === PHP_SESSION_NONE) session_start();
   $orderId = (int)($_GET['order_id'] ?? 0);
-  if ($orderId > 0) {
-    $_SESSION['last_order_id'] = $orderId;
 
-    // Clear cart for this session/customer
+  $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+  $host = $_SERVER['HTTP_HOST'];
+  $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+  $baseFolder = preg_replace('#/api$#', '', $scriptDir);
+  $baseUrl = $protocol . '://' . $host . $baseFolder;
+
+  if ($orderId > 0) {
+    // Check payment status from DB
     $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
     $dbName = $_ENV['DB_NAME'] ?? 'cloths';
     $dbUser = $_ENV['DB_USER'] ?? 'root';
     $dbPass = $_ENV['DB_PASS'] ?? '';
     $db = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+    $paymentOk = false;
+
     if (!$db->connect_error) {
       $db->set_charset('utf8mb4');
-      $sid = session_id();
-      $custId = $_SESSION['customer_id'] ?? null;
-      if ($custId) {
-        $del = $db->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.customer_id = ?');
-        if ($del) { $del->bind_param('i', $custId); $del->execute(); }
-      } else {
-        $del = $db->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.session_id = ? AND c.customer_id IS NULL');
-        if ($del) { $del->bind_param('s', $sid); $del->execute(); }
+      $stmt = $db->prepare('SELECT payment_status, payment_session_id, order_number FROM orders WHERE id = ?');
+      if ($stmt) {
+        $stmt->bind_param('i', $orderId);
+        $stmt->execute();
+        $ord = $stmt->get_result()->fetch_assoc();
+        if ($ord) {
+          // If already paid, proceed to success
+          if (in_array($ord['payment_status'], ['paid', 'completed'])) {
+            $paymentOk = true;
+          } else {
+            // Verify with Cashfree API
+            $cfAppId = $_ENV['CF_APP_ID'] ?? '';
+            $cfSecret = $_ENV['CF_SECRET_KEY'] ?? '';
+            $cfOrderId = $ord['payment_session_id'] ?? '';
+            if ($cfAppId && $cfSecret && $cfOrderId && preg_match('/^ORD-/i', $cfOrderId)) {
+              $ch = curl_init('https://api.cashfree.com/pg/orders/' . urlencode($cfOrderId));
+              curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+                CURLOPT_HTTPHEADER => [
+                  'x-client-id: ' . $cfAppId,
+                  'x-client-secret: ' . $cfSecret,
+                  'x-api-version: 2023-08-01',
+                ],
+              ]);
+              $cfResp = curl_exec($ch);
+              curl_close($ch);
+              if ($cfResp) {
+                $cfData = json_decode($cfResp, true);
+                $cfStatus = $cfData['order_status'] ?? '';
+                if ($cfStatus === 'PAID') {
+                  $db->query("UPDATE orders SET payment_status = 'paid', order_status = 'confirmed' WHERE id = $orderId");
+                  $paymentOk = true;
+                }
+              }
+            }
+          }
+        }
       }
       $db->close();
     }
 
-    // Calculate base URL dynamically
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'];
-    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
-    $baseFolder = preg_replace('#/api$#', '', $scriptDir);
-    $baseUrl = $protocol . '://' . $host . $baseFolder;
-    header('Location: ' . $baseUrl . '/customer/order-success.php');
-    exit;
+    if ($paymentOk) {
+      // Payment confirmed — clear cart
+      $_SESSION['last_order_id'] = $orderId;
+      $db2 = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+      if (!$db2->connect_error) {
+        $db2->set_charset('utf8mb4');
+        $sid = session_id();
+        $custId = $_SESSION['customer_id'] ?? null;
+        if ($custId) {
+          $del = $db2->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.customer_id = ?');
+          if ($del) { $del->bind_param('i', $custId); $del->execute(); }
+        } else {
+          $del = $db2->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.session_id = ? AND c.customer_id IS NULL');
+          if ($del) { $del->bind_param('s', $sid); $del->execute(); }
+        }
+        $db2->close();
+      }
+      header('Location: ' . $baseUrl . '/customer/order-success.php');
+      exit;
+    } else {
+      // Payment not confirmed — redirect back to checkout
+      header('Location: ' . $baseUrl . '/customer/checkout.php');
+      exit;
+    }
   }
+  // Fallback: go to shop
+  header('Location: ' . $baseUrl . '/shop.php');
   exit;
 }
 
