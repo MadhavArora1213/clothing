@@ -175,6 +175,27 @@ if ($action === 'callback') {
   $orderId = (int)($_GET['order_id'] ?? 0);
   if ($orderId > 0) {
     $_SESSION['last_order_id'] = $orderId;
+
+    // Clear cart for this session/customer
+    $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
+    $dbName = $_ENV['DB_NAME'] ?? 'cloths';
+    $dbUser = $_ENV['DB_USER'] ?? 'root';
+    $dbPass = $_ENV['DB_PASS'] ?? '';
+    $db = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+    if (!$db->connect_error) {
+      $db->set_charset('utf8mb4');
+      $sid = session_id();
+      $custId = $_SESSION['customer_id'] ?? null;
+      if ($custId) {
+        $del = $db->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.customer_id = ?');
+        if ($del) { $del->bind_param('i', $custId); $del->execute(); }
+      } else {
+        $del = $db->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.session_id = ? AND c.customer_id IS NULL');
+        if ($del) { $del->bind_param('s', $sid); $del->execute(); }
+      }
+      $db->close();
+    }
+
     // Calculate base URL dynamically
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'];

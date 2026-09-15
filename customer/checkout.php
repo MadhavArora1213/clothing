@@ -121,8 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
     }
   }
 
-  $mysqli->query("DELETE FROM cart_items WHERE cart_id = " . (int)$cart['id']);
-
   $envFile = dirname(__DIR__) . '/.env';
   if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

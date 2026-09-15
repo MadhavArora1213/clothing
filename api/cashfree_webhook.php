@@ -108,5 +108,19 @@ if ($upd) {
   $upd->execute();
 }
 
+// Clear cart after successful payment
+if ($newPaymentStatus === 'paid') {
+  $ordStmt = $mysqli->prepare('SELECT customer_id FROM orders WHERE id = ?');
+  if ($ordStmt) {
+    $ordStmt->bind_param('i', $order['id']);
+    $ordStmt->execute();
+    $ordRow = $ordStmt->get_result()->fetch_assoc();
+    if ($ordRow && $ordRow['customer_id'] > 0) {
+      $delStmt = $mysqli->prepare('DELETE ci FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.customer_id = ?');
+      if ($delStmt) { $delStmt->bind_param('i', $ordRow['customer_id']); $delStmt->execute(); }
+    }
+  }
+}
+
 error_log("Cashfree Webhook: order {$order['id']} → payment=$newPaymentStatus, order=$newOrderStatus (event=$eventType)");
 echo json_encode(['status' => 'ok', 'payment_status' => $newPaymentStatus]);
