@@ -21,7 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect(adminUrl('products/?msg=Invalid+request'));
   }
 
+  // Check if product has order items (cannot delete — FK RESTRICT)
+  $chkOrder = $mysqli->prepare('SELECT COUNT(*) AS cnt FROM order_items WHERE product_id = ?');
+  $chkOrder->bind_param('i', $id);
+  $chkOrder->execute();
+  $orderCount = $chkOrder->get_result()->fetch_assoc()['cnt'] ?? 0;
+  if ($orderCount > 0) {
+    redirect(adminUrl('products/?msg=Cannot+delete+product+with+existing+orders'));
+  }
+
   // Delete related records first
+  $delCartItems = $mysqli->prepare('DELETE FROM cart_items WHERE product_id = ?');
+  $delCartItems->bind_param('i', $id);
+  $delCartItems->execute();
+
+  $delWish = $mysqli->prepare('DELETE FROM wishlists WHERE product_id = ?');
+  $delWish->bind_param('i', $id);
+  $delWish->execute();
+
   $delColors = $mysqli->prepare('DELETE FROM product_colors WHERE product_id = ?');
   $delColors->bind_param('i', $id);
   $delColors->execute();
