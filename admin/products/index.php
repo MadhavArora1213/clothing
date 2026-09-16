@@ -82,6 +82,22 @@ include dirname(__DIR__) . '/includes/header.php';
 ?>
 
 <div class="admin-content">
+  <?php if (!empty($_GET['msg'])): ?>
+    <div style="padding: 12px 20px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+      <?= strpos($_GET['msg'], 'Cannot') !== false || strpos($_GET['msg'], 'Invalid') !== false
+          ? 'background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA;'
+          : 'background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0;' ?>">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <?php if (strpos($_GET['msg'], 'Cannot') !== false || strpos($_GET['msg'], 'Invalid') !== false): ?>
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        <?php else: ?>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        <?php endif; ?>
+      </svg>
+      <?= esc(str_replace('+', ' ', $_GET['msg'])) ?>
+    </div>
+  <?php endif; ?>
+
   <div class="admin-page-header">
     <div>
       <h1>Products Management</h1>
