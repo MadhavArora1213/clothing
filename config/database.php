@@ -137,6 +137,8 @@ if ($conn && !$conn->connect_error) {
     if ($checkPsid && $checkPsid->num_rows === 0) {
       $mysqli->query("ALTER TABLE orders ADD COLUMN payment_session_id VARCHAR(255) NULL AFTER payment_method");
     }
+    // Fix any orders with empty payment_method caused by old bind_param type mismatch
+    $mysqli->query("UPDATE orders SET payment_method = 'online' WHERE payment_method = '' AND payment_session_id IS NOT NULL AND payment_session_id != ''");
     // Check if carts table exists
     $checkCarts = $mysqli->query("SHOW TABLES LIKE 'carts'");
     if ($checkCarts && $checkCarts->num_rows === 0) {

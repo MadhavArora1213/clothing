@@ -101,7 +101,7 @@ if ($orderId) {
           <div style="padding: var(--space-6);">
             <p><strong>Order Number:</strong> <?= esc($order['order_number']) ?></p>
             <p><strong>Amount:</strong> <?= formatPrice($order['grand_total']) ?></p>
-            <p><strong>Payment:</strong> <?= ucfirst($order['payment_method']) ?></p>
+            <p><strong>Payment:</strong> <?= ucfirst($order['payment_method'] ?: ($order['payment_session_id'] ? 'Online' : 'N/A')) ?></p>
             <p><strong>Status:</strong> <span class="status-badge status-<?= $order['order_status'] ?>"><?= ucfirst($order['order_status']) ?></span></p>
           </div>
         </div>

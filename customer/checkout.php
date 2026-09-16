@@ -120,12 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
     $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (!$stmt) { echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']); exit; }
     $paymentStatus = 'pending'; $orderStatus = 'pending'; $paymentMethod = 'online';
-    $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $freshSubtotal, $discountAmount, $couponCode, $freshShipping, $taxAmount, $freshGrandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+    $stmt->bind_param('sisssssddsdddsss', $orderNumber, $customerId, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $freshSubtotal, $discountAmount, $couponCode, $freshShipping, $taxAmount, $freshGrandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   } else {
     $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (!$stmt) { echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']); exit; }
     $paymentStatus = 'pending'; $orderStatus = 'pending'; $paymentMethod = 'online';
-    $stmt->bind_param('ssssssdddsdddss', $orderNumber, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $freshSubtotal, $discountAmount, $couponCode, $freshShipping, $taxAmount, $freshGrandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+    $stmt->bind_param('ssssssddsdddsss', $orderNumber, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $freshSubtotal, $discountAmount, $couponCode, $freshShipping, $taxAmount, $freshGrandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   }
   if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
