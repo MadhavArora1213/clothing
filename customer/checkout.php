@@ -91,6 +91,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   $customerEmail = $customerId && $customer ? ($customer['email'] ?? $shippingEmail) : $shippingEmail;
 
+  // Re-fetch items from DB to get latest quantities after AJAX changes
+  $freshItems = [];
+  $freshSubtotal = 0;
+  $freshShipping = 0;
+  if ($cart) {
+    $fStmt = $mysqli->prepare('SELECT ci.*, p.name, p.sku, p.price, p.image, p.shipping_charge, p.free_shipping, p.shipping_days FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = ?');
+    if ($fStmt) {
+      $fStmt->bind_param('i', $cart['id']);
+      $fStmt->execute();
+      $freshItems = $fStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      foreach ($freshItems as $fi) {
+        $freshSubtotal += $fi['unit_price'] * $fi['quantity'];
+        if (!$fi['free_shipping']) $freshShipping += $fi['shipping_charge'] * $fi['quantity'];
+      }
+    }
+  }
+  if (empty($freshItems)) {
+    echo json_encode(['success' => false, 'message' => 'Your cart is empty.']);
+    exit;
+  }
+  $freshGrandTotal = $freshSubtotal + $freshShipping;
+
   $orderNumber = generateOrderNumber();
   $addressJson = json_encode(['name' => $shippingName, 'phone' => $shippingPhone, 'address' => $shippingAddress, 'city' => $shippingCity, 'state' => $shippingState, 'postal_code' => $shippingPostal]);
 
@@ -98,12 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
     $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (!$stmt) { echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']); exit; }
     $paymentStatus = 'pending'; $orderStatus = 'pending'; $paymentMethod = 'online';
-    $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+    $stmt->bind_param('sissssdddsdddsss', $orderNumber, $customerId, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $freshSubtotal, $discountAmount, $couponCode, $freshShipping, $taxAmount, $freshGrandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   } else {
     $stmt = $mysqli->prepare('INSERT INTO orders (order_number, customer_name, customer_email, customer_phone, billing_address, shipping_address, subtotal, discount_amount, coupon_code, shipping_amount, tax_amount, grand_total, payment_method, payment_status, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (!$stmt) { echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']); exit; }
     $paymentStatus = 'pending'; $orderStatus = 'pending'; $paymentMethod = 'online';
-    $stmt->bind_param('ssssssdddsdddss', $orderNumber, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $subtotal, $discountAmount, $couponCode, $shippingAmount, $taxAmount, $grandTotal, $paymentMethod, $paymentStatus, $orderStatus);
+    $stmt->bind_param('ssssssdddsdddss', $orderNumber, $shippingName, $customerEmail, $shippingPhone, $addressJson, $addressJson, $freshSubtotal, $discountAmount, $couponCode, $freshShipping, $taxAmount, $freshGrandTotal, $paymentMethod, $paymentStatus, $orderStatus);
   }
   if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
@@ -111,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
   }
   $orderId = $mysqli->insert_id;
 
-  foreach ($items as $item) {
+  foreach ($freshItems as $item) {
     $totalPrice = $item['unit_price'] * $item['quantity'];
     $productSku = $item['sku'] ?? null;
     $ist = $mysqli->prepare('INSERT INTO order_items (order_id, product_id, product_name, product_sku, size, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
@@ -148,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax']) && $_POST['aj
 
   $payload = [
     'order_id' => $cfOrderId,
-    'order_amount' => (float)$grandTotal,
+    'order_amount' => (float)$freshGrandTotal,
     'order_currency' => 'INR',
     'customer_details' => [
       'customer_id' => $customerId ? 'CUST_' . $customerId : 'GUEST_' . $orderId,
@@ -230,6 +252,17 @@ include dirname(__DIR__) . '/includes/header.php';
 .ck-product-name { font-size: 12px; font-weight: 600; color: var(--color-text-main); margin-bottom: 4px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ck-product-price { font-size: 13px; font-weight: 700; color: var(--color-text-main); }
 .ck-product-qty { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+.ck-product-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; }
+.ck-qty-stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--color-border); border-radius: 6px; overflow: hidden; background: var(--color-bg); }
+.ck-qty-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--color-text-main); transition: background 0.2s; }
+.ck-qty-btn:hover { background: var(--color-border); }
+.ck-qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.ck-qty-val { width: 32px; text-align: center; font-size: 12px; font-weight: 700; color: var(--color-text-main); border-left: 1.5px solid var(--color-border); border-right: 1.5px solid var(--color-border); padding: 3px 0; }
+.ck-remove-btn { background: none; border: none; cursor: pointer; padding: 4px; color: var(--color-text-muted); transition: color 0.2s; display: flex; align-items: center; }
+.ck-remove-btn:hover { color: #DC2626; }
+.ck-product.removing { opacity: 0.4; pointer-events: none; transition: opacity 0.3s; }
+.ck-empty-msg { text-align: center; padding: 60px 20px; color: var(--color-text-muted); font-size: 14px; }
+.ck-empty-msg a { color: var(--color-accent); text-decoration: underline; font-weight: 600; }
 .ck-right { background: var(--color-surface); border-left: 1px solid var(--color-border); padding: 32px 36px; display: flex; flex-direction: column; max-height: calc(100vh - var(--header-height, 80px)); position: sticky; top: var(--header-height, 80px); overflow-y: auto; }
 .ck-section { padding: 12px 0; border-bottom: 1px solid var(--color-border); }
 .ck-section:last-child { border-bottom: none; }
@@ -267,24 +300,32 @@ include dirname(__DIR__) . '/includes/header.php';
       Checkout
     </div>
     <div class="ck-left-title">Confirm & Pay</div>
-    <div class="ck-left-count"><?= count($items) ?> item<?= count($items) > 1 ? 's' : '' ?></div>
-    <div class="ck-products">
+    <div class="ck-left-count" id="ckItemCount"><?= count($items) ?> item<?= count($items) > 1 ? 's' : '' ?></div>
+    <div class="ck-products" id="ckProducts">
       <?php foreach ($items as $item):
         $img = !empty($item['image']) ? $item['image'] : 'https://via.placeholder.com/300x400?text=No+Image';
       ?>
-        <div class="ck-product">
+        <div class="ck-product" id="ckItem<?= (int)$item['id'] ?>" data-id="<?= (int)$item['id'] ?>" data-price="<?= (float)$item['unit_price'] ?>" data-shipping="<?= (float)$item['shipping_charge'] ?>" data-free-shipping="<?= $item['free_shipping'] ? '1' : '0' ?>">
           <img class="ck-product-img" src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy">
           <div class="ck-product-name"><?= esc($item['name']) ?></div>
           <?php if (!empty($item['size'])): ?>
             <div style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-main);background:var(--color-bg);border:1px solid var(--color-border);padding:2px 8px;border-radius:4px;margin-bottom:4px;">Size: <?= esc($item['size']) ?></div>
           <?php endif; ?>
           <div class="ck-product-price"><?= formatPrice($item['unit_price']) ?></div>
-          <?php if ($item['quantity'] > 1): ?>
-            <div class="ck-product-qty">Qty: <?= (int)$item['quantity'] ?></div>
-          <?php endif; ?>
+          <div class="ck-product-controls">
+            <div class="ck-qty-stepper">
+              <button type="button" class="ck-qty-btn" onclick="ckChangeQty(<?= (int)$item['id'] ?>, -1)" aria-label="Decrease quantity">&minus;</button>
+              <div class="ck-qty-val" id="ckQty<?= (int)$item['id'] ?>"><?= (int)$item['quantity'] ?></div>
+              <button type="button" class="ck-qty-btn" onclick="ckChangeQty(<?= (int)$item['id'] ?>, 1)" aria-label="Increase quantity">+</button>
+            </div>
+            <button type="button" class="ck-remove-btn" onclick="ckRemoveItem(<?= (int)$item['id'] ?>)" aria-label="Remove item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+          </div>
         </div>
       <?php endforeach; ?>
     </div>
+    <div id="ckEmptyMsg" class="ck-empty-msg" style="display:none;">Your cart is empty. <a href="<?= BASE_URL ?>/shop.php">Continue Shopping</a></div>
   </div>
 
   <div class="ck-right">
@@ -326,12 +367,12 @@ include dirname(__DIR__) . '/includes/header.php';
       </div>
 
       <div class="ck-section ck-summary" style="flex:1;">
-        <div class="ck-summary-row"><span>Subtotal</span><span><?= formatPrice($subtotal) ?></span></div>
-        <div class="ck-summary-row"><span>Shipping</span><?php if ($shippingAmount > 0): ?><span><?= formatPrice($shippingAmount) ?></span><?php else: ?><span class="free">Free</span><?php endif; ?></div>
-        <div class="ck-summary-row total"><span>Total</span><span><?= formatPrice($grandTotal) ?></span></div>
+        <div class="ck-summary-row"><span>Subtotal</span><span id="ckSubtotal"><?= formatPrice($subtotal) ?></span></div>
+        <div class="ck-summary-row"><span>Shipping</span><span id="ckShipping"><?php if ($shippingAmount > 0): ?><?= formatPrice($shippingAmount) ?><?php else: ?><span class="free">Free</span><?php endif; ?></span></div>
+        <div class="ck-summary-row total"><span>Total</span><span id="ckGrandTotal"><?= formatPrice($grandTotal) ?></span></div>
       </div>
 
-      <button type="submit" id="payBtn" class="ck-place-btn">Pay <?= formatPrice($grandTotal) ?></button>
+      <button type="submit" id="payBtn" class="ck-place-btn" data-raw-total="<?= (float)$grandTotal ?>">Pay <?= formatPrice($grandTotal) ?></button>
     </form>
   </div>
 </section>
@@ -339,7 +380,94 @@ include dirname(__DIR__) . '/includes/header.php';
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <script>
 const CF_ENV = '<?= CF_ENV ?>';
+const CSRF_TOKEN = '<?= generateCSRFToken() ?>';
+const CART_API = '<?= BASE_URL ?>/api/cart.php';
+const fmt = n => '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+// ─── Update summary UI ───
+function updateSummaryUI(totals) {
+  if (!totals) return;
+  document.getElementById('ckSubtotal').textContent = fmt(totals.subtotal);
+  const shipEl = document.getElementById('ckShipping');
+  if (totals.shipping > 0) {
+    shipEl.innerHTML = fmt(totals.shipping);
+  } else {
+    shipEl.innerHTML = '<span class="free">Free</span>';
+  }
+  document.getElementById('ckGrandTotal').textContent = fmt(totals.grand_total);
+  const btn = document.getElementById('payBtn');
+  btn.textContent = 'Pay ' + fmt(totals.grand_total);
+  btn.dataset.rawTotal = totals.grand_total;
+  document.getElementById('ckItemCount').textContent = totals.item_count + ' item' + (totals.item_count !== 1 ? 's' : '');
+  // Update cart badge
+  document.querySelectorAll('.cart-count').forEach(el => el.textContent = totals.item_count);
+}
+
+// ─── Change quantity ───
+let qtyLock = {};
+async function ckChangeQty(itemId, delta) {
+  if (qtyLock[itemId]) return;
+  qtyLock[itemId] = true;
+
+  const qtyEl = document.getElementById('ckQty' + itemId);
+  let currentQty = parseInt(qtyEl.textContent);
+  let newQty = currentQty + delta;
+  if (newQty < 1) { qtyLock[itemId] = false; return; }
+
+  qtyEl.textContent = newQty;
+
+  try {
+    const res = await fetch(CART_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=update_quantity&cart_item_id=' + itemId + '&quantity=' + newQty
+    });
+    const data = await res.json();
+    if (data.success && data.totals) {
+      updateSummaryUI(data.totals);
+    } else {
+      qtyEl.textContent = currentQty;
+      showToast(data.message || 'Failed to update', 'error');
+    }
+  } catch (err) {
+    qtyEl.textContent = currentQty;
+    showToast('Network error', 'error');
+  }
+  qtyLock[itemId] = false;
+}
+
+// ─── Remove item ───
+async function ckRemoveItem(itemId) {
+  const card = document.getElementById('ckItem' + itemId);
+  if (!card) return;
+
+  card.classList.add('removing');
+
+  try {
+    const res = await fetch(CART_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=remove&cart_item_id=' + itemId
+    });
+    const data = await res.json();
+    if (data.success) {
+      card.remove();
+      updateSummaryUI(data.totals);
+      // If cart is empty, redirect
+      if (data.totals && data.totals.item_count === 0) {
+        window.location.href = '<?= BASE_URL ?>/customer/cart.php';
+      }
+    } else {
+      card.classList.remove('removing');
+      showToast(data.message || 'Failed to remove', 'error');
+    }
+  } catch (err) {
+    card.classList.remove('removing');
+    showToast('Network error', 'error');
+  }
+}
+
+// ─── Checkout handler (unchanged) ───
 async function handleCheckout(e) {
   e.preventDefault();
   const btn = document.getElementById('payBtn');
@@ -349,7 +477,6 @@ async function handleCheckout(e) {
   const form = document.getElementById('checkoutForm');
   const formData = new FormData(form);
   formData.append('ajax', '1');
-  // CSRF token is already in the form via getCSRFInput()
 
   try {
     const res = await fetch('<?= BASE_URL ?>/customer/checkout.php', {
@@ -362,7 +489,7 @@ async function handleCheckout(e) {
     if (!data.success) {
       alert(data.message || 'Error placing order');
       btn.disabled = false;
-      btn.innerHTML = 'Pay <?= formatPrice($grandTotal) ?>';
+      btn.innerHTML = 'Pay ' + fmt(btn.dataset.rawTotal);
       return;
     }
 
@@ -374,7 +501,7 @@ async function handleCheckout(e) {
   } catch (err) {
     alert('Error: ' + err.message);
     btn.disabled = false;
-    btn.innerHTML = 'Pay <?= formatPrice($grandTotal) ?>';
+    btn.innerHTML = 'Pay ' + fmt(btn.dataset.rawTotal);
   }
 }
 </script>
