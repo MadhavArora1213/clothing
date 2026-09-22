@@ -200,10 +200,10 @@ function deptBadge($dept) {
   </div>
 
   <!-- LEFT + RIGHT STRUCTURED LAYOUT -->
-  <div style="display: grid; grid-template-columns: 340px 1fr; gap: var(--space-4); align-items: start;">
+  <div class="cat-split">
 
     <!-- LEFT: Parent Categories -->
-    <div class="admin-card" style="overflow: hidden;">
+    <div class="admin-card cat-split-left" style="overflow: hidden;">
       <div style="padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-bg-elevated); display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 15px; font-weight: 700; margin: 0;">Parent Categories</h2>
         <span style="font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 2px 10px; border-radius: 12px; color: #475569;">
@@ -216,7 +216,7 @@ function deptBadge($dept) {
           No parent categories yet.
         </div>
       <?php else: ?>
-        <div style="display: flex; flex-direction: column;">
+        <div class="cat-parent-list" style="display: flex; flex-direction: column;">
           <?php foreach ($parentCategories as $pc):
             $isActive = ((int)$pc['id'] === $selectedParentId);
             $childCount = count(array_filter($subCategories, fn($c) => (int)$c['parent_id'] === (int)$pc['id']));
@@ -260,7 +260,7 @@ function deptBadge($dept) {
     </div>
 
     <!-- RIGHT: Subcategories of selected parent -->
-    <div class="admin-card" style="overflow: hidden;">
+    <div class="admin-card cat-split-right" style="overflow: hidden;">
       <div style="padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-bg-elevated); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
         <div>
           <h2 style="font-size: 15px; font-weight: 700; margin: 0;">
@@ -355,6 +355,47 @@ function deptBadge($dept) {
     </div>
   </div>
 </div>
+
+<style>
+.cat-split {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+.cat-split-left,
+.cat-split-right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.cat-parent-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.cat-split-right .table-wrap {
+  flex: 1;
+  min-height: 0;
+}
+.cat-split-right > div:last-child:not(.table-wrap) {
+  flex: 1;
+}
+
+@media (max-width: 1024px) {
+  .cat-split {
+    grid-template-columns: 1fr;
+  }
+  .cat-split-left,
+  .cat-split-right {
+    height: auto;
+  }
+  .cat-parent-list {
+    max-height: 320px;
+  }
+}
+</style>
 
 <script>
 function autoSlugCategory(name) {
