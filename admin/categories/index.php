@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-// Fetch all categories with parent names
+// Fetch all categories with parent names & product counts
 $categories = $mysqli->query("
   SELECT c.*, p.name as parent_name, 
     (SELECT COUNT(*) FROM products prod WHERE prod.category_id = c.id OR prod.subcategory_id = c.id) as product_count
@@ -67,10 +67,35 @@ $categories = $mysqli->query("
   ORDER BY c.parent_id ASC, c.sort_order ASC, c.name ASC
 ")->fetch_all(MYSQLI_ASSOC);
 
-$parentCategories = array_filter($categories, fn($c) => $c['parent_id'] == 0);
+$parentCategories = array_values(array_filter($categories, fn($c) => $c['parent_id'] == 0));
+$subCategories = array_values(array_filter($categories, fn($c) => $c['parent_id'] > 0));
+
+// Selected parent for right panel
+$selectedParentId = (int)($_GET['parent_id'] ?? 0);
+if ($selectedParentId <= 0 && !empty($parentCategories)) {
+  $selectedParentId = (int)$parentCategories[0]['id'];
+}
+$selectedParent = null;
+foreach ($parentCategories as $pc) {
+  if ((int)$pc['id'] === $selectedParentId) {
+    $selectedParent = $pc;
+    break;
+  }
+}
+$subsForSelected = array_values(array_filter($subCategories, fn($c) => (int)$c['parent_id'] === $selectedParentId));
 
 $pageTitle = 'Categories Management — urban outfit Admin';
 include dirname(__DIR__) . '/includes/header.php';
+
+function deptBadge($dept) {
+  $style = match ($dept) {
+    'women' => 'background: #FCE7F3; color: #9D174D;',
+    'men' => 'background: #E0E7FF; color: #3730A3;',
+    'kids' => 'background: #FEF3C7; color: #92400E;',
+    default => 'background: #F3F4F6; color: #374151;',
+  };
+  return '<span style="font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; ' . $style . '">' . ucfirst($dept) . '</span>';
+}
 ?>
 
 <div class="admin-content">
@@ -78,7 +103,7 @@ include dirname(__DIR__) . '/includes/header.php';
     <div>
       <h1>Categories &amp; Subcategories</h1>
       <p style="color: var(--color-text-secondary); margin-top: 4px;">
-        Manage parent collections (Women, Men, Kids, Accessories) and their subcategories (Suits, Sarees, Shirts, etc.).
+        Left: parent collections — Right: their subcategories. Click a parent on the left to manage its children.
       </p>
     </div>
     <button class="btn btn-primary" onclick="openAddForm()">+ Add New Category</button>
@@ -174,94 +199,159 @@ include dirname(__DIR__) . '/includes/header.php';
     </form>
   </div>
 
-  <!-- Categories Table -->
-  <div class="admin-card">
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Category Name</th>
-            <th>Slug</th>
-            <th>Department</th>
-            <th>Type / Parent</th>
-            <th>Products Count</th>
-            <th>Sort Order</th>
-            <th>Status</th>
-            <th style="text-align: right;">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (empty($categories)): ?>
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-tertiary);">
-                No categories found. Click "+ Add New Category" above to create one.
-              </td>
-            </tr>
-          <?php else: ?>
-            <?php foreach ($categories as $cat): ?>
-              <?php
-                $isSub = $cat['parent_id'] > 0;
-                $deptBadge = match($cat['department']) {
-                  'women' => 'background: #FCE7F3; color: #9D174D;',
-                  'men' => 'background: #E0E7FF; color: #3730A3;',
-                  'kids' => 'background: #FEF3C7; color: #92400E;',
-                  default => 'background: #F3F4F6; color: #374151;'
-                };
-              ?>
-              <tr style="<?= !$isSub ? 'background: #fafaf9; font-weight: 600;' : '' ?>">
-                <td>
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <?php if ($isSub): ?>
-                      <span style="color: var(--color-text-tertiary); font-family: monospace; font-size: 16px; margin-left: 12px;">↳</span>
-                    <?php endif; ?>
-                    <?php if (!empty($cat['image'])): ?>
-                      <img src="<?= htmlspecialchars($cat['image']) ?>" alt="" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px;">
-                    <?php endif; ?>
-                    <span><?= esc($cat['name']) ?></span>
-                  </div>
-                </td>
-                <td style="font-family: monospace; font-size: 12px; color: #475569;">
-                  <?= esc($cat['slug']) ?>
-                </td>
-                <td>
-                  <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; <?= $deptBadge ?>">
-                    <?= ucfirst($cat['department']) ?>
+  <!-- LEFT + RIGHT STRUCTURED LAYOUT -->
+  <div style="display: grid; grid-template-columns: 340px 1fr; gap: var(--space-4); align-items: start;">
+
+    <!-- LEFT: Parent Categories -->
+    <div class="admin-card" style="overflow: hidden;">
+      <div style="padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-bg-elevated); display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 15px; font-weight: 700; margin: 0;">Parent Categories</h2>
+        <span style="font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 2px 10px; border-radius: 12px; color: #475569;">
+          <?= count($parentCategories) ?>
+        </span>
+      </div>
+
+      <?php if (empty($parentCategories)): ?>
+        <div style="padding: 32px 20px; text-align: center; color: var(--color-text-tertiary); font-size: 13px;">
+          No parent categories yet.
+        </div>
+      <?php else: ?>
+        <div style="display: flex; flex-direction: column;">
+          <?php foreach ($parentCategories as $pc):
+            $isActive = ((int)$pc['id'] === $selectedParentId);
+            $childCount = count(array_filter($subCategories, fn($c) => (int)$c['parent_id'] === (int)$pc['id']));
+          ?>
+            <a href="<?= adminUrl('categories/?parent_id=' . $pc['id']) ?>"
+               style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; border-left: 4px solid <?= $isActive ? '#0284c7' : 'transparent' ?>; background: <?= $isActive ? '#F0F9FF' : 'transparent' ?>; border-bottom: 1px solid var(--color-bg-elevated); transition: background 0.15s;">
+              <?php if (!empty($pc['image'])): ?>
+                <img src="<?= htmlspecialchars($pc['image']) ?>" alt="" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+              <?php else: ?>
+                <div style="width: 44px; height: 44px; border-radius: 8px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: #64748b; flex-shrink: 0;">
+                  <?= strtoupper(substr($pc['name'], 0, 1)) ?>
+                </div>
+              <?php endif; ?>
+
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 700; font-size: 14px; color: <?= $isActive ? '#0369A1' : '#0f172a' ?>; margin-bottom: 3px;">
+                  <?= esc($pc['name']) ?>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <?= deptBadge($pc['department']) ?>
+                  <span style="font-size: 11px; color: var(--color-text-tertiary);">
+                    <?= $childCount ?> sub · <?= (int)$pc['product_count'] ?> products
                   </span>
-                </td>
-                <td>
-                  <?php if ($isSub): ?>
-                    <span style="color: var(--color-text-secondary); font-size: 12px;">Subcategory of <strong><?= esc($cat['parent_name'] ?? 'Parent') ?></strong></span>
-                  <?php else: ?>
-                    <span style="color: #0284c7; font-weight: 600; font-size: 12px;">★ Top Level (Parent)</span>
-                  <?php endif; ?>
-                </td>
-                <td>
-                  <span style="font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 12px;">
-                    <?= number_format($cat['product_count']) ?> items
-                  </span>
-                </td>
-                <td><?= $cat['sort_order'] ?></td>
-                <td>
-                  <span class="status-badge <?= $cat['is_active'] ? 'status-active' : 'status-inactive' ?>">
-                    <?= $cat['is_active'] ? 'Active' : 'Inactive' ?>
-                  </span>
-                </td>
-                <td style="text-align: right;">
-                  <div style="display: flex; gap: 6px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="editCategory(<?= htmlspecialchars(json_encode($cat)) ?>)">
-                      Edit
-                    </button>
-                    <form method="POST" action="<?= adminUrl('categories/delete.php?id=' . $cat['id']) ?>" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete category \'<?= addslashes(esc($cat['name'])) ?>\'?')">
-                      <?= getCSRFInput() ?>
-                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            <?php endforeach; ?>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+                <button type="button" class="btn btn-secondary btn-sm" style="padding: 3px 10px; font-size: 11px;"
+                        onclick="event.preventDefault(); event.stopPropagation(); editCategory(<?= htmlspecialchars(json_encode($pc), ENT_QUOTES) ?>)">
+                  Edit
+                </button>
+              </div>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+
+      <div style="padding: 12px 16px; border-top: 1px solid var(--color-bg-elevated);">
+        <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="openAddForm('0')">+ Add Parent Category</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Subcategories of selected parent -->
+    <div class="admin-card" style="overflow: hidden;">
+      <div style="padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-bg-elevated); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; margin: 0;">
+            Subcategories
+            <?php if ($selectedParent): ?>
+              <span style="color: #0284c7;">of <?= esc($selectedParent['name']) ?></span>
+            <?php endif; ?>
+          </h2>
+          <?php if ($selectedParent): ?>
+            <p style="font-size: 12px; color: var(--color-text-tertiary); margin: 3px 0 0;">
+              <?= deptBadge($selectedParent['department']) ?>
+              &nbsp; <?= (int)$selectedParent['product_count'] ?> products in parent
+            </p>
           <?php endif; ?>
-        </tbody>
-      </table>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="openAddForm('<?= $selectedParentId ?>')">+ Add Subcategory</button>
+          <?php if ($selectedParent): ?>
+            <button class="btn btn-secondary btn-sm" onclick="editCategory(<?= htmlspecialchars(json_encode($selectedParent), ENT_QUOTES) ?>)">Edit Parent</button>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <?php if (!$selectedParent): ?>
+        <div style="padding: 48px 24px; text-align: center; color: var(--color-text-tertiary); font-size: 14px;">
+          No parent category selected. Create a parent on the left first.
+        </div>
+      <?php elseif (empty($subsForSelected)): ?>
+        <div style="padding: 48px 24px; text-align: center; color: var(--color-text-tertiary); font-size: 14px;">
+          No subcategories under <strong><?= esc($selectedParent['name']) ?></strong> yet.
+          <div style="margin-top: 12px;">
+            <button class="btn btn-primary btn-sm" onclick="openAddForm('<?= $selectedParentId ?>')">+ Add First Subcategory</button>
+          </div>
+        </div>
+      <?php else: ?>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Subcategory</th>
+                <th>Slug</th>
+                <th>Products</th>
+                <th>Sort</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($subsForSelected as $sub): ?>
+                <tr>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <?php if (!empty($sub['image'])): ?>
+                        <img src="<?= htmlspecialchars($sub['image']) ?>" alt="" style="width: 36px; height: 36px; object-fit: cover; border-radius: 6px;">
+                      <?php else: ?>
+                        <div style="width: 36px; height: 36px; border-radius: 6px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #64748b;">
+                          <?= strtoupper(substr($sub['name'], 0, 1)) ?>
+                        </div>
+                      <?php endif; ?>
+                      <span style="font-weight: 600; font-size: 13px;"><?= esc($sub['name']) ?></span>
+                    </div>
+                  </td>
+                  <td style="font-family: monospace; font-size: 12px; color: #475569;"><?= esc($sub['slug']) ?></td>
+                  <td>
+                    <span style="font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 12px;">
+                      <?= number_format($sub['product_count']) ?> items
+                    </span>
+                  </td>
+                  <td><?= $sub['sort_order'] ?></td>
+                  <td>
+                    <span class="status-badge <?= $sub['is_active'] ? 'status-active' : 'status-inactive' ?>">
+                      <?= $sub['is_active'] ? 'Active' : 'Inactive' ?>
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                      <button type="button" class="btn btn-secondary btn-sm" onclick='editCategory(<?= htmlspecialchars(json_encode($sub), ENT_QUOTES) ?>)'>
+                        Edit
+                      </button>
+                      <form method="POST" action="<?= adminUrl('categories/delete.php?id=' . $sub['id']) ?>" style="display: inline;" onsubmit="return confirm('Delete subcategory \'<?= addslashes(esc($sub['name'])) ?>\'?')">
+                        <?= getCSRFInput() ?>
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 </div>
@@ -276,7 +366,7 @@ function autoSlugCategory(name) {
   document.getElementById('catSlug').value = slug;
 }
 
-function openAddForm() {
+function openAddForm(parentId) {
   document.getElementById('categoryForm').style.display = 'block';
   document.getElementById('formTitle').textContent = 'Add New Category / Subcategory';
   document.getElementById('submitBtn').textContent = 'Save Category';
@@ -284,7 +374,7 @@ function openAddForm() {
   document.getElementById('catName').value = '';
   document.getElementById('catSlug').value = '';
   document.getElementById('catDept').value = 'women';
-  document.getElementById('catParent').value = '0';
+  document.getElementById('catParent').value = parentId !== undefined ? String(parentId) : '0';
   document.getElementById('catDesc').value = '';
   document.getElementById('catImage').value = '';
   document.getElementById('catSort').value = '0';
