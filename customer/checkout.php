@@ -295,7 +295,7 @@ include dirname(__DIR__) . '/includes/header.php';
 <section class="ck-page">
   <div class="ck-left">
     <div class="ck-breadcrumb">
-      <a href="<?= BASE_URL ?>/shop.php">Shop</a>
+      <a href="<?= shopUrl() ?>">Shop</a>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       Checkout
     </div>
@@ -325,7 +325,7 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
       <?php endforeach; ?>
     </div>
-    <div id="ckEmptyMsg" class="ck-empty-msg" style="display:none;">Your cart is empty. <a href="<?= BASE_URL ?>/shop.php">Continue Shopping</a></div>
+    <div id="ckEmptyMsg" class="ck-empty-msg" style="display:none;">Your cart is empty. <a href="<?= shopUrl() ?>">Continue Shopping</a></div>
   </div>
 
   <div class="ck-right">

@@ -111,7 +111,7 @@ include __DIR__ . '/includes/header.php';
       </div>
       <div class="shop-cat-scroll" id="catScroll">
         <?php foreach ($kidsSubcats as $sc): ?>
-        <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=<?= htmlspecialchars($sc['slug']) ?>" class="shop-cat-item">
+        <a href="<?= shopUrl('kids', $sc['slug']) ?>" class="shop-cat-item">
           <div class="shop-cat-item-name"><?= htmlspecialchars($sc['name']) ?></div>
           <?php if (!empty($sc['image'])): ?>
           <img src="<?= htmlspecialchars($sc['image']) ?>" alt="<?= htmlspecialchars($sc['name']) ?>" class="shop-cat-item-img" loading="lazy">
@@ -149,13 +149,13 @@ include __DIR__ . '/includes/header.php';
           <span class="uoc-eyebrow">Most Wanted</span>
           <h2 class="uoc-section-title">Trending For Kids</h2>
         </div>
-        <a href="<?= BASE_URL ?>/shop.php?category=kids" class="uoc-view-all">View All &rarr;</a>
+          <a href="<?= shopUrl('kids') ?>" class="uoc-view-all">View All &rarr;</a>
       </div>
 
       <div class="uoc-product-grid">
         <?php foreach ($kidsProducts as $i => $item): ?>
         <div class="uoc-product-card">
-          <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>" class="uoc-product-link">
+          <a href="<?= productUrl($item['slug']) ?>" class="uoc-product-link">
             <div class="uoc-product-img">
               <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="uoc-img-main" loading="lazy">
               <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="uoc-img-hover" loading="lazy">
@@ -214,7 +214,7 @@ include __DIR__ . '/includes/header.php';
           <span class="kids-cta-badge">FESTIVE COLLECTION</span>
           <h2 class="kids-cta-title">Little Ones,<br>Big Traditions.</h2>
           <p class="kids-cta-text">Ethnic wear for festivals, weddings & celebrations — because tradition looks adorable on them.</p>
-          <a href="<?= BASE_URL ?>/shop.php?category=kids&subcategory=boys-ethnic-wear" class="kids-cta-btn">
+          <a href="<?= shopUrl('kids', 'boys-ethnic-wear') ?>" class="kids-cta-btn">
             Shop Ethnic
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>

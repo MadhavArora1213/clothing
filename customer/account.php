@@ -592,7 +592,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <p>Discover the latest arrivals, manage your orders, and explore our curated collections — all in one place.</p>
         </div>
         <div class="acct-hero-right">
-          <a href="<?= BASE_URL ?>/shop.php" class="acct-hero-btn primary">
+          <a href="<?= shopUrl() ?>" class="acct-hero-btn primary">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
             Shop Now
           </a>
@@ -680,7 +680,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <div class="acct-empty">
               <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
               <p>No orders yet</p>
-              <a href="<?= BASE_URL ?>/shop.php" class="btn btn-primary">Start Shopping</a>
+              <a href="<?= shopUrl() ?>" class="btn btn-primary">Start Shopping</a>
             </div>
           <?php else: ?>
             <?php foreach ($orders as $order): ?>
@@ -720,7 +720,7 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
         <span>Shopping Bag</span>
       </a>
-      <a href="<?= BASE_URL ?>/shop.php" class="acct-action">
+      <a href="<?= shopUrl() ?>" class="acct-action">
         <div class="acct-action-icon">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM12 12l6-3-6-3v6z"/></svg>
         </div>

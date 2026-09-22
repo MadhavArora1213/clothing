@@ -112,7 +112,7 @@ header("Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyrosco
           "@type": "SearchAction",
           "target": {
             "@type": "EntryPoint",
-            "urlTemplate": "<?= $siteUrl ?>/shop.php?search={search_term_string}"
+            "urlTemplate": "<?= $siteUrl ?>/shop?search={search_term_string}"
           },
           "query-input": "required name=search_term_string"
         }
@@ -304,7 +304,7 @@ header("Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyrosco
           <div class="drawer-carousel">
             <div class="drawer-carousel-track">
               <?php foreach ($drawerSubcats[$dept] as $i => $sub): ?>
-              <a href="<?= BASE_URL ?>/shop.php?category=<?= htmlspecialchars($sub['slug']) ?>" class="drawer-carousel-card">
+              <a href="<?= shopUrl($sub['slug']) ?>" class="drawer-carousel-card">
                 <img src="<?= !empty($sub['image']) ? htmlspecialchars($sub['image']) : $placeholderImg ?>" alt="<?= htmlspecialchars($sub['name']) ?>" loading="lazy">
                 <span><?= htmlspecialchars($sub['name']) ?></span>
               </a>
@@ -321,7 +321,7 @@ header("Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyrosco
           <div class="drawer-section-label">Shop All</div>
           <div class="drawer-cat-grid">
             <?php foreach ($drawerSubcats[$dept] as $sub): ?>
-            <a href="<?= BASE_URL ?>/shop.php?category=<?= htmlspecialchars($sub['slug']) ?>" class="drawer-cat-item">
+            <a href="<?= shopUrl($sub['slug']) ?>" class="drawer-cat-item">
               <img src="<?= !empty($sub['image']) ? htmlspecialchars($sub['image']) : $placeholderImg ?>" alt="<?= htmlspecialchars($sub['name']) ?>" loading="lazy">
               <span><?= htmlspecialchars($sub['name']) ?></span>
             </a>

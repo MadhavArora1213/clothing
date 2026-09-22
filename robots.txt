@@ -17,6 +17,8 @@ Disallow: /*.json$
 
 # Allow key public pages explicitly
 Allow: /index.php
+Allow: /shop
+Allow: /product/
 Allow: /shop.php
 Allow: /product.php
 Allow: /pages/

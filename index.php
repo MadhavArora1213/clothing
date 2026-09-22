@@ -129,7 +129,7 @@ $heroSlides = [
         'title' => 'Dress outside the expected.',
         'copy' => 'Contemporary Indian clothing with a street-level attitude.',
         'cta' => 'Shop new arrivals',
-        'url' => BASE_URL . '/shop.php?category=new-arrivals'
+        'url' => shopUrl('new-arrivals')
     ],
     [
         'image' => BASE_URL . '/images/hero2.png',
@@ -138,7 +138,7 @@ $heroSlides = [
         'title' => 'Built for the way you move.',
         'copy' => 'Relaxed silhouettes, substantial fabrics and easy layers.',
         'cta' => 'Explore streetwear',
-        'url' => BASE_URL . '/shop.php?category=streetwear'
+        'url' => shopUrl('streetwear')
     ],
     [
         'image' => BASE_URL . '/images/hero3.png',
@@ -147,7 +147,7 @@ $heroSlides = [
         'title' => 'Tradition. Re-cut.',
         'copy' => 'Craft-led pieces designed for a modern Indian wardrobe.',
         'cta' => 'Shop ethnic fusion',
-        'url' => BASE_URL . '/shop.php?category=ethnic-fusion'
+        'url' => shopUrl('ethnic-fusion')
     ],
 ];
 
@@ -271,7 +271,7 @@ function uocProductCard(array $item, string $variant = 'grid'): void {
     $sizes = $item['sizes'] ?? [];
     ?>
     <article class="uoc-product-card <?= $variant === 'rail' ? 'uoc-product-card--rail' : '' ?>">
-        <a href="<?= BASE_URL ?>/product.php?slug=<?= $slug ?>" class="uoc-product-link" aria-label="<?= $name ?>">
+        <a href="<?= productUrl($slug) ?>" class="uoc-product-link" aria-label="<?= $name ?>">
             <div class="uoc-product-media">
                 <img src="<?= $image ?>" alt="<?= $name ?>" class="uoc-img-main" loading="lazy">
                 <img src="<?= $hover ?>" alt="" class="uoc-img-hover" loading="lazy">
@@ -1590,7 +1590,7 @@ body {
                     and Indian craft into clothing that feels current without chasing
                     the algorithm.
                 </p>
-                <a class="uoc-view-all" href="<?= BASE_URL ?>/shop.php">Enter the collection →</a>
+                <a class="uoc-view-all" href="<?= shopUrl() ?>">Enter the collection →</a>
             </div>
         </div>
     </section>
@@ -1603,11 +1603,11 @@ body {
                     <span class="uoc-eyebrow">Shop by department</span>
                     <h2 class="uoc-section-title">Shop by department.</h2>
                 </div>
-                <a class="uoc-view-all" href="<?= BASE_URL ?>/shop.php">View all →</a>
+                <a class="uoc-view-all" href="<?= shopUrl() ?>">View all →</a>
             </div>
 
             <div class="uoc-category-grid">
-                <a class="uoc-category-card" href="<?= BASE_URL ?>/shop.php?category=men">
+                <a class="uoc-category-card" href="<?= shopUrl('men') ?>">
                     <img src="<?= htmlspecialchars($menImage) ?>" alt="Men's collection" loading="lazy">
                     <div class="uoc-category-copy">
                         <small>01 / Street · Ethnic · Essentials</small>
@@ -1615,7 +1615,7 @@ body {
                     </div>
                 </a>
 
-                <a class="uoc-category-card" href="<?= BASE_URL ?>/shop.php?category=women">
+                <a class="uoc-category-card" href="<?= shopUrl('women') ?>">
                     <img src="<?= htmlspecialchars($womenImage) ?>" alt="Women's collection" loading="lazy">
                     <div class="uoc-category-copy">
                         <small>02 / Fusion · Modern · Elegant</small>
@@ -1623,7 +1623,7 @@ body {
                     </div>
                 </a>
 
-                <a class="uoc-category-card" href="<?= BASE_URL ?>/shop.php?category=kids">
+                <a class="uoc-category-card" href="<?= shopUrl('kids') ?>">
                     <img src="<?= htmlspecialchars($kidsImage) ?>" alt="Kids' collection" loading="lazy">
                     <div class="uoc-category-copy">
                         <small>03 / Play · Comfort · Fun</small>
@@ -1685,7 +1685,7 @@ body {
             </div>
 
             <div style="margin-top:32px">
-                <a class="uoc-view-all" href="<?= BASE_URL ?>/shop.php?sort=newest">See all new arrivals →</a>
+                <a class="uoc-view-all" href="<?= shopUrl(null, null, ['sort' => 'newest']) ?>">See all new arrivals →</a>
             </div>
         </div>
     </section>
@@ -1712,7 +1712,7 @@ body {
                         3 => 'kids',
                         default => 'shop'
                     };
-                    $url = BASE_URL . '/shop.php?category=' . $dept . '&subcategory=' . urlencode($sc['slug']);
+                    $url = shopUrl($dept, $sc['slug']);
                 ?>
                     <a class="uoc-collection-row" href="<?= htmlspecialchars($url) ?>">
                         <span class="uoc-collection-row-num"><?= str_pad((string)($idx + 1), 2, '0', STR_PAD_LEFT) ?></span>
@@ -1744,7 +1744,7 @@ body {
             </div>
 
             <div style="margin-top:32px">
-                <a class="uoc-view-all" href="<?= BASE_URL ?>/shop.php?sort=bestseller">Shop the bestsellers →</a>
+                <a class="uoc-view-all" href="<?= shopUrl(null, null, ['sort' => 'bestseller']) ?>">Shop the bestsellers →</a>
             </div>
         </div>
     </section>

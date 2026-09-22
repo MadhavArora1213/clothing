@@ -260,7 +260,7 @@ include dirname(__DIR__) . '/includes/header.php';
       </div>
       <div class="page-header-actions" style="display: flex; gap: 8px;">
         <a href="<?= adminUrl('products/') ?>" class="btn btn-secondary">&larr; Back to Products</a>
-        <a href="<?= siteUrl('product.php?slug=' . $product['slug']) ?>" target="_blank" class="btn btn-secondary">View in Store &rarr;</a>
+        <a href="<?= productUrl($product['slug']) ?>" target="_blank" class="btn btn-secondary">View in Store &rarr;</a>
         <button type="submit" form="editProductForm" class="btn btn-primary" style="padding: 10px 22px;">Update Product</button>
       </div>
     </div>

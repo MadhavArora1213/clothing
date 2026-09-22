@@ -25,7 +25,7 @@
             <?php
             $menCats = $mysqli ? $mysqli->query("SELECT name, slug FROM categories WHERE parent_id = 2 AND is_active = 1 ORDER BY sort_order")->fetch_all(MYSQLI_ASSOC) : [];
             foreach ($menCats as $mc): ?>
-              <li><a href="<?= BASE_URL ?>/shop.php?category=<?= $mc['slug'] ?>"><?= $mc['name'] ?></a></li>
+              <li><a href="<?= shopUrl($mc['slug']) ?>"><?= $mc['name'] ?></a></li>
             <?php endforeach; ?>
           </ul>
         </div>
@@ -119,19 +119,19 @@
                 html += '<div style="padding:10px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#999;">Categories</div>';
                 data.categories.forEach(c => {
                   const url = c.parent_id > 0
-                    ? '<?= BASE_URL ?>/shop.php?category=' + c.department + '&subcategory=' + c.slug
-                    : '<?= BASE_URL ?>/shop.php?category=' + c.slug;
+                    ? '<?= BASE_URL ?>/shop/' + encodeURIComponent(c.department) + '/' + encodeURIComponent(c.slug)
+                    : '<?= BASE_URL ?>/shop/' + encodeURIComponent(c.slug);
                   html += '<a href="' + url + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:#333;transition:background 0.15s;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'transparent\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span style="font-size:13px;font-weight:500;">' + c.name + '</span><span style="font-size:11px;color:#aaa;margin-left:auto;">' + (c.parent_id > 0 ? c.department : 'Category') + '</span></a>';
                 });
               }
               if (data.products && data.products.length) {
                 html += '<div style="padding:10px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#999;border-top:1px solid #eee;">Products</div>';
                 data.products.forEach(p => {
-                  html += '<a href="<?= BASE_URL ?>/product.php?slug=' + p.slug + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:#333;transition:background 0.15s;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'transparent\'"><img src="' + (p.image || '') + '" style="width:40px;height:50px;object-fit:cover;border-radius:6px;background:#f5f5f5;" onerror="this.style.display=\'none\'"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.name + '</div><div style="font-size:12px;color:#888;">₹' + Number(p.price).toLocaleString() + (p.discount_percent ? ' <span style="color:#16a34a;font-weight:600;">' + p.discount_percent + '% OFF</span>' : '') + '</div></div></a>';
+                  html += '<a href="<?= BASE_URL ?>/product/' + encodeURIComponent(p.slug) + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:#333;transition:background 0.15s;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'transparent\'"><img src="' + (p.image || '') + '" style="width:40px;height:50px;object-fit:cover;border-radius:6px;background:#f5f5f5;" onerror="this.style.display=\'none\'"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.name + '</div><div style="font-size:12px;color:#888;">₹' + Number(p.price).toLocaleString() + (p.discount_percent ? ' <span style="color:#16a34a;font-weight:600;">' + p.discount_percent + '% OFF</span>' : '') + '</div></div></a>';
                 });
               }
               if (!html) html = '<div style="padding:24px;text-align:center;color:#999;font-size:13px;">No results found</div>';
-              html += '<a href="<?= BASE_URL ?>/shop.php?search=' + encodeURIComponent(q) + '" style="display:block;padding:12px;text-align:center;font-size:12px;font-weight:600;color:#000;border-top:1px solid #eee;text-decoration:none;">View all results →</a>';
+              html += '<a href="<?= BASE_URL ?>/shop?search=' + encodeURIComponent(q) + '" style="display:block;padding:12px;text-align:center;font-size:12px;font-weight:600;color:#000;border-top:1px solid #eee;text-decoration:none;">View all results →</a>';
               modalSearchResults.innerHTML = html;
             });
         }, 300);
@@ -156,21 +156,21 @@
                 html += '<div style="padding:10px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#999;">Categories</div>';
                 data.categories.forEach(c => {
                   const url = c.parent_id > 0
-                    ? '<?= BASE_URL ?>/shop.php?category=' + c.department + '&subcategory=' + c.slug
-                    : '<?= BASE_URL ?>/shop.php?category=' + c.slug;
+                    ? '<?= BASE_URL ?>/shop/' + encodeURIComponent(c.department) + '/' + encodeURIComponent(c.slug)
+                    : '<?= BASE_URL ?>/shop/' + encodeURIComponent(c.slug);
                   html += '<a href="' + url + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:#333;transition:background 0.15s;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'transparent\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span style="font-size:13px;font-weight:500;">' + c.name + '</span></a>';
                 });
               }
               if (data.products && data.products.length) {
                 html += '<div style="padding:10px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#999;border-top:1px solid #eee;">Products</div>';
                 data.products.forEach(p => {
-                  html += '<a href="<?= BASE_URL ?>/product.php?slug=' + p.slug + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:#333;transition:background 0.15s;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'transparent\'"><img src="' + (p.image || '') + '" style="width:40px;height:50px;object-fit:cover;border-radius:6px;background:#f5f5f5;" onerror="this.style.display=\'none\'"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.name + '</div><div style="font-size:12px;color:#888;">₹' + Number(p.price).toLocaleString() + (p.discount_percent ? ' <span style="color:#16a34a;font-weight:600;">' + p.discount_percent + '% OFF</span>' : '') + '</div></div></a>';
+                  html += '<a href="<?= BASE_URL ?>/product/' + encodeURIComponent(p.slug) + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:#333;transition:background 0.15s;" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'transparent\'"><img src="' + (p.image || '') + '" style="width:40px;height:50px;object-fit:cover;border-radius:6px;background:#f5f5f5;" onerror="this.style.display=\'none\'"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.name + '</div><div style="font-size:12px;color:#888;">₹' + Number(p.price).toLocaleString() + (p.discount_percent ? ' <span style="color:#16a34a;font-weight:600;">' + p.discount_percent + '% OFF</span>' : '') + '</div></div></a>';
                 });
               }
               if (!html) {
                 html = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">No results found</div>';
               } else {
-                html += '<a href="<?= BASE_URL ?>/shop.php?search=' + encodeURIComponent(q) + '" style="display:block;padding:12px;text-align:center;font-size:12px;font-weight:600;color:#000;border-top:1px solid #eee;text-decoration:none;">View all results →</a>';
+                html += '<a href="<?= BASE_URL ?>/shop?search=' + encodeURIComponent(q) + '" style="display:block;padding:12px;text-align:center;font-size:12px;font-weight:600;color:#000;border-top:1px solid #eee;text-decoration:none;">View all results →</a>';
               }
               navDropdown.innerHTML = html;
               navDropdown.style.display = 'block';
@@ -182,7 +182,7 @@
       navInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && this.value.trim()) {
           navDropdown.style.display = 'none';
-          window.location = '<?= BASE_URL ?>/shop.php?search=' + encodeURIComponent(this.value.trim());
+          window.location = '<?= BASE_URL ?>/shop?search=' + encodeURIComponent(this.value.trim());
         }
       });
 

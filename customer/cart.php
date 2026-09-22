@@ -589,7 +589,7 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
         <h3>Your bag is empty</h3>
         <p>Looks like you haven't added anything yet. Explore our collection and find something you love.</p>
-        <a href="<?= BASE_URL ?>/shop.php" class="btn-shop">
+        <a href="<?= shopUrl() ?>" class="btn-shop">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Browse Collection
         </a>
@@ -607,12 +607,12 @@ include dirname(__DIR__) . '/includes/header.php';
                 $img = !empty($item['image']) ? $item['image'] : 'https://via.placeholder.com/200x260?text=No+Image';
               ?>
               <li class="cart-item">
-                <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>" class="ci-img">
+                <a href="<?= productUrl($item['slug']) ?>" class="ci-img">
                   <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy">
                 </a>
 
                 <div class="ci-details">
-                  <h3><a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= esc($item['name']) ?></a></h3>
+                  <h3><a href="<?= productUrl($item['slug']) ?>"><?= esc($item['name']) ?></a></h3>
                   <div class="ci-meta">
                     <?php if ($item['size']): ?>
                       <span>Size: <?= esc($item['size']) ?></span>
@@ -685,7 +685,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <div class="complete-look">
                 <div class="complete-look-title">Complete the look</div>
                 <?php foreach ($suggestedProducts as $sp): ?>
-                  <a href="<?= BASE_URL ?>/product.php?slug=<?= $sp['slug'] ?>" class="look-card">
+                  <a href="<?= productUrl($sp['slug']) ?>" class="look-card">
                     <div class="look-card-img">
                       <img src="<?= htmlspecialchars($sp['image'] ?: 'https://via.placeholder.com/120x144?text=No+Image') ?>" alt="<?= esc($sp['name']) ?>" loading="lazy">
                     </div>

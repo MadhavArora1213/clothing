@@ -382,7 +382,7 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
         <h3>Your wishlist is empty</h3>
         <p>Save your favorite pieces here. Tap the heart icon on any product to add it to your wishlist.</p>
-        <a href="<?= BASE_URL ?>/shop.php" class="btn-shop">
+        <a href="<?= shopUrl() ?>" class="btn-shop">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Browse Collection
         </a>
@@ -396,7 +396,7 @@ include dirname(__DIR__) . '/includes/header.php';
           <div class="wish-card">
             <!-- Image -->
             <div class="wish-card-img">
-              <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>">
+              <a href="<?= productUrl($item['slug']) ?>">
                 <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>" loading="lazy">
               </a>
 
@@ -425,7 +425,7 @@ include dirname(__DIR__) . '/includes/header.php';
             <div class="wish-card-body">
               <div class="wish-card-cat"><?= htmlspecialchars($item['category_name'] ?? 'UOC') ?></div>
               <div class="wish-card-name">
-                <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
+                <a href="<?= productUrl($item['slug']) ?>"><?= htmlspecialchars($item['name']) ?></a>
               </div>
               <div class="wish-card-price">
                 <span class="wish-price-now">₹<?= number_format($item['price']) ?></span>

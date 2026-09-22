@@ -136,7 +136,7 @@ if (!empty($products)) {
 ?>
     <div class="shop-card">
       <div class="shop-card-img">
-        <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>">
+        <a href="<?= productUrl($item['slug']) ?>">
           <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="main-img" loading="lazy">
           <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="hover-img" loading="lazy">
         </a>
@@ -152,7 +152,7 @@ if (!empty($products)) {
       <div class="shop-card-info">
         <span class="shop-card-cat"><?= htmlspecialchars($item['category_name'] ?? '') ?></span>
         <h4 class="shop-card-name">
-          <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
+          <a href="<?= productUrl($item['slug']) ?>"><?= htmlspecialchars($item['name']) ?></a>
         </h4>
         <div class="shop-card-price">
           <span class="shop-price-now">₹<?= number_format($item['price']) ?></span>

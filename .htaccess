@@ -11,6 +11,32 @@ RewriteRule ^database/ - [F,L]
 # ── SEO: sitemap.xml always served by dynamic PHP (auto-updates with new products) ──
 RewriteRule ^sitemap\.xml$ sitemap.xml.php [L,QSA]
 
+# ── SEO: Pretty product permalinks → /product/{slug} ──
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^product/([^/]+)/?$ product.php?slug=$1 [L,QSA]
+
+# ── SEO: Pretty shop permalinks → /shop, /shop/{cat}, /shop/{cat}/{sub} ──
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^shop/sale/?$ shop.php?sale=1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^shop/new/?$ shop.php?new=1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^shop/([^/]+)/([^/]+)/?$ shop.php?category=$1&subcategory=$2 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^shop/([^/]+)/?$ shop.php?category=$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^shop/?$ shop.php [L,QSA]
+
 # ── SEO: Canonical trailing-slash removal (only for .php files, not dirs) ──
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f

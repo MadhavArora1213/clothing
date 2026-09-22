@@ -258,7 +258,7 @@ if ($action === 'callback') {
     }
   }
   // Fallback: go to shop
-  header('Location: ' . $baseUrl . '/shop.php');
+  header('Location: ' . $baseUrl . '/shop');
   exit;
 }
 

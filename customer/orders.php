@@ -423,7 +423,7 @@ include dirname(__DIR__) . '/includes/header.php';
         </div>
         <h3>No orders yet</h3>
         <p>You haven't placed any orders. Explore our collection and find something you love.</p>
-        <a href="<?= BASE_URL ?>/shop.php" class="ord-btn ord-btn-primary" style="display:inline-flex;margin:0 auto;">
+        <a href="<?= shopUrl() ?>" class="ord-btn ord-btn-primary" style="display:inline-flex;margin:0 auto;">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Browse Collection
         </a>
@@ -546,7 +546,7 @@ include dirname(__DIR__) . '/includes/header.php';
               <div class="ord-items-count"><?= count($items) ?> item<?= count($items) !== 1 ? 's' : '' ?></div>
             </div>
             <div class="ord-actions">
-              <a href="<?= BASE_URL ?>/shop.php" class="ord-btn ord-btn-primary">
+              <a href="<?= shopUrl() ?>" class="ord-btn ord-btn-primary">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
                 Shop Again
               </a>

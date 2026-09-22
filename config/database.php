@@ -284,6 +284,40 @@ function siteUrl($path = '') {
 }
 
 /**
+ * Clean product permalink: /product/{slug}
+ */
+function productUrl($slug) {
+  return BASE_URL . '/product/' . rawurlencode((string)$slug);
+}
+
+/**
+ * Clean shop permalinks:
+ *   shopUrl()                          → /shop
+ *   shopUrl('women')                   → /shop/women
+ *   shopUrl('women', 'women-jeans')    → /shop/women/women-jeans
+ *   shopUrl('sale')                    → /shop/sale
+ *   shopUrl(null, null, ['search'=>'x']) → /shop?search=x
+ */
+function shopUrl($category = null, $subcategory = null, array $extra = []) {
+  if ($category === 'sale') {
+    $url = BASE_URL . '/shop/sale';
+  } elseif ($category === 'new') {
+    $url = BASE_URL . '/shop/new';
+  } elseif (!empty($category)) {
+    $url = BASE_URL . '/shop/' . rawurlencode($category);
+    if (!empty($subcategory)) {
+      $url .= '/' . rawurlencode($subcategory);
+    }
+  } else {
+    $url = BASE_URL . '/shop';
+  }
+  if (!empty($extra)) {
+    $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($extra);
+  }
+  return $url;
+}
+
+/**
  * Fix image URL for current environment.
  * If stored URL has wrong domain (e.g. urbanoutfitshop.com on localhost, or vice versa),
  * replace with current BASE_URL + relative path.

@@ -1,6 +1,15 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 
+// 301: legacy product.php?slug=… → clean /product/{slug}
+if (isset($_GET['slug']) && $_GET['slug'] !== '') {
+  $reqPath = (string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+  if (strpos($reqPath, '/product/') === false) {
+    header('Location: ' . productUrl($_GET['slug']), true, 301);
+    exit;
+  }
+}
+
 $slug = $_GET['slug'] ?? '';
 $product = null;
 
@@ -15,7 +24,7 @@ if ($mysqli && !empty($slug)) {
 
 // No fallback — only show real DB products
 if (!$product) {
-  header('Location: ' . BASE_URL . '/shop.php');
+  header('Location: ' . shopUrl());
   exit;
 }
 
@@ -107,7 +116,7 @@ $pageDescription = $productDesc ?: ('Buy ' . $productName . ' online in India. P
 $pageKeywords    = strtolower($productName) . ', buy online india, ' . strtolower($productCat) . ', urban outfit, fashion india';
 $pageOgType      = 'product';
 $pageOgImage     = $productImg;
-$pageCanonical   = $siteUrl . '/product.php?slug=' . urlencode($productSlug);
+$pageCanonical   = productUrl($productSlug);
 
 // Offer & rating schema fragments
 $offerExtra = '';
@@ -833,7 +842,7 @@ if (!empty($_SESSION['customer_id']) && $mysqli && !empty($product['id'])) {
           $rpOrig = $rp['original_price'] ?? 0;
           $rpImg = fixImageUrl($rp['thumb'] ?? '') ?: ($rp['images'][0] ?? 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=85');
         ?>
-          <a href="<?= BASE_URL ?>/product.php?slug=<?= htmlspecialchars($rpSlug) ?>" class="rel-card">
+          <a href="<?= productUrl($rpSlug) ?>" class="rel-card">
             <div class="rel-card-img">
               <img src="<?= htmlspecialchars($rpImg) ?>" alt="<?= htmlspecialchars($rpName) ?>" loading="lazy">
             </div>

@@ -40,23 +40,23 @@ $urls = [];
 $staticPages = [
   // Core
   ['loc' => $base . '/',                              'pri' => '1.0', 'freq' => 'daily'],
-  ['loc' => $base . '/shop.php',                      'pri' => '0.9', 'freq' => 'daily'],
+  ['loc' => $base . '/shop',                          'pri' => '0.9', 'freq' => 'daily'],
 
   // Gender departments
-  ['loc' => $base . '/shop.php?category=men',         'pri' => '0.8', 'freq' => 'daily'],
-  ['loc' => $base . '/shop.php?category=women',       'pri' => '0.8', 'freq' => 'daily'],
-  ['loc' => $base . '/shop.php?category=kids',        'pri' => '0.7', 'freq' => 'weekly'],
+  ['loc' => $base . '/shop/men',         'pri' => '0.8', 'freq' => 'daily'],
+  ['loc' => $base . '/shop/women',       'pri' => '0.8', 'freq' => 'daily'],
+  ['loc' => $base . '/shop/kids',        'pri' => '0.7', 'freq' => 'weekly'],
 
   // Discovery
-  ['loc' => $base . '/shop.php?category=new-arrivals','pri' => '0.8', 'freq' => 'daily'],
-  ['loc' => $base . '/shop.php?category=bestsellers', 'pri' => '0.7', 'freq' => 'weekly'],
-  ['loc' => $base . '/shop.php?sale=1',               'pri' => '0.8', 'freq' => 'daily'],
+  ['loc' => $base . '/shop/new-arrivals','pri' => '0.8', 'freq' => 'daily'],
+  ['loc' => $base . '/shop/bestsellers', 'pri' => '0.7', 'freq' => 'weekly'],
+  ['loc' => $base . '/shop/sale',               'pri' => '0.8', 'freq' => 'daily'],
 
   // Style collections
-  ['loc' => $base . '/shop.php?category=ethnic-fusion','pri' => '0.7', 'freq' => 'weekly'],
-  ['loc' => $base . '/shop.php?category=oversized',   'pri' => '0.7', 'freq' => 'weekly'],
-  ['loc' => $base . '/shop.php?category=co-ords',     'pri' => '0.7', 'freq' => 'weekly'],
-  ['loc' => $base . '/shop.php?category=streetwear',  'pri' => '0.7', 'freq' => 'weekly'],
+  ['loc' => $base . '/shop/ethnic-fusion','pri' => '0.7', 'freq' => 'weekly'],
+  ['loc' => $base . '/shop/oversized',   'pri' => '0.7', 'freq' => 'weekly'],
+  ['loc' => $base . '/shop/co-ords',     'pri' => '0.7', 'freq' => 'weekly'],
+  ['loc' => $base . '/shop/streetwear',  'pri' => '0.7', 'freq' => 'weekly'],
 
   // Info pages
   ['loc' => $base . '/pages/about.php',               'pri' => '0.5', 'freq' => 'monthly'],
@@ -96,7 +96,7 @@ if ($mysqli) {
   if ($productResult) {
     while ($row = $productResult->fetch_assoc()) {
       $urls[] = [
-        'loc'     => $base . '/product.php?slug=' . rawurlencode($row['slug']),
+        'loc'     => $base . '/product/' . rawurlencode($row['slug']),
         'lastmod' => sitemapDate($row['updated_at']),
         'freq'    => 'weekly',
         'pri'     => '0.8',
@@ -121,7 +121,7 @@ if ($mysqli) {
       // Only add subcategory URLs (department is already in static pages above)
       if (!empty($row['slug']) && $row['slug'] !== $row['department']) {
         $urls[] = [
-          'loc'     => $base . '/shop.php?category=' . rawurlencode($row['department']) . '&subcategory=' . rawurlencode($row['slug']),
+          'loc'     => $base . '/shop/' . rawurlencode($row['department']) . '/' . rawurlencode($row['slug']),
           'lastmod' => sitemapDate($row['updated_at']),
           'freq'    => 'weekly',
           'pri'     => '0.6',

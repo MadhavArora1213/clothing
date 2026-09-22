@@ -9,6 +9,36 @@ $newArrivals = isset($_GET['new']);
 $sort        = $_GET['sort']   ?? 'newest';
 $search      = $_GET['search'] ?? null;
 
+// ── 301: legacy query URLs → clean /shop/… permalinks ──
+$reqPath = (string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+$onCleanShop = strpos($reqPath, 'shop.php') === false
+  && (bool)preg_match('#/shop(/|$)#', $reqPath);
+
+if (!$onCleanShop && !$search) {
+  $cleanTarget = null;
+  if ($sale) {
+    $cleanTarget = shopUrl('sale');
+  } elseif ($newArrivals) {
+    $cleanTarget = shopUrl('new');
+  } elseif (!empty($category)) {
+    $cleanTarget = shopUrl($category, $subcategory);
+  }
+  if ($cleanTarget) {
+    $extra = [];
+    if (isset($_GET['sort']) && $_GET['sort'] !== '' && $_GET['sort'] !== 'newest') {
+      $extra['sort'] = $_GET['sort'];
+    }
+    if (isset($_GET['page']) && $_GET['page'] !== '' && $_GET['page'] !== '1') {
+      $extra['page'] = $_GET['page'];
+    }
+    if ($extra) {
+      $cleanTarget .= '?' . http_build_query($extra);
+    }
+    header('Location: ' . $cleanTarget, true, 301);
+    exit;
+  }
+}
+
 // ── Dynamic SEO based on filter context ──
 $siteUrl = 'https://urbanoutfitshop.com';
 
@@ -30,24 +60,30 @@ if ($search) {
   $pageDescription = 'Find "' . htmlspecialchars($search) . '" in our collection of premium streetwear, ethnic fusion & resort wear. Shop online with free shipping above ₹999.';
   $pageKeywords    = htmlspecialchars($search) . ', urban outfit, buy clothes india, fashion online';
   $pageRobots      = 'noindex, follow';
-  $pageCanonical   = $siteUrl . '/shop.php?search=' . urlencode($search);
+  $pageCanonical   = shopUrl(null, null, ['search' => $search]);
 } elseif ($sale) {
   [$titleSuffix, $desc, $kw] = $categoryMeta['sale'];
   $pageTitle       = $titleSuffix . ' — Urban Outfit Collection';
   $pageDescription = $desc;
   $pageKeywords    = $kw;
-  $pageCanonical   = $siteUrl . '/shop.php?sale=1';
+  $pageCanonical   = shopUrl('sale');
+} elseif ($newArrivals) {
+  [$titleSuffix, $desc, $kw] = $categoryMeta['new-arrivals'];
+  $pageTitle       = $titleSuffix . ' — Urban Outfit Collection';
+  $pageDescription = $desc;
+  $pageKeywords    = $kw;
+  $pageCanonical   = shopUrl('new');
 } elseif ($category && isset($categoryMeta[$category])) {
   [$titleSuffix, $desc, $kw] = $categoryMeta[$category];
   $pageTitle       = $titleSuffix . ' — Urban Outfit Collection';
   $pageDescription = $desc;
   $pageKeywords    = $kw;
-  $pageCanonical   = $siteUrl . '/shop.php?category=' . urlencode($category) . ($subcategory ? '&subcategory=' . urlencode($subcategory) : '');
+  $pageCanonical   = shopUrl($category, $subcategory);
 } else {
   $pageTitle       = 'Shop All Collections — Urban Outfit | Streetwear, Ethnic Fusion & Resort Wear India';
   $pageDescription = 'Browse our complete collection — oversized drop tees, Chikankari ethnic fusion kurtas, resort co-ords & streetwear. New arrivals daily. Free shipping above ₹999.';
   $pageKeywords    = 'shop clothes online india, urban outfit collection, streetwear ethnic fusion resort wear india, buy fashion online';
-  $pageCanonical   = $siteUrl . '/shop.php';
+  $pageCanonical   = shopUrl();
 }
 
 $pageSchema = '{
@@ -671,9 +707,9 @@ if ($subcategory && $mysqli) {
     <aside class="shop-sidebar" id="shopSidebar">
       <div class="sidebar-section">
         <div class="sidebar-title">Department</div>
-        <a href="<?= BASE_URL ?>/shop.php" class="sidebar-link <?= empty($category) && !$sale && !$newArrivals && !$subcategory ? 'active' : '' ?>">All Products</a>
-        <a href="<?= BASE_URL ?>/shop.php?new=1" class="sidebar-link <?= $newArrivals ? 'active' : '' ?>">New Arrivals</a>
-        <a href="<?= BASE_URL ?>/shop.php?sale=1" class="sidebar-link <?= $sale ? 'active' : '' ?>">Sale</a>
+        <a href="<?= shopUrl() ?>" class="sidebar-link <?= empty($category) && !$sale && !$newArrivals && !$subcategory ? 'active' : '' ?>">All Products</a>
+        <a href="<?= shopUrl('new') ?>" class="sidebar-link <?= $newArrivals ? 'active' : '' ?>">New Arrivals</a>
+        <a href="<?= shopUrl('sale') ?>" class="sidebar-link <?= $sale ? 'active' : '' ?>">Sale</a>
       </div>
 
       <?php
@@ -691,9 +727,9 @@ if ($subcategory && $mysqli) {
       ?>
       <div class="sidebar-section">
         <div class="sidebar-title"><?= $sLabel ?></div>
-        <a href="<?= BASE_URL ?>/shop.php?category=<?= $sSlug ?>" class="sidebar-link <?= ($category === $sSlug && !$subcategory) ? 'active' : '' ?>">All <?= $sLabel ?></a>
+          <a href="<?= shopUrl($sSlug) ?>" class="sidebar-link <?= ($category === $sSlug && !$subcategory) ? 'active' : '' ?>">All <?= $sLabel ?></a>
         <?php foreach ($sideSubs as $ss): ?>
-        <a href="<?= BASE_URL ?>/shop.php?category=<?= $sSlug ?>&subcategory=<?= $ss['slug'] ?>" class="sidebar-link <?= ($category === $sSlug && $subcategory === $ss['slug']) ? 'active' : '' ?>"><?= htmlspecialchars($ss['name']) ?></a>
+          <a href="<?= shopUrl($sSlug, $ss['slug']) ?>" class="sidebar-link <?= ($category === $sSlug && $subcategory === $ss['slug']) ? 'active' : '' ?>"><?= htmlspecialchars($ss['name']) ?></a>
         <?php endforeach; ?>
       </div>
       <?php endforeach; ?>
@@ -707,7 +743,7 @@ if ($subcategory && $mysqli) {
           <div class="shop-empty-icon">:(</div>
           <h3>No products found</h3>
           <p>Try adjusting your filters or browse all products.</p>
-          <a href="<?= BASE_URL ?>/shop.php">View All Products</a>
+          <a href="<?= shopUrl() ?>">View All Products</a>
         </div>
       </div>
       <?php else: ?>
@@ -716,7 +752,7 @@ if ($subcategory && $mysqli) {
           <?php $firstSize = !empty($item['sizes']) ? $item['sizes'][0] : ''; ?>
           <div class="shop-card">
             <div class="shop-card-img">
-              <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>">
+              <a href="<?= productUrl($item['slug']) ?>">
                 <img src="<?= $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="main-img" loading="lazy">
                 <img src="<?= $item['hover_image'] ?? $item['image'] ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="hover-img" loading="lazy">
               </a>
@@ -732,7 +768,7 @@ if ($subcategory && $mysqli) {
             <div class="shop-card-info">
               <span class="shop-card-cat"><?= htmlspecialchars($item['category_name'] ?? '') ?></span>
               <h4 class="shop-card-name">
-                <a href="<?= BASE_URL ?>/product.php?slug=<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
+                <a href="<?= productUrl($item['slug']) ?>"><?= htmlspecialchars($item['name']) ?></a>
               </h4>
               <div class="shop-card-price">
                 <span class="shop-price-now">₹<?= number_format($item['price']) ?></span>

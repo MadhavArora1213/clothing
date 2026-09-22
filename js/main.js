@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(data => {
             if (!data.length) { searchResults.innerHTML = '<div style="padding:24px;text-align:center;color:#999;">No products found</div>'; return; }
             searchResults.innerHTML = data.map(p =>
-              '<a href="/product.php?slug=' + p.slug + '" class="search-result-item"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy"><div class="search-result-info"><h4>' + p.name + '</h4><p>&#8377;' + parseFloat(p.price).toLocaleString('en-IN') + '</p></div></a>'
+              '<a href="/product/' + encodeURIComponent(p.slug) + '" class="search-result-item"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy"><div class="search-result-info"><h4>' + p.name + '</h4><p>&#8377;' + parseFloat(p.price).toLocaleString('en-IN') + '</p></div></a>'
             ).join('');
           })
           .catch(() => { searchResults.innerHTML = '<div style="padding:24px;text-align:center;color:#999;">Something went wrong</div>'; });
