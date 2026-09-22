@@ -60,19 +60,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Add status history record if status changed or note provided
     if ($newStatus !== $order['order_status'] || !empty($note)) {
       $adminId = $_SESSION['admin_id'] ?? null;
-      $histStmt = $mysqli->prepare('INSERT INTO order_status_history (order_id, status, note, created_by) VALUES (?, ?, ?, ?)');
-      $histStmt->bind_param('issi', $id, $newStatus, $note, $adminId);
-      $histStmt->execute();
+      $insStmt = $mysqli->prepare('INSERT INTO order_status_history (order_id, status, note, created_by) VALUES (?, ?, ?, ?)');
+      $insStmt->bind_param('issi', $id, $newStatus, $note, $adminId);
+      $insStmt->execute();
     }
 
     $success = 'Order status and details updated successfully.';
-    
-    // Refresh order data
-    $stmt->execute();
-    $order = $stmt->get_result()->fetch_assoc();
 
-    $histStmt->execute();
-    $history = $histStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    // Refresh order data with a fresh query ($stmt now points to the items query)
+    $refStmt = $mysqli->prepare('SELECT o.*, c.first_name, c.last_name, c.email as cust_email, c.phone as cust_phone 
+                                FROM orders o 
+                                LEFT JOIN customers c ON o.customer_id = c.id 
+                                WHERE o.id = ?');
+    $refStmt->bind_param('i', $id);
+    $refStmt->execute();
+    $order = $refStmt->get_result()->fetch_assoc();
+
+    // Refresh status history with a fresh query ($histStmt may point to the INSERT)
+    $refHistStmt = $mysqli->prepare('
+      SELECT h.*, a.name as admin_name 
+      FROM order_status_history h 
+      LEFT JOIN admins a ON h.created_by = a.id 
+      WHERE h.order_id = ? 
+      ORDER BY h.created_at DESC
+    ');
+    $refHistStmt->bind_param('i', $id);
+    $refHistStmt->execute();
+    $history = $refHistStmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
 }
 
