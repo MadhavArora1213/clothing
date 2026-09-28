@@ -44,24 +44,25 @@ $subCategories = array_filter($allCategories, fn($c) => $c['parent_id'] > 0);
 $error = '';
 $success = '';
 
-// Handle Delete Single Image Action via POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image_id'])) {
+// Handle Delete Single Image Action via POST (submit button inside the main form —
+// only sent when this specific button is clicked)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
   if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
     redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Invalid+request'));
   }
-  $delImgId = (int)$_POST['delete_image_id'];
+  $delImgId = (int)$_POST['delete_image'];
   $delStmt = $mysqli->prepare("DELETE FROM product_images WHERE id = ? AND product_id = ?");
   $delStmt->bind_param('ii', $delImgId, $id);
   $delStmt->execute();
   redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Image+deleted'));
 }
 
-// Handle Set Primary Image via POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_primary_image_id'])) {
+// Handle Set Primary Image via POST (submit button inside the main form)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_primary_image'])) {
   if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
     redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Invalid+request'));
   }
-  $primaryImgId = (int)$_POST['set_primary_image_id'];
+  $primaryImgId = (int)$_POST['set_primary_image'];
   $pStmt = $mysqli->prepare("SELECT image_url FROM product_images WHERE id = ? AND product_id = ?");
   $pStmt->bind_param('ii', $primaryImgId, $id);
   $pStmt->execute();
@@ -82,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_primary_image_id'
   redirect(adminUrl('products/edit.php?id=' . $id . '&msg=Primary+image+updated'));
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id']) && !isset($_POST['set_primary_image_id'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image']) && !isset($_POST['set_primary_image'])) {
   if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
     $error = 'Invalid request. Please try again.';
   } else {
@@ -130,6 +131,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id']) &
     }
 
     $mainImageUrl = $product['image'];
+    // Self-heal: older buggy saves wrote image='0'; restore primary gallery image
+    if (empty($mainImageUrl) || $mainImageUrl === '0') {
+      $healStmt = $mysqli->prepare("SELECT image_url FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1");
+      $healStmt->bind_param('i', $id);
+      $healStmt->execute();
+      $healRow = $healStmt->get_result()->fetch_assoc();
+      if ($healRow && !empty($healRow['image_url'])) {
+        $mainImageUrl = $healRow['image_url'];
+      }
+    }
     if (isset($_FILES['main_image_file']) && $_FILES['main_image_file']['error'] === UPLOAD_ERR_OK) {
       $uploaded = handleImageUpload($_FILES['main_image_file'], 'products');
       if ($uploaded) {
@@ -155,12 +166,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id']) &
 
     $upStmt = $mysqli->prepare("UPDATE products SET 
       name=?, slug=?, sku=?, brand=?, gender=?, description=?, features=?, material=?, care_instructions=?, 
-      price=?, original_price=?, discount_percent=?, category_id=?, subcategory_id=?, image=?, is_featured=?, is_active=? 
+      price=?, original_price=?, discount_percent=?, category_id=?, subcategory_id=?, image=?, is_featured=?, is_active=?,
+      shipping_charge=?, free_shipping=?, shipping_days=?
       WHERE id=?");
 
-    $upStmt->bind_param('sssssssssdiiiiiiii', 
+    $upStmt->bind_param('sssssssssdiiiisiidisi', 
       $name, $slug, $sku, $brand, $gender, $description, $featuresJson, $material, $care_instructions, 
-      $price, $original_price, $discount_percent, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active, $id);
+      $price, $original_price, $discount_percent, $category_id, $subcategory_id, $mainImageUrl, $is_featured, $is_active,
+      $shipping_charge, $free_shipping, $shipping_days, $id);
 
     if ($upStmt->execute()) {
       if (isset($_FILES['subimage_files']['name']) && is_array($_FILES['subimage_files']['name'])) {
@@ -176,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image_id']) &
             ];
             $uploadedSub = handleImageUpload($singleFile, 'products');
             if ($uploadedSub) {
-              $lbl = !empty($_POST['subimage_file_labels'][$i]) ? sanitize($_POST['subimage_file_labels'][$i]) : 'Sub Image';
+              $lbl = !empty($_POST['subimage_labels'][$i]) ? sanitize($_POST['subimage_labels'][$i]) : 'Sub Image';
               $subStmt = $mysqli->prepare("INSERT INTO product_images (product_id, image_url, image_label, sort_order, is_primary) VALUES (?, ?, ?, 5, 0)");
               $subStmt->bind_param('iss', $id, $uploadedSub, $lbl);
               $subStmt->execute();
@@ -458,19 +471,11 @@ include dirname(__DIR__) . '/includes/header.php';
                     <span class="gallery-label-badge" style="font-size: 10px; padding: 2px 4px;"><?= esc($img['image_label'] ?? 'View') ?></span>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
                       <?php if (!$img['is_primary']): ?>
-                        <form method="POST" style="display: inline;">
-                          <?= getCSRFInput() ?>
-                          <input type="hidden" name="set_primary_image_id" value="<?= $img['id'] ?>">
-                          <button type="submit" style="font-size: 10px; color: #0284c7; text-decoration: underline; background: none; border: none; cursor: pointer;">Set Main</button>
-                        </form>
+                        <button type="submit" name="set_primary_image" value="<?= $img['id'] ?>" style="font-size: 10px; color: #0284c7; text-decoration: underline; background: none; border: none; cursor: pointer;">Set Main</button>
                       <?php else: ?>
                         <span style="font-size: 10px; color: #0284c7; font-weight: 700;">&#9733; Main</span>
                       <?php endif; ?>
-                      <form method="POST" style="display: inline;" onsubmit="return confirm('Delete image?')">
-                        <?= getCSRFInput() ?>
-                        <input type="hidden" name="delete_image_id" value="<?= $img['id'] ?>">
-                        <button type="submit" style="font-size: 10px; color: #dc2626; background: none; border: none; cursor: pointer;">Delete</button>
-                      </form>
+                        <button type="submit" name="delete_image" value="<?= $img['id'] ?>" onclick="return confirm('Delete image?')" style="font-size: 10px; color: #dc2626; background: none; border: none; cursor: pointer;">Delete</button>
                     </div>
                   </div>
                 </div>
