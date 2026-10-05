@@ -65,23 +65,40 @@ jobs:
           CHANGED_UPLOADS=$(git diff --name-only HEAD~1 HEAD | grep "^uploads/" | wc -l | tr -d ' ')
           CHANGED_PHP=$(git diff --name-only HEAD~1 HEAD | grep "\.php$" | wc -l | tr -d ' ')
 
-          cat > .build-info <<EOF
-          build:    ${{ github.sha }}
-          branch:   ${{ github.ref_name }}
-          pusher:   ${{ github.actor }}
-          time:     $(date -u +'%Y-%m-%d %H:%M:%S UTC')
-          uploads:  ${CHANGED_UPLOADS} image(s) pushed
-          php_files: ${CHANGED_PHP} file(s) changed
-          EOF
+          BUILD_INFO=$(printf '%s\n' \
+            "build:    ${{ github.sha }}" \
+            "branch:   ${{ github.ref_name }}" \
+            "pusher:   ${{ github.actor }}" \
+            "time:     $(date -u +'%Y-%m-%d %H:%M:%S UTC')" \
+            "uploads:  ${CHANGED_UPLOADS} image(s) pushed" \
+            "php_files: ${CHANGED_PHP} file(s) changed")
 
-          git add -f .build-info
-          if git diff --staged --quiet; then
-            echo "No changes to commit."
-          else
+          # Sync to the real remote tip FIRST, then commit .build-info on top.
+          # Never rebase a .build-info commit — it conflicts with the one
+          # pushed by the previous run. Retry if the remote moves mid-push.
+          for attempt in 1 2 3; do
+            git fetch origin
+            git reset --hard origin/main
+
+            printf '%s\n' "$BUILD_INFO" > .build-info
+            git add -f .build-info
+
+            if git diff --staged --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
             git commit -m "ci: build info [${{ github.sha }}] [skip ci]"
-            git pull origin main --rebase
-            git push
-          fi
+            if git push origin HEAD:main; then
+              echo "✅ Build info pushed."
+              exit 0
+            fi
+
+            echo "⚠️ Push rejected (remote moved), retrying ($attempt/3)..."
+          done
+
+          echo "❌ Could not push .build-info after 3 attempts."
+          exit 1
 
   # ─── NOTIFY ───────────────────────────────────────────────
   notify:
