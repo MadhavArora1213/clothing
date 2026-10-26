@@ -603,9 +603,6 @@ function handleImageUpload($fileArray, $subfolder = 'products') {
   if (move_uploaded_file($fileArray['tmp_name'], $targetPath)) {
     $uploadedUrl = BASE_URL . '/uploads/' . trim($subfolder, '/') . '/' . $filename;
 
-    // ── Auto git push to GitHub after every upload ──
-    gitPushUpload($targetPath);
-
     return $uploadedUrl;
   }
 
@@ -613,108 +610,28 @@ function handleImageUpload($fileArray, $subfolder = 'products') {
 }
 
 /**
- * Auto push uploaded image to GitHub via REST API.
- * Works on ANY hosted server — no git, no shell_exec needed.
- * Requires in .env:
- *   GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
- *   GITHUB_REPO=MadhavArora1213/clothing
- *   GITHUB_BRANCH=main
- *
- * @param string $filePath  Absolute path to the newly uploaded file
+ * Delete a file that handleImageUpload() just wrote, when the follow-up
+ * DB INSERT/UPDATE fails. This keeps uploads/ and the database in sync:
+ * a file is only kept on disk if a DB row references it.
+ * Only ever deletes files inside our own uploads dir — never anything else.
  */
-function gitPushUpload($filePath) {
-  // ── Load GitHub credentials from .env ──
-  $token  = $_ENV['GITHUB_TOKEN']  ?? '';
-  $repo   = $_ENV['GITHUB_REPO']   ?? 'MadhavArora1213/clothing';
-  $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
-
-  if (empty($token)) {
-    error_log('gitPushUpload: GITHUB_TOKEN not set in .env — skipping push');
-    return;
+function deleteUploadedImage($uploadedUrl, $subfolder = 'products') {
+  if (empty($uploadedUrl) || !is_string($uploadedUrl)) {
+    return false;
   }
-
-  if (!file_exists($filePath)) {
-    error_log('gitPushUpload: file not found: ' . $filePath);
-    return;
+  $prefix = BASE_URL . '/uploads/' . trim($subfolder, '/') . '/';
+  if (strpos($uploadedUrl, $prefix) !== 0) {
+    return false; // not one of our fresh uploads (external URL etc.) — never delete
   }
-
-  // ── Build relative path for GitHub API (use forward slashes) ──
-  $repoRoot = str_replace('\\', '/', dirname(__DIR__));
-  $absPath  = str_replace('\\', '/', $filePath);
-  $relPath  = ltrim(str_replace($repoRoot, '', $absPath), '/');
-  // e.g. "uploads/products/img_abc123.jpg"
-
-  // ── Encode file content as base64 ──
-  $content = base64_encode(file_get_contents($filePath));
-
-  // ── GitHub API endpoint ──
-  $apiUrl = "https://api.github.com/repos/{$repo}/contents/{$relPath}";
-
-  // ── Check if file already exists (need its SHA for update) ──
-  $sha = null;
-  $ch = curl_init($apiUrl . '?ref=' . urlencode($branch));
-  curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 15,
-    CURLOPT_HTTPHEADER     => [
-      'Authorization: token ' . $token,
-      'Accept: application/vnd.github.v3+json',
-      'User-Agent: UrbanOutfitCollection-AutoPush/1.0',
-      'X-GitHub-Api-Version: 2022-11-28',
-    ],
-  ]);
-  $existing = curl_exec($ch);
-  curl_close($ch);
-  if ($existing) {
-    $existingData = json_decode($existing, true);
-    $sha = $existingData['sha'] ?? null;
+  $filename = basename(substr($uploadedUrl, strlen($prefix)));
+  if ($filename === '' || strpos($filename, '..') !== false) {
+    return false;
   }
-
-  // ── Build request body ──
-  $filename  = basename($filePath);
-  $timestamp = date('Y-m-d H:i:s');
-  $body = [
-    'message' => "upload: {$filename} [{$timestamp}]",
-    'content' => $content,
-    'branch'  => $branch,
-  ];
-  if ($sha) {
-    $body['sha'] = $sha; // required for updating existing file
+  $path = UPLOADS_PATH . '/' . trim($subfolder, '/') . '/' . $filename;
+  if (is_file($path)) {
+    return @unlink($path);
   }
-
-  // ── PUT request to GitHub API ──
-  $ch = curl_init($apiUrl);
-  curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 30,
-    CURLOPT_CUSTOMREQUEST  => 'PUT',
-    CURLOPT_POSTFIELDS     => json_encode($body),
-    CURLOPT_HTTPHEADER     => [
-      'Authorization: token ' . $token,
-      'Accept: application/vnd.github.v3+json',
-      'Content-Type: application/json',
-      'User-Agent: UrbanOutfitCollection-AutoPush/1.0',
-      'X-GitHub-Api-Version: 2022-11-28',
-    ],
-  ]);
-
-  $response = curl_exec($ch);
-  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-  $curlErr  = curl_error($ch);
-  curl_close($ch);
-
-  if ($curlErr) {
-    error_log("gitPushUpload: curl error for {$filename}: {$curlErr}");
-    return;
-  }
-
-  if (in_array($httpCode, [200, 201])) {
-    error_log("gitPushUpload: SUCCESS pushed {$relPath} to GitHub (HTTP {$httpCode})");
-  } else {
-    $result = json_decode($response, true);
-    $msg    = $result['message'] ?? $response;
-    error_log("gitPushUpload: FAILED {$filename} — HTTP {$httpCode}: {$msg}");
-  }
+  return false;
 }
 
 /**

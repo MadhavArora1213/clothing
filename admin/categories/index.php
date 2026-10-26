@@ -21,18 +21,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Handle Image Upload or URL
     $image = sanitize($_POST['image'] ?? '');
+    $imageUploadedPath = '';
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
       $uploaded = handleImageUpload($_FILES['image_file'], 'categories');
       if ($uploaded) {
         $image = $uploaded;
+        $imageUploadedPath = $uploaded; // track for cleanup if the DB write fails
       }
     }
 
     if (empty($name)) {
       $error = 'Category name is required.';
+      if (!empty($imageUploadedPath)) {
+        deleteUploadedImage($imageUploadedPath, 'categories');
+      }
     } else {
       if (empty($slug)) {
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+      }
+
+      // slug has a UNIQUE key — a duplicate slug would fail the DB write
+      // below and orphan the uploaded file. Auto-uniquify like products do.
+      if ($edit_id > 0) {
+        $slugCheck = $mysqli->prepare('SELECT id FROM categories WHERE slug = ? AND id != ?');
+        $slugCheck->bind_param('si', $slug, $edit_id);
+      } else {
+        $slugCheck = $mysqli->prepare('SELECT id FROM categories WHERE slug = ?');
+        $slugCheck->bind_param('s', $slug);
+      }
+      $slugCheck->execute();
+      if ($slugCheck->get_result()->num_rows > 0) {
+        $slug = $slug . '-' . time();
       }
 
       if ($edit_id > 0) {
@@ -41,6 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
           redirect(adminUrl('categories/?msg=Category+updated+successfully'));
         } else {
+          // DB write failed — remove the just-uploaded file to keep uploads/ and DB in sync
+          if (!empty($imageUploadedPath)) {
+            deleteUploadedImage($imageUploadedPath, 'categories');
+          }
           $error = 'Update failed. Please try again.';
           error_log('Category update failed: ' . $mysqli->error);
         }
@@ -50,6 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
           redirect(adminUrl('categories/?msg=Category+created+successfully'));
         } else {
+          // DB write failed — remove the just-uploaded file to keep uploads/ and DB in sync
+          if (!empty($imageUploadedPath)) {
+            deleteUploadedImage($imageUploadedPath, 'categories');
+          }
           $error = 'Creation failed. Please try again.';
           error_log('Category creation failed: ' . $mysqli->error);
         }

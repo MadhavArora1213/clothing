@@ -62,11 +62,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $slug = $slug . '-' . time();
     }
 
+    // sku has a UNIQUE key — a duplicate sku would fail the INSERT below
+    // (orphaning the uploaded file). Auto-uniquify like we do for slug.
+    $skuCheck = $mysqli->prepare("SELECT id FROM products WHERE sku = ?");
+    $skuCheck->bind_param('s', $sku);
+    $skuCheck->execute();
+    if ($skuCheck->get_result()->num_rows > 0) {
+      $sku = $sku . '-' . strtoupper(substr(uniqid(), -4));
+    }
+
     $mainImageUrl = '';
+    $mainImageUploadedPath = '';
     if (isset($_FILES['main_image_file']) && $_FILES['main_image_file']['error'] === UPLOAD_ERR_OK) {
       $uploaded = handleImageUpload($_FILES['main_image_file'], 'products');
       if ($uploaded) {
         $mainImageUrl = $uploaded;
+        $mainImageUploadedPath = $uploaded; // track for cleanup if INSERT fails
       }
     }
     if (empty($mainImageUrl) && !empty($_POST['main_image_url'])) {
@@ -109,7 +120,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               $subStmt = $mysqli->prepare("INSERT INTO product_images (product_id, image_url, image_label, sort_order, is_primary) VALUES (?, ?, ?, ?, 0)");
               $sortOrder = $i + 1;
               $subStmt->bind_param('issi', $productId, $uploadedSub, $lbl, $sortOrder);
-              $subStmt->execute();
+              if (!$subStmt->execute()) {
+                // Row failed — remove the file so uploads/ and DB stay in sync
+                deleteUploadedImage($uploadedSub, 'products');
+              }
             }
           }
         }
@@ -156,6 +170,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: ' . adminUrl('products/?success=Product+added+successfully'));
       exit;
     } else {
+      // INSERT failed — remove the just-uploaded file so uploads/ and DB stay in sync
+      if (!empty($mainImageUploadedPath)) {
+        deleteUploadedImage($mainImageUploadedPath, 'products');
+      }
       $error = 'Failed to create product. Please try again.';
       error_log('Product creation failed: ' . $mysqli->error);
     }

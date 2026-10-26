@@ -42,7 +42,12 @@ if ($check->get_result()->num_rows > 0) {
 
 $stmt = $mysqli->prepare("INSERT INTO reviews (product_id, customer_id, customer_name, rating, title, comment, is_approved) VALUES (?, ?, (SELECT CONCAT(first_name, ' ', last_name) FROM customers WHERE id = ?), ?, ?, ?, 1)");
 $stmt->bind_param('iiisss', $productId, $customerId, $customerId, $rating, $title, $comment);
-$stmt->execute();
+if (!$stmt->execute()) {
+  // Review row failed — do NOT upload images (they would be orphaned)
+  http_response_code(500);
+  echo json_encode(['error' => 'Could not save review. Please try again.']);
+  exit;
+}
 $reviewId = $mysqli->insert_id;
 
 // Handle image uploads
@@ -62,8 +67,12 @@ if (!empty($_FILES['review_images']['name'][0])) {
     if ($uploaded) {
       $imgStmt = $mysqli->prepare("INSERT INTO review_images (review_id, image_url, sort_order) VALUES (?, ?, ?)");
       $imgStmt->bind_param('isi', $reviewId, $uploaded, $i);
-      $imgStmt->execute();
-      $imageUrls[] = $uploaded;
+      if ($imgStmt->execute()) {
+        $imageUrls[] = $uploaded;
+      } else {
+        // Row failed — remove the file so uploads/ and DB stay in sync
+        deleteUploadedImage($uploaded, 'reviews');
+      }
     }
   }
 }

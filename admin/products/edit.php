@@ -130,7 +130,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image']) && !
       $slug = $slug . '-' . time();
     }
 
+    // sku has a UNIQUE key — a duplicate sku would fail the UPDATE below.
+    // Auto-uniquify like we do for slug.
+    $skuCheck = $mysqli->prepare("SELECT id FROM products WHERE sku = ? AND id != ?");
+    $skuCheck->bind_param('si', $sku, $id);
+    $skuCheck->execute();
+    if ($skuCheck->get_result()->num_rows > 0) {
+      $sku = $sku . '-' . strtoupper(substr(uniqid(), -4));
+    }
+
     $mainImageUrl = $product['image'];
+    $mainImageUploadedPath = '';
     // Self-heal: older buggy saves wrote image='0'; restore primary gallery image
     if (empty($mainImageUrl) || $mainImageUrl === '0') {
       $healStmt = $mysqli->prepare("SELECT image_url FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1");
@@ -145,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image']) && !
       $uploaded = handleImageUpload($_FILES['main_image_file'], 'products');
       if ($uploaded) {
         $mainImageUrl = $uploaded;
+        $mainImageUploadedPath = $uploaded; // track for cleanup if UPDATE fails
         $updImg1 = $mysqli->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
         $updImg1->bind_param('i', $id);
         $updImg1->execute();
@@ -192,7 +203,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image']) && !
               $lbl = !empty($_POST['subimage_labels'][$i]) ? sanitize($_POST['subimage_labels'][$i]) : 'Sub Image';
               $subStmt = $mysqli->prepare("INSERT INTO product_images (product_id, image_url, image_label, sort_order, is_primary) VALUES (?, ?, ?, 5, 0)");
               $subStmt->bind_param('iss', $id, $uploadedSub, $lbl);
-              $subStmt->execute();
+              if (!$subStmt->execute()) {
+                // Row failed — remove the file so uploads/ and DB stay in sync
+                deleteUploadedImage($uploadedSub, 'products');
+              }
             }
           }
         }
@@ -253,6 +267,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_image']) && !
       $sizesStmt->execute();
       $existingSizes = $sizesStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     } else {
+      // UPDATE failed — roll back the just-uploaded image (file + gallery row)
+      // so uploads/ and the database stay in sync.
+      if (!empty($mainImageUploadedPath)) {
+        $rollbackImg = $mysqli->prepare('DELETE FROM product_images WHERE product_id = ? AND image_url = ?');
+        $rollbackImg->bind_param('is', $id, $mainImageUploadedPath);
+        $rollbackImg->execute();
+        deleteUploadedImage($mainImageUploadedPath, 'products');
+      }
       $error = 'Failed to update product. Please try again.';
       error_log('Product update failed: ' . $mysqli->error);
     }

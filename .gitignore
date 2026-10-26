@@ -1,3 +1,7 @@
 node_modules/
 .env
 
+# Never let git touch uploaded images again — they live only on the server.
+# (Existing tracked files stay tracked; ignore only stops NEW files being staged.)
+uploads/
+
