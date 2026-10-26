@@ -108,6 +108,11 @@ if ($upd) {
   $upd->execute();
 }
 
+// Send order confirmation email once payment succeeds (guarded against duplicates)
+if ($newPaymentStatus === 'paid') {
+  sendOrderConfirmationEmail($mysqli, $order['id']);
+}
+
 // Clear cart after successful payment
 if ($newPaymentStatus === 'paid') {
   $ordStmt = $mysqli->prepare('SELECT customer_id FROM orders WHERE id = ?');

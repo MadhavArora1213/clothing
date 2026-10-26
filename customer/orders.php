@@ -50,6 +50,7 @@ if ($pendingOrders && $pendingOrders->num_rows > 0) {
         if (($cfData['order_status'] ?? '') === 'PAID') {
           $oid = (int)$po['id'];
           $mysqli->query("UPDATE orders SET payment_status='paid', order_status='confirmed' WHERE id=$oid");
+          sendOrderConfirmationEmail($mysqli, $oid);
         }
       }
     }

@@ -38,6 +38,9 @@ $cfAppId = $_ENV['CF_APP_ID'] ?? '';
 $cfSecret = $_ENV['CF_SECRET_KEY'] ?? '';
 $cfApiUrl = 'https://api.cashfree.com/pg';
 
+// Order confirmation email helper (standalone-safe, no database.php needed)
+require_once __DIR__ . '/../includes/order-email.php';
+
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 // ─── CREATE ORDER ───
@@ -223,6 +226,7 @@ if ($action === 'callback') {
                 if ($cfStatus === 'PAID') {
                   $db->query("UPDATE orders SET payment_status = 'paid', order_status = 'confirmed' WHERE id = $orderId");
                   $paymentOk = true;
+                  sendOrderConfirmationEmail($db, $orderId);
                 }
               }
             }

@@ -61,6 +61,7 @@ if ($orderId) {
             $mysqli->query("UPDATE orders SET payment_status = 'paid', order_status = 'confirmed' WHERE id = $orderId");
             $order['payment_status'] = 'paid';
             $order['order_status'] = 'confirmed';
+            sendOrderConfirmationEmail($mysqli, $orderId);
           } elseif (in_array($cfStatus, ['EXPIRED', 'TERMINATED'])) {
             unset($_SESSION['last_order_id']);
             header('Location: ' . BASE_URL . '/customer/payment.php?order_id=' . $orderId . '&status=failed');

@@ -67,6 +67,14 @@ define('SMTP_PASS', $_ENV['SMTP_PASS'] ?? '');
 define('SMTP_FROM', $_ENV['SMTP_FROM'] ?? '');
 define('SMTP_FROM_NAME', $_ENV['SMTP_FROM_NAME'] ?? 'Urban Outfit Collection');
 
+// Order confirmation emails — while set, every order email goes to this
+// inbox instead of the customer (used for testing). Remove the line from
+// .env to start emailing customers directly.
+define('ORDER_EMAIL_OVERRIDE', $_ENV['ORDER_EMAIL_OVERRIDE'] ?? '');
+
+// Order confirmation email helper (Resend)
+require_once BASE_PATH . '/includes/order-email.php';
+
 // Ensure uploads directory exists
 if (!is_dir(UPLOADS_PATH . '/products')) {
   @mkdir(UPLOADS_PATH . '/products', 0755, true);
